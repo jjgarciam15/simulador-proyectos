@@ -234,3 +234,52 @@ Validación final: `pnpm typecheck` sin errores; `pnpm test` 192 pruebas aprobad
 - `engine.ts` mezcla código original compacto con bloques nuevos legibles; conviene separarlo por etapa.
 - `App.tsx` concentra navegación y modales; conviene extraer un enrutador de vistas.
 - El paquete de producción supera 500 kB; conviene dividirlo por etapa con importación dinámica.
+
+# V2.4 · Plataforma de proyectos (25 de septiembre de 2026)
+
+Especificación acumulativa V2 + V2.2 + V2.4 (el prompt V2.3 no se recibió; su importación se implementó aquí). Prompt completo en `MANUAL_CREACION.md → Historial de prompts`.
+
+## Línea base y diseño
+
+Línea base: 192 pruebas (17 archivos), tipos y compilación sin errores. Decisión central: no crear simuladores paralelos. `NormalizedProject` → `MissionGenerator` → mismo `Scenario` y mismo `act()`; las misiones generadas se registran en tiempo de ejecución junto a las oficiales (que no cambian). Orden seguido: arquitectura (P0) → Builder (P1) → importación (P2) → experiencia (P3) → pruebas, E2E y documentación.
+
+## Resultado
+
+`pnpm typecheck` sin errores; `pnpm test` 220 pruebas en 20 archivos; `pnpm build` correcto (pdf.js se carga bajo demanda). E2E en navegador A–E aprobadas sin errores de consola.
+
+| Área | Estado | Evidencia o límite |
+|---|---|---|
+| NormalizedProject + schemaVersion + migraciones | IMPLEMENTADO | `types.ts`, `schema.ts`, pruebas de versión futura y v0 |
+| ProjectSource (official, imported_pdf, imported_excel, manual) | IMPLEMENTADO | Adapta revisión, confianza y estado de respuestas |
+| MissionGenerator por reglas sobre el motor único | IMPLEMENTADO | Misión generada jugada completa en prueba; misiones oficiales convertidas pasan por el mismo generador |
+| Puzzles auditables (esperada / plausible / requiere revisión) | IMPLEMENTADO | 12 tipos de actividad con fuente; editor del creador |
+| Selección de fases y configuración (dificultad, modo, duración) | IMPLEMENTADO | Exploración = cambios sin costo |
+| Partida rápida | PARCIAL | Reduce módulos (sin flujo económico ni comité); las ocho etapas siguen presentes |
+| Project Builder (asistente, borradores, autoguardado, completitud, validación, vista previa, crear partida) | IMPLEMENTADO | E2E B |
+| Asistencia académica y «Revisar mi proyecto» | IMPLEMENTADO | Heurísticas que advierten sin corregir |
+| Árbol del problema visual con arrastrar y alternativa por teclado | IMPLEMENTADO | DnD HTML5; botones «Mover a…», subir y bajar |
+| Modo creador/profesor (respuestas, distractores, dificultad, actividades, vista previa como jugador) | IMPLEMENTADO | Datos ocultos por campo: PREPARADO (campo en el esquema, sin interfaz) |
+| Publicación local / compartir | PARCIAL | Exportar/importar `.proyecta.json` validado; sin enlace de publicación |
+| Importación PDF nativa | IMPLEMENTADO | pdf.js local, página de origen, E2E C |
+| OCR de PDF escaneado | PENDIENTE | Se detecta y se pide completar manualmente |
+| Importación Excel (hojas, encabezados, tablas, valores, fórmulas como texto, sin macros) | IMPLEMENTADO | Lector propio; E2E D verifica números |
+| Seguridad (extensión, MIME, tamaño, firma, corrupción) y privacidad local | IMPLEMENTADO | Pruebas de rechazo |
+| Referencias de fuente, confianza, «No identificada», revisión obligatoria | IMPLEMENTADO | Bloqueo hasta confirmar la revisión |
+| Mis proyectos (oficiales, importados, creados, borradores, partidas; acciones) | IMPLEMENTADO | Duplicar proyecto y partida |
+| Restablecer partidas y preparar para compartir con verificación tras recargar | IMPLEMENTADO | E2E E: solo queda la preferencia de sonido; 9 misiones oficiales |
+| Paleta, tokens (color, tipografía, espaciado, radios, sombras, transiciones) | IMPLEMENTADO | `tokens.css`; pantallas nuevas y V2.2 los usan |
+| Rediseño visual completo de pantallas antiguas | PARCIAL | Heredan la paleta donde usan tokens; su estructura se conserva |
+| Dashboard | PARCIAL | Recursos, etapa, alternativa y riesgo ya visibles; se añadió «antes → después» y animación de medidores |
+| Hoja tipo Excel: entrada, dato, calculado, advertencia, error | IMPLEMENTADO | Filas marcadas en modo aprendizaje |
+| Personajes con 7 estados y 5 roles | IMPLEMENTADO | Estado derivado de la partida, en texto y animación |
+| Microinteracciones, eventos, logros, mapa, movimiento reducido | IMPLEMENTADO | `v5.css` |
+| Centro de aprendizaje desde el Builder (modal) | IMPLEMENTADO | Enlaces «¿Qué es esto?» |
+| Ejemplos del Centro que ayudan a llenar el proyecto con confirmación | PENDIENTE | |
+| TeacherProject / Assignment / StudentAttempt / Result | PREPARADO | Tipos documentados |
+| Comparación de intentos | PENDIENTE | |
+
+### Deuda técnica V2.4
+
+- `App.tsx` crece con cada vista; conviene un enrutador de vistas y un contexto para el almacén de proyectos.
+- El registro de misiones generadas escribe en tablas por misión existentes (`missionImpacts`, `missionProfiles`, `directSDGs`, `missions`); una interfaz de consulta única sería más limpia.
+- Heurísticas de asistencia basadas en palabras clave: útiles para advertir, no para calificar.

@@ -8,6 +8,66 @@ Integra MGA, economía, regulación económica, gestión de recursos, evaluació
 
 Pasar de «respondo actividades para avanzar» a «administro un proyecto y mis decisiones tienen consecuencias». El simulador recompensa analizar, priorizar, administrar, justificar, anticipar y corregir.
 
+## Formas de jugar
+
+| Experiencia | Qué es | Cómo se entra |
+|---|---|---|
+| **Jugar historia** | Nueve misiones oficiales en Aurora, con narrativa y datos diseñados. | Inicio → «Jugar historia» o «Comenzar reconstrucción». |
+| **Importar proyecto** | Convierte un PDF o un Excel en una estructura académica editable y luego en una simulación. | Inicio → «Importar proyecto» (o Mis proyectos). |
+| **Crear proyecto** | Formula tu propio proyecto paso a paso; el sistema revisa su coherencia y lo convierte en una simulación. | Inicio → «Crear proyecto» (o Mis proyectos). |
+
+Las tres fuentes llegan al **mismo motor**:
+
+```
+Oficial ──────────────┐
+PDF / Excel → parser ─┼─> NormalizedProject → validación → MissionGenerator → motor único (act) → puzzles, flujos, decisiones → puntuación → comité → resultado
+Manual → Builder ─────┘
+```
+
+**Mis proyectos** reúne oficiales, importados, creados, borradores y partidas. Cada tarjeta muestra origen, estado, completitud, dificultad y última edición, con acciones jugar, continuar, editar, duplicar, eliminar, generar partida y vista previa. Una misión oficial se puede duplicar como proyecto editable para crear variantes; la oficial no cambia.
+
+### Project Builder (crear o revisar un proyecto)
+
+Asistente por pasos agrupados, con autoguardado en el navegador, indicador de completitud calculado con los campos que la misión realmente necesita y la progresión Problema → Objetivo → Alternativas → Proyecto.
+
+| Paso | Qué pide | Asistencia académica |
+|---|---|---|
+| 1. Información general | Perfil (estudiante o creador/profesor), nombre, descripción, sector, ubicación, tipo (público/privado), horizonte | — |
+| 2. Problema, causas y efectos | Árbol visual efectos ↑ problema ↑ causas; arrastrar o «Mover a…» con teclado; nivel directo/indirecto | Advierte si el problema parece una solución («Comprar buses») o si una causa parece efecto; nunca cambia el texto |
+| 3. Actores y población | Población total, afectada, objetivo y atendida hoy; actores con interés, poder, posición e influencia | Objetivo ≤ afectada ≤ total |
+| 4. Objetivos | Objetivo general, específicos ligados a una causa y fines ligados a efectos | «El objetivo específico 2 parece no responder a ninguna causa identificada» |
+| 5. Alternativas | 2–4 alternativas: inversión, O&M, ingresos, beneficio social, duración, vida útil, residual, capacidad, cobertura, riesgo, balance ambiental, trade-off y causas que atiende | Tabla comparativa en vivo, sin elegir la mejor |
+| 6. Cadena de valor | Insumos → actividades → productos → resultados → impactos (las conexiones se iluminan) | — |
+| 7. Efectos, impactos y valoración | Efecto o impacto, dirección, grupo, magnitud, duración, tipo de cambio en bienestar, método, valor anual, medida por persona, doble conteo | — |
+| 8. Costos, beneficios y finanzas | Costos por clasificación, beneficios (ingreso, ahorro, beneficio económico, impacto valorado), presupuesto, plazo, tasas, ajustes económicos y supuestos | Distingue ingreso financiero de beneficio económico |
+| 9. Riesgos, regulación y ODS | Riesgos con probabilidad, impacto y mitigación; falla de mercado, externalidades, regulación, tarifas, subsidios, competencia, restricciones; ODS sugeridos por el creador o que identificará el jugador | — |
+| (Creador) Actividades | Revisa y edita las actividades generadas: pregunta, opciones, respuestas, explicación, puntos, dificultad; distractores del árbol; vista previa como jugador | — |
+| 10. Revisar y crear partida | «Revisar mi proyecto» (✓ / ! / ✕ por elemento), resumen, fases que tus datos permiten, dificultad (Fácil/Intermedio/Avanzado), modo (Aprendizaje/Evaluación/Exploración), duración (Rápida/Normal/Completa) y **CREAR PARTIDA INTERACTIVA** | Los errores bloquean; las advertencias no |
+
+Los datos ausentes nunca se inventan: si el generador necesita un valor (por ejemplo, presupuesto), usa un supuesto documentado que se muestra en la partida. Cada misión generada es una copia congelada del proyecto: editarlo después no altera partidas en curso.
+
+### Importar PDF o Excel
+
+- **Local y privado:** el archivo se procesa en el navegador; no se envía a ningún servicio.
+- **Seguridad:** extensión (.pdf, .xlsx), tipo MIME, tamaño (≤ 15 MB) y firma del archivo; los libros con macros (.xlsm, .xls…) se rechazan; las fórmulas se leen como texto y **no se ejecutan**.
+- **PDF:** extracción nativa del texto con pdf.js (sin evaluación de código). Reconoce «Etiqueta: valor», listas bajo «Causas», «Efectos», «Objetivos específicos» y bloques «Alternativa 1: …». Los PDF escaneados no tienen texto: el OCR no está incluido y se pide completar manualmente.
+- **Excel:** lee hojas, encabezados, tablas y valores; reconoce pares etiqueta/valor y tablas de alternativas, actores, costos y riesgos. Hay una **plantilla descargable**.
+- **Trazabilidad:** cada dato guarda su página, hoja y celda, y una confianza (alta, media, baja). Lo que falta aparece como «No identificada».
+- **Revisión obligatoria:** el proyecto se abre en el mismo Project Builder; hay que confirmar la revisión antes de generar la partida.
+- **Formato portable:** un proyecto se exporta e importa como `.proyecta.json` (datos versionados, sin código), validado contra el esquema.
+
+### Restablecer partidas y preparar para compartir
+
+Mis proyectos → «Restablecer partidas…». Hay que escribir `RESTABLECER`.
+
+| Se borra (datos del jugador) | Se conserva (datos del sistema) |
+|---|---|
+| Partidas activas, en pausa y terminadas; puntuaciones, respuestas, progreso y bitácoras (`proyecta-v1`, `proyecta-v1:unreadable`) | Las nueve misiones oficiales, su contenido e ilustraciones |
+| Proyectos importados y creados, borradores y misiones generadas (`proyecta-projects-v1`) | Metodologías y Centro de aprendizaje |
+| Intentos del Examen 2 (`proyecta-exam2-v1`) | Preferencias de sonido y animación, y el código |
+
+Con «Preparar el simulador para compartir» la página se recarga y verifica el estado cero (0 partidas, 0 proyectos personales, 0 importados, 0 misiones generadas) y que las misiones oficiales siguen disponibles.
+
 ## Qué aprenderás
 
 - Construir el **Árbol del problema** (causas, problema central, efectos) y transformarlo en objetivos.
@@ -57,6 +117,7 @@ La dificultad cambia lo que conoces y tu exposición al riesgo, no la realidad s
 - **Dependencias y «Requiere revisión»:** cambiar una decisión anterior invalida lo que dependía de ella y explica por qué.
 - **Dilemas y eventos condicionados:** aparecen según tus decisiones previas y su efecto puede llegar etapas después.
 - **Hoja de flujo:** celdas con colores por tipo (dato entregado, debes calcular, debes ingresar, calculado automáticamente); al seleccionar una celda se explica su cálculo.
+- **Plataforma de proyectos:** `NormalizedProject` (`src/domain/project/types.ts`, `schemaVersion` 1) es el contrato común; `MissionGenerator` (`generator.ts`) lo traduce al mismo `Scenario` de las misiones oficiales y registra la misión en tiempo de ejecución (`store.ts`). No hay simuladores paralelos para PDF, Excel o proyectos manuales.
 - **Flujos:** `src/domain/flows.ts` es el único motor de flujos, VPN, RPC, escenarios y valor de quiebre; lo usan las misiones, la calculadora y el Examen 2.
 - **Semilla:** el código de condiciones reproduce demanda, costos, eventos y dilemas para comparar estrategias.
 
@@ -121,7 +182,7 @@ En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o re
 pnpm test
 ```
 
-Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y su diagnóstico, cadena de valor, dependencias y «requiere revisión», dilemas y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Última ejecución: 192 pruebas en 17 archivos, todas aprobadas.
+Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y su diagnóstico, cadena de valor, dependencias y «requiere revisión», dilemas y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder (vacío, parcial, completo, varias alternativas, validaciones), la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, persistencia de borradores, formato portable, reset y personajes. Última ejecución: 220 pruebas en 20 archivos, todas aprobadas. Las pruebas de extremo a extremo (misión oficial, crear, importar PDF, importar Excel y reset) se ejecutaron en navegador con Playwright.
 
 ## Compilación
 
@@ -158,9 +219,9 @@ La CI de GitHub (`.github/workflows/ci.yml`, «Validar simulador») ejecuta `pnp
 
 ## Persistencia
 
-- La partida se guarda automáticamente en el `localStorage` del navegador (clave `proyecta-v1`) tras cada decisión confirmada.
+- La partida se guarda automáticamente en el `localStorage` del navegador (clave `proyecta-v1`) tras cada decisión confirmada. Los proyectos, borradores y misiones generadas se guardan en `proyecta-projects-v1` con autoguardado.
 - Se puede cerrar la pestaña y continuar después («Continuar misión»). Al empezar otra misión, la actual queda **en pausa** y se puede retomar desde el inicio.
-- `?qa=1` usa un espacio de guardado separado (`proyecta-qa-v1`) para pruebas.
+- `?qa=1` usa espacios de guardado separados (`proyecta-qa-v1`, `proyecta-qa-projects-v1`) para pruebas.
 - Si el guardado falla, aparece un aviso y la sesión sigue en memoria.
 - Limpiar los datos del navegador borra las partidas. Otro navegador, puerto o dominio usa otro almacenamiento.
 - No hay cuentas, sincronización ni seguimiento externo.
@@ -173,6 +234,9 @@ src/
   domain/      Reglas puras: motor (act), estado, dilemas, regulación, presupuesto,
                coherencia, puntuación, persistencia, validación y pruebas
   features/    Pantallas de cada etapa y herramientas (dilemas, laboratorio, resultados)
+  domain/project  NormalizedProject, validación, MissionGenerator, almacén, esquema y
+                  migraciones, importación PDF/XLSX (import/)
+  features/projects  Mis proyectos, Project Builder, importación, reset, inicio
   features/v22 Objetivos, efectos e impactos, valoración, hoja de flujo, RPC, sensibilidad,
                comparador, comité, Centro de aprendizaje, Cómo jugar y Examen 2
   components/  Controles, gráficos, navegación, personajes y efectos
@@ -197,6 +261,9 @@ La memoria técnica completa está en [`MANUAL_CREACION.md`](MANUAL_CREACION.md)
 | Puerto 5173 ocupado | Cierra la otra instancia o revisa `.local/servidor-error.log` (lanzador Windows) |
 | La partida no se guarda | Revisa permisos o cuota del almacenamiento del navegador; mantén la pestaña abierta |
 | «No se pudo leer la partida guardada» | El guardado es de un formato incompatible; se conserva una copia en `proyecta-v1:unreadable` al guardar una nueva |
+| «La misión generada no está disponible» | El proyecto se eliminó o se restablecieron los datos: genera la partida de nuevo desde Mis proyectos |
+| Un PDF importado no muestra datos | Probablemente es escaneado (sin texto). Completa el proyecto en el Builder o exporta el PDF con texto seleccionable |
+| El Excel se rechaza | Guárdalo como .xlsx sin macros |
 | Imágenes rotas tras publicar en una subruta | Compila con `--base=/tu-subruta/` (ver Despliegue) |
 | Pantalla en blanco al abrir `dist/index.html` | Sírvelo por HTTP (`pnpm preview` o un hosting estático) |
 

@@ -1,5 +1,15 @@
 # Cambios
 
+## 2.4.0 · plataforma de proyectos (25 de septiembre de 2026)
+
+- Tres experiencias en el inicio: Jugar historia, Importar proyecto y Crear proyecto, más Continuar, Aprender y Cómo jugar.
+- NormalizedProject versionado con migraciones y MissionGenerator por reglas sobre el mismo motor de las misiones oficiales.
+- Project Builder: asistente por pasos, árbol del problema visual, asistencia académica, autoguardado, completitud, «Revisar mi proyecto», vista previa, configuración y creación de la partida; modo creador con editor de actividades y vista previa como jugador.
+- Importación local de PDF (texto nativo) y Excel (sin macros) con seguridad, referencias de fuente, confianza y revisión obligatoria; plantilla Excel y formato portable `.proyecta.json`.
+- Mis proyectos con oficiales, importados, creados, borradores y partidas; duplicar proyectos y partidas.
+- Restablecer partidas y preparar el simulador para compartir con confirmación escrita y verificación tras recargar.
+- Nueva paleta y tokens de diseño; personajes con estados y roles; microinteracciones y movimiento reducido; celdas de advertencia y error en la hoja de flujo.
+
 ## 2.2.0 · evolución académica, económica y de simulación (25 de septiembre de 2026)
 
 - Objetivos general y específicos desde el Árbol del problema; clasificación de efectos e impactos con doble conteo.

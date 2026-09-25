@@ -6,7 +6,7 @@ Gestión de proyectos en un territorio ficticio después del Gran Apagón. El ju
 
 ## Estado de evolución
 
-V2 funcional implementada sobre la base anterior (22–23 de septiembre de 2026) y ampliada en la iteración 2 (25 de septiembre de 2026): dilemas condicionales con consecuencias diferidas y sistémicas, laboratorio regulatorio con severidad oculta y puzzle causal, cadena de valor por misión con tarjetas parciales, planificador presupuestal con guía y diagnóstico, coherencia transversal, bonificaciones y penalizaciones explicables, aciertos y errores, preguntas con 6–7 opciones y nuevos logros. Ver la sección «Iteración 2 de la V2». La V2.2 (misma fecha) agrega objetivos, efectos e impactos, valoración económica, flujos financiero y económico con RPC, sensibilidad, comparador, comité, Centro de aprendizaje y Examen 2: ver «Evolución V2.2».
+V2 funcional implementada sobre la base anterior (22–23 de septiembre de 2026) y ampliada en la iteración 2 (25 de septiembre de 2026): dilemas condicionales con consecuencias diferidas y sistémicas, laboratorio regulatorio con severidad oculta y puzzle causal, cadena de valor por misión con tarjetas parciales, planificador presupuestal con guía y diagnóstico, coherencia transversal, bonificaciones y penalizaciones explicables, aciertos y errores, preguntas con 6–7 opciones y nuevos logros. Ver la sección «Iteración 2 de la V2». La V2.2 (misma fecha) agrega objetivos, efectos e impactos, valoración económica, flujos financiero y económico con RPC, sensibilidad, comparador, comité, Centro de aprendizaje y Examen 2: ver «Evolución V2.2». La V2.4 agrega la plataforma de proyectos (importar PDF/Excel, crear desde cero, Mis proyectos, reset) sobre el mismo motor: ver «Evolución V2.4».
 
 Validación de la iteración 2: 156 pruebas automatizadas en 14 archivos, tipos y compilación sin errores; revisión en navegador del inicio y la comparación de dificultades, un dilema resuelto, el panel lateral, el planificador presupuestal, el laboratorio regulatorio, el resultado con aciertos y errores, y la vista móvil de 390 px sin desbordamiento horizontal. No sustituye un piloto con estudiantes.
 
@@ -217,6 +217,72 @@ Tokens en `src/tokens.css` (fondo, superficie, primario, éxito, alerta, peligro
 - Modo docente preparado en datos, sin interfaz propia.
 - El Examen 2 es independiente de las misiones.
 - El arrastrar y soltar se verificó con eventos sintéticos en navegador sin interfaz; hay alternativa accesible por selección.
+
+## Evolución V2.4 · plataforma de proyectos · 25 de septiembre de 2026
+
+La V2.4 convierte el simulador en una plataforma con tres fuentes de proyectos (misiones oficiales, PDF/Excel importados y proyectos creados desde cero) y un único motor. El prompt V2.3 mencionado en la instrucción no se recibió en este repositorio; la importación que pedía se implementó dentro de la V2.4 y se integró al nuevo modelo.
+
+### NormalizedProject
+
+Contrato central en `src/domain/project/types.ts` (`schemaVersion` 1). Adaptado al código existente: valores simples (sin envolver cada campo) y un mapa `evidence` por ruta de campo (`alternatives.<id>.investment`) con confianza, referencia de fuente (página, hoja, celda, extracto) y marca de revisión. Un valor ausente es `null` o vacío y se muestra «No identificada». Incluye metadatos (perfil estudiante/creador, estado, revisión, confirmación de importación), árbol del problema, actores, población, objetivos y fines, alternativas, cadena de valor, costos, beneficios, efectos e impactos con valoración, información financiera y económica, supuestos, riesgos, regulación, ODS (sugeridos vs. a identificar por el jugador) y ajustes del creador. `completeness` y `projectConfidence` se calculan, no se guardan.
+
+### ProjectSource
+
+`source.type` = `official` | `imported_pdf` | `imported_excel` | `manual`, con nombre de archivo, fecha de importación, misión oficial de origen o proyecto duplicado. La experiencia se adapta: los importados muestran procedencia y exigen revisión; las respuestas generadas de un proyecto de estudiante son «plausibles»; las del perfil creador son «esperadas».
+
+### Esquema, migraciones y formato portable
+
+`src/domain/project/schema.ts`: `parseProject` valida tipos campo a campo, recorta longitudes, descarta claves desconocidas y acepta solo datos. `migrateProject` aplica migraciones por versión (v0 → v1) y rechaza versiones futuras. El formato portable `.proyecta.json` (`format: "proyecta-project"`) se exporta desde la revisión y se importa por la misma pantalla de importación.
+
+### MissionGenerator
+
+`src/domain/project/generator.ts` transforma `NormalizedProject` + configuración en los datos que ya usa el motor: un `Scenario` construido con la misma función `build` de las misiones oficiales (ampliada con `extras` opcionales que no alteran las oficiales), tarjetas de efectos e impactos, perfil de misión (módulos según datos y duración), ODS directos, metadatos narrativos y actividades. Reglas principales:
+
+- Árbol del problema del juego: problema central, dos causas (directa primero, luego indirecta) y dos efectos; los demás elementos quedan en el proyecto y se informan como supuesto.
+- Objetivos: el general y los específicos ligados a cada causa; si falta un fin, se deriva «Reducir: <efecto>» y se declara.
+- Beneficio social de una alternativa: el registrado; si falta, la suma de impactos valorados; si tampoco existe, 0 (con advertencia).
+- Participación de cada impacto en el beneficio (para la valoración del juego): su valor anual sobre la suma de impactos valorados; solo el impacto que declara «mide lo mismo que…» queda marcado como doble conteo.
+- Supuestos del simulador documentados cuando faltan datos: presupuesto 1,3 × mayor inversión, plazo = obra más larga + 12 meses, oferta actual = afectada − objetivo, tasas 12 % y 9 %.
+- La misión generada se valida con `validateMission`, igual que las oficiales.
+- Modo Exploración: retroalimentación inmediata y reformulación sin costo (`v22.exploration`).
+- Duración: Rápida (actividades esenciales, sin flujo económico ni comité), Normal (flujo económico, estrés y comité), Completa (todas las fases compatibles, incluida la distributiva si hay varios grupos).
+
+### Puzzles generados y auditables
+
+`generateActivities` crea actividades solo cuando hay datos: problema central, causa vs. efecto, objetivo general, mayor inversión, mayor cobertura, clasificación de costos, tipo de beneficio, efecto vs. impacto, método de valoración (según la tabla de idoneidad), RPC de las tarifas, falla de mercado y ODS. Cada una tiene `question`, `options`, `validAnswers`, `feedback`, `source` (campos de origen), `concept`, `difficulty`, `score` y estado: **esperada** (creador u oficial), **plausible** (estudiante: mitad de puntos, con nota «según el autor») o **requiere revisión** (dato importado sin revisar: no se juega). Los distractores son plausibles: salen del mismo proyecto (una causa, un efecto, «Falta de <alternativa>», «Construir <alternativa>»). Las actividades se suman a la práctica de cada etapa mediante el motor de preguntas existente.
+
+### Project Builder
+
+`src/features/projects/ProjectBuilder.tsx` y `steps.tsx`. Diez pasos agrupados (más «Actividades» para el creador). Autoguardado en cada cambio, completitud ponderada por lo que la misión necesita, errores que bloquean y advertencias que no, asistencia académica sin correcciones automáticas, enlaces al Centro de aprendizaje en modal, «Revisar mi proyecto» con checklist y nivel de preparación, resumen completo, fases disponibles, configuración y «CREAR PARTIDA INTERACTIVA». Un proyecto importado se abre en este mismo editor, prellenado.
+
+### Importación
+
+`src/domain/project/import/`: `common.ts` (seguridad, números en formato colombiano, etiquetas), `xlsx.ts` (lector propio de Office Open XML con `fflate`; solo partes XML, sin macros, fórmulas como texto, límite de celdas), `pdf.ts`/`pdfBrowser.ts` (pdf.js local con `isEvalSupported: false`, carga diferida y worker local), `normalize.ts` (PDF/Excel → NormalizedProject con evidencia y confianza) y `xlsxWriter.ts` (plantilla descargable). OCR: PENDIENTE (no se incluye porque requiere descargar modelos de idioma).
+
+### Validaciones
+
+`src/domain/project/validation.ts`: problema vacío o formulado como solución, menos de dos causas o efectos, causa que parece efecto y viceversa, objetivos sin causa, alternativas sin datos, horizonte inválido, población inconsistente, flujo imposible (ninguna alternativa financiable), tasas fuera de rango, costos o beneficios incompletos, impactos sin grupo o con doble conteo inexistente y revisión de importación pendiente.
+
+### Personajes
+
+`src/domain/characters.ts`: el estado (`idle`, `thinking`, `speaking`, `concerned`, `positive`, `warning`, `celebrating`) se deriva de la partida (riesgo, caja, eventos, dilemas, avance, resultado) y el rol de la etapa (Tutor, Analista, Regulador, Evaluador, Comunidad). El panel del asesor muestra rol y estado en texto y anima el retrato sin tapar información.
+
+### Animaciones
+
+`src/v5.css` y `src/tokens.css`: tokens de duración y curva; entrada y reacciones de personajes, puntos de «pensando», destello de celebración, transición de medidores, consecuencias «antes → después» en el aviso (presupuesto y riesgo), entrada diferenciada de eventos, logros y conexiones completadas del mapa del proyecto. Con `prefers-reduced-motion` las duraciones son 0 y las animaciones se desactivan.
+
+### Reset
+
+`resetPlayerData` borra solo claves de datos del jugador (`proyecta-v1`, `proyecta-v1:unreadable`, `proyecta-projects-v1`, variantes `qa`, `proyecta-exam2-v1`, borradores) y limpia el registro de misiones generadas. Conserva preferencias (`aurora-experience-v1`), misiones oficiales y contenido. Confirmación escribiendo `RESTABLECER`; tras recargar, `verifyZeroState` comprueba el estado cero. Las partidas de misiones generadas que ya no existen se descartan al cargar sin invalidar el resto del guardado.
+
+### Arquitectura para compartir y modo profesor (preparado)
+
+Formato portable versionado y tipos `TeacherProject`, `Assignment`, `StudentAttempt` y `AttemptResult` en `types.ts`, pensados para un futuro flujo: el profesor crea el proyecto → genera la misión → comparte → el estudiante juega → el profesor revisa. No hay servidor, cuentas ni LMS.
+
+### Pruebas y validación V2.4
+
+220 pruebas en 20 archivos (`project.test.ts`, `import.test.ts`, `characters.test.ts` nuevas). Pruebas de extremo a extremo en navegador: A (misión oficial), B (crear desde cero, cerrar, continuar, generar y jugar), C (importar PDF, rechazar .xlsm, revisar, completar actores, generar y jugar), D (importar Excel, verificar números 1.800/1.300 M y cobertura 85 %, generar), E (reset con verificación de estado cero y nueve misiones oficiales intactas).
+
 
 ## Referencias académicas
 
@@ -6879,6 +6945,1455 @@ Analiza profundamente. Implementa progresivamente. Prueba cada fase. Mantén el 
 ### Cambios y validación
 
 Resumen en la sección «Evolución V2.2» de este manual y estados en `IMPLEMENTATION_PLAN_V2.md`. Validación: `pnpm typecheck`, `pnpm test` (192 pruebas en 17 archivos), `pnpm build` y revisión en navegador.
+
+---
+
+
+## 2026-09-25 · Evolución V2.4: plataforma de proyectos, Project Builder, PDF/Excel, UX, animaciones y reset
+
+<details><summary>Prompt completo recibido</summary>
+
+quiero que agregues esto cuando termines el plan actual sigue con esto;
+CLAUDE CODE — EVOLUCIÓN V2.4
+PLATAFORMA DE PROYECTOS + PROJECT BUILDER + PDF/EXCEL + UX PREMIUM + ANIMACIONES + RESET
+Esta instrucción es una ampliación del:
+
+* PROMPT MAESTRO V2
+* EVOLUCIÓN ACADÉMICA V2.2
+
+y SUSTITUYE la ampliación V2.3 anterior.
+Debes combinar:
+V2 + V2.2 + V2.4
+como especificación acumulativa del proyecto.
+No reconstruyas la aplicación desde cero.
+Trabaja sobre la arquitectura existente.
+1. OBJETIVO CENTRAL DE V2.4
+Quiero que el simulador evolucione hacia una verdadera:
+PLATAFORMA INTERACTIVA DE FORMULACIÓN Y EVALUACIÓN DE PROYECTOS
+El usuario debe poder trabajar con proyectos provenientes de tres fuentes diferentes:
+
+```
+                    PLATAFORMA
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+        ▼               ▼               ▼
+ MISIONES OFICIALES   IMPORTAR       CREAR PROYECTO
+                     PDF / EXCEL       DESDE CERO
+        │               │               │
+        │               ▼               ▼
+        │        NormalizedProject   Project Builder
+        │               │               │
+        │               │               ▼
+        │               │        NormalizedProject
+        │               │               │
+        └───────────────┴───────────────┘
+                        │
+                        ▼
+                  MISSION ENGINE
+                        │
+                        ▼
+                    SIMULADOR
+```
+
+Este principio arquitectónico es FUNDAMENTAL.
+NO crear tres simuladores.
+Crear:
+tres fuentes de proyectos → un único motor de simulación.
+2. LAS TRES EXPERIENCIAS
+La pantalla principal debe permitir acceder claramente a:
+JUGAR HISTORIA
+Misiones oficiales diseñadas previamente.
+IMPORTAR PROYECTO
+PDF o Excel.
+CREAR PROYECTO
+Construir manualmente un proyecto desde cero.
+Además:
+CONTINUAR
+APRENDER
+CÓMO JUGAR
+3. MISIÓN OFICIAL
+Las misiones actuales deben seguir funcionando.
+No modificar innecesariamente su narrativa.
+No mezclarlas con proyectos importados.
+No mezclarlas con proyectos creados manualmente.
+4. IMPORTAR PROYECTO
+Permite cargar:
+
+* PDF;
+* XLSX.
+
+El sistema:
+
+```
+Archivo
+↓
+Parser
+↓
+Extracción
+↓
+Normalización
+↓
+Validación
+↓
+Revisión
+↓
+NormalizedProject
+↓
+Mission Generator
+↓
+Mission Engine
+```
+
+5. CREAR PROYECTO DESDE CERO
+Nueva funcionalidad principal.
+Permitir al usuario construir un proyecto sin necesidad de cargar archivos.
+Flujo:
+
+```
+Crear proyecto
+↓
+Asistente
+↓
+Información
+↓
+Validación
+↓
+NormalizedProject
+↓
+Vista previa
+↓
+Generación
+↓
+Mission Engine
+```
+
+PARTE I — ARQUITECTURA UNIFICADA
+6. NORMALIZED PROJECT COMO CONTRATO CENTRAL
+Crear o consolidar un modelo central.
+Conceptualmente:
+
+```
+NormalizedProject {
+    schemaVersion
+
+    metadata
+    source
+
+    title
+    description
+    sector
+    territory
+
+    problem
+    causes
+    problemEffects
+
+    actors
+    targetPopulation
+
+    generalObjective
+    specificObjectives
+
+    alternatives
+
+    resources
+    activities
+    products
+
+    projectEffects
+    impacts
+
+    valuation
+
+    budget
+
+    financialData
+    economicData
+
+    rpc
+
+    risks
+
+    regulation
+
+    sdgs
+
+    assumptions
+
+    evidence
+    sourceReferences
+
+    completeness
+    confidence
+}
+```
+
+NO copies esta estructura ciegamente.
+Adáptala correctamente al código existente.
+7. PROJECT SOURCE
+Cada proyecto debe saber de dónde provino.
+Ejemplo:
+
+```
+source.type =
+official
+imported_pdf
+imported_excel
+manual
+```
+
+Esto permitirá adaptar la experiencia.
+8. NO DUPLICAR LÓGICA
+NO crear:
+`PDFSimulator`
+`ExcelSimulator`
+`ManualSimulator`
+Debe existir:
+
+```
+NormalizedProject
+↓
+MissionGenerator
+↓
+MissionEngine
+```
+
+9. VERSIONADO
+Agregar:
+`schemaVersion`
+para permitir futuras migraciones.
+10. TRAZABILIDAD
+Mantener la trazabilidad académica V2.2:
+
+```
+Problema
+↓
+Objetivo
+↓
+Alternativa
+↓
+Actividad
+↓
+Producto
+↓
+Efecto
+↓
+Impacto
+↓
+Valoración
+↓
+Flujo
+↓
+Evaluación
+↓
+Decisión
+```
+
+PARTE II — CREAR PROYECTO DESDE CERO
+11. PROJECT BUILDER
+Crear una nueva experiencia:
+CREAR PROYECTO
+Debe funcionar como un asistente visual.
+NO como un formulario gigante.
+12. PASOS DEL ASISTENTE
+Propuesta:
+
+```
+1. Información general
+2. Problema
+3. Causas y efectos
+4. Actores y población
+5. Objetivos
+6. Alternativas
+7. Recursos
+8. Cadena de valor
+9. Efectos e impactos
+10. Costos
+11. Beneficios
+12. Información financiera
+13. Información económica
+14. Riesgos
+15. Regulación
+16. ODS
+17. Revisión
+18. Crear partida
+```
+
+No es obligatorio mostrar 18 pantallas.
+Agrupa inteligentemente.
+13. INFORMACIÓN GENERAL
+Solicitar:
+
+* nombre;
+* descripción;
+* sector;
+* ubicación general;
+* horizonte;
+* tipo de proyecto.
+
+No solicitar datos innecesarios.
+14. DEFINICIÓN DEL PROBLEMA
+Permitir escribir:
+Problema central
+Después:
+
+* causas;
+* efectos.
+
+Agregar ejemplos y ayuda contextual.
+15. ASISTENCIA ACADÉMICA
+Mientras construye:
+el sistema puede advertir:
+Este elemento parece estar formulado como una solución y no como un problema.
+o:
+Este efecto parece corresponder más a una causa.
+No modificar automáticamente sin confirmación.
+16. ÁRBOL DEL PROBLEMA
+Permitir construir visualmente:
+
+```
+EFECTOS
+↑
+PROBLEMA
+↑
+CAUSAS
+```
+
+Utilizar drag & drop si aporta valor.
+Debe existir alternativa accesible.
+17. ACTORES
+Permitir agregar actores.
+Campos opcionales:
+
+* nombre;
+* interés;
+* poder;
+* posición;
+* influencia.
+
+18. POBLACIÓN
+Permitir:
+
+* población afectada;
+* población objetivo;
+* cantidad;
+* características relevantes.
+
+19. OBJETIVOS
+Permitir construir:
+
+* objetivo general;
+* objetivos específicos.
+
+Mostrar relación con problema.
+20. ALTERNATIVAS
+Permitir crear varias alternativas.
+Cada alternativa puede contener:
+
+* descripción;
+* inversión;
+* O&M;
+* duración;
+* vida útil;
+* residual;
+* capacidad;
+* cobertura;
+* riesgos;
+* beneficios;
+* efectos;
+* impactos.
+
+21. COMPARACIÓN DURANTE CREACIÓN
+Mientras se crean alternativas:
+mostrar una tabla comparativa.
+No seleccionar automáticamente la mejor.
+22. CADENA DE VALOR
+Permitir introducir:
+
+* insumos;
+* actividades;
+* productos;
+* resultados;
+* impactos.
+
+Mostrar visualmente conexiones.
+23. COSTOS
+Permitir clasificar:
+
+* inversión;
+* operación;
+* mantenimiento;
+* otros.
+
+24. BENEFICIOS
+Permitir:
+
+* ingresos;
+* ahorros;
+* beneficios económicos;
+* impactos valorados.
+
+Diferenciar correctamente.
+25. EFECTOS E IMPACTOS
+Permitir registrar:
+
+* efecto;
+* impacto;
+* dirección;
+* grupo afectado;
+* magnitud;
+* duración;
+* valoración posible.
+
+26. VALORACIÓN
+Permitir asociar un impacto con:
+
+* precio de mercado;
+* costo de viaje;
+* precios hedónicos;
+* valoración contingente;
+* experimentos de elección;
+* costos evitados;
+* reposición;
+* transferencia de beneficios;
+* otros métodos validados.
+
+27. INFORMACIÓN FINANCIERA
+Permitir ingresar:
+
+* inversión;
+* O&M;
+* ingresos;
+* residual;
+* horizonte;
+* tasa.
+
+28. INFORMACIÓN ECONÓMICA
+Permitir:
+
+* RPC;
+* beneficios económicos;
+* costos económicos;
+* ajustes.
+
+29. SUPUESTOS
+Agregar:
+Supuestos
+Ejemplos:
+
+* demanda;
+* inflación;
+* crecimiento;
+* tasa;
+* vida útil;
+* precios.
+
+30. RIESGOS
+Permitir agregar:
+
+* riesgo;
+* probabilidad;
+* impacto;
+* mitigación.
+
+31. REGULACIÓN
+Permitir indicar:
+
+* externalidades;
+* regulación existente;
+* tarifas;
+* subsidios;
+* competencia;
+* restricciones;
+* intervención pública.
+
+32. ODS
+Permitir relacionar ODS.
+Pero distinguir:
+ODS sugerido por creador
+de
+ODS que deberá identificar el jugador.
+33. GUARDAR BORRADOR
+El creador debe poder:
+Guardar borrador
+y continuar después.
+34. AUTOGUARDADO
+Implementar autoguardado cuando sea razonable.
+Evitar pérdida de información.
+35. INDICADOR DE COMPLETITUD
+Mostrar:
+
+```
+Proyecto
+████████░░ 82%
+```
+
+Basado en campos realmente necesarios.
+No porcentaje arbitrario.
+36. VALIDACIÓN
+Detectar:
+
+* problema vacío;
+* objetivo incoherente;
+* alternativa sin datos;
+* costos incompletos;
+* horizonte inválido;
+* impacto sin relación;
+* flujo imposible.
+
+37. ADVERTENCIAS VS ERRORES
+Distinguir:
+Error
+Impide generar.
+Advertencia
+Puede continuar.
+Ejemplo:
+Advertencia: no definiste valor residual.
+38. VISTA PREVIA
+Antes de generar:
+mostrar:
+RESUMEN DEL PROYECTO
+con todas las secciones.
+39. GENERAR PARTIDA
+Botón:
+CREAR PARTIDA INTERACTIVA
+Transforma:
+
+```
+ManualProject
+↓
+NormalizedProject
+↓
+GeneratedMission
+```
+
+PARTE III — PERFIL CREADOR / PROFESOR
+40. DOS FORMAS DE CREAR
+Preparar dos perfiles conceptuales.
+ESTUDIANTE
+Construye su propio proyecto para analizarlo.
+CREADOR / PROFESOR
+Construye un caso que posteriormente otros pueden resolver.
+41. MODO CREADOR
+Permitir definir:
+
+* respuestas esperadas;
+* distractores;
+* dificultad;
+* fases;
+* scoring;
+* ayudas;
+* datos ocultos.
+
+42. GENERACIÓN AUTOMÁTICA
+El profesor no debería tener que crear manualmente cada puzzle.
+A partir del proyecto:
+generar propuestas.
+Después permitir:
+Revisar actividades generadas
+43. EDITOR DE ACTIVIDADES
+Permitir modificar:
+
+* pregunta;
+* opciones;
+* respuestas;
+* explicación;
+* puntuación;
+* dificultad.
+
+No hace falta convertirlo en un LMS.
+44. VISTA PREVIA COMO JUGADOR
+Agregar:
+Vista previa
+para probar la misión antes de compartirla.
+45. PUBLICACIÓN LOCAL
+Preparar concepto:
+Proyecto listo para compartir
+sin necesidad de construir todavía infraestructura cloud compleja.
+PARTE IV — IMPORTACIÓN PDF / EXCEL
+46. IMPORTACIÓN
+Mantener V2.3 pero integrarla al nuevo modelo.
+
+```
+PDF/XLSX
+↓
+Parser
+↓
+NormalizedProject
+```
+
+47. PDF
+Priorizar extracción nativa.
+OCR solo fallback.
+48. EXCEL
+Leer:
+
+* hojas;
+* encabezados;
+* tablas;
+* valores;
+* fórmulas legibles.
+
+NO ejecutar macros.
+49. SEGURIDAD
+Validar:
+
+* extensión;
+* MIME;
+* tamaño;
+* corrupción;
+* contenido.
+
+50. PRIVACIDAD
+Preferir procesamiento local.
+No enviar archivos a servicios externos sin consentimiento.
+51. NO INVENTAR
+Información ausente:
+No identificada
+52. SOURCE REFERENCES
+Guardar:
+
+* página;
+* hoja;
+* celda/rango;
+* sección.
+
+53. CONFIANZA
+Cada dato extraído puede tener:
+
+```
+Alta
+Media
+Baja
+```
+
+54. REVISIÓN OBLIGATORIA
+Antes de generar:
+usuario revisa y corrige.
+55. CONVERTIR IMPORTACIÓN EN PROJECT BUILDER
+Mejora importante:
+después de importar un PDF/Excel,
+abrir la información dentro del MISMO editor utilizado por:
+Crear proyecto
+pero prellenado.
+Arquitectura:
+
+```
+PDF/Excel
+↓
+NormalizedProject
+↓
+PROJECT BUILDER
+↓
+usuario revisa
+↓
+MissionGenerator
+```
+
+Esto evita construir dos editores.
+PARTE V — GENERACIÓN INTELIGENTE DE PARTIDA
+56. MISSION GENERATOR
+Crear una capa:
+
+```
+NormalizedProject
+↓
+MissionGenerator
+↓
+MissionConfig
+```
+
+57. GENERACIÓN POR REGLAS
+Primero utilizar:
+
+* estructura;
+* datos;
+* relaciones;
+* reglas académicas.
+
+Después, si existe capacidad inteligente adicional, usarla para enriquecer.
+58. PUZZLES
+Generar:
+
+* árbol del problema;
+* objetivos;
+* actores;
+* alternativas;
+* cadena;
+* efectos;
+* impactos;
+* valoración;
+* presupuesto;
+* flujos;
+* RPC;
+* regulación;
+* ODS.
+
+Solo cuando existan datos.
+59. DISTRACTORES
+Generar distractores plausibles.
+Nunca absurdos.
+60. VALIDACIÓN DE PUZZLES
+Cada puzzle necesita:
+
+```
+question
+options
+validAnswers
+feedback
+source
+concept
+difficulty
+score
+```
+
+61. PUZZLES AUDITABLES
+Permitir saber internamente:
+de qué información salió cada actividad.
+62. NO INVENTAR RESPUESTAS OFICIALES
+Si no existe suficiente evidencia:
+no marcar una respuesta generada como verdad absoluta.
+Utilizar:
+
+* respuesta esperada;
+* respuesta plausible;
+* requiere revisión.
+
+63. SELECCIÓN DE FASES
+Antes de jugar:
+mostrar:
+
+```
+✓ Problema
+✓ Actores
+✓ Alternativas
+✓ Impactos
+✓ Presupuesto
+✓ Flujo
+? Valoración
+✕ RPC
+✓ Regulación
+✓ ODS
+```
+
+64. CONFIGURACIÓN
+Permitir:
+Dificultad
+Fácil / Intermedio / Avanzado
+Modo
+Aprendizaje / Evaluación / Exploración
+Duración
+Rápida / Normal / Completa
+65. PARTIDA RÁPIDA
+Seleccionar actividades esenciales.
+66. PARTIDA COMPLETA
+Utilizar todas las fases compatibles.
+PARTE VI — CENTRO DE PROYECTOS
+67. CREAR NUEVA PANTALLA
+MIS PROYECTOS
+Mostrar:
+Oficiales
+Importados
+Creados
+Borradores
+Partidas
+68. TARJETAS
+Cada proyecto:
+
+* nombre;
+* origen;
+* estado;
+* completitud;
+* dificultad;
+* última edición.
+
+69. ACCIONES
+Según contexto:
+
+* jugar;
+* continuar;
+* editar;
+* duplicar;
+* eliminar;
+* generar partida;
+* vista previa.
+
+70. DUPLICAR
+Permitir duplicar un proyecto creado.
+Muy útil para crear variantes.
+71. DUPLICAR PARTIDA
+Permitir probar otra estrategia sin destruir la anterior cuando sea viable.
+PARTE VII — RESET Y COMPARTIR
+72. RESTABLECER PARTIDAS
+Crear botón global:
+RESTABLECER PARTIDAS
+73. BORRAR PLAYER DATA
+Eliminar:
+
+* partidas;
+* puntuaciones;
+* respuestas;
+* progreso;
+* bitácoras;
+* proyectos importados;
+* proyectos manuales del jugador;
+* archivos temporales.
+
+74. NO BORRAR SYSTEM DATA
+Conservar:
+
+* misiones oficiales;
+* contenido;
+* assets;
+* configuración;
+* código;
+* metodologías;
+* Centro de Aprendizaje.
+
+75. CONFIRMACIÓN
+Modal claro.
+Para reset global considerar escribir:
+`RESTABLECER`
+76. PREPARAR PARA COMPARTIR
+Crear:
+PREPARAR SIMULADOR PARA COMPARTIR
+Debe dejar:
+
+```
+0 partidas
+0 progreso
+0 archivos importados
+0 proyectos personales
+```
+
+pero conservar toda la aplicación.
+77. VERIFICACIÓN
+Después de limpiar:
+recargar.
+Comprobar estado cero.
+PARTE VIII — REDISEÑO VISUAL
+78. OBJETIVO
+Transformar la UI completa.
+Debe sentirse:
+
+* moderna;
+* limpia;
+* profesional;
+* interactiva;
+* visual;
+* estratégica.
+
+79. DESIGN SYSTEM
+Centralizar:
+
+* color;
+* typography;
+* spacing;
+* radius;
+* shadows;
+* transitions;
+* states.
+
+80. PALETA
+Crear una nueva paleta profesional.
+Evitar colores demasiado apagados.
+Debe existir buen contraste.
+81. PERSONALIDAD VISUAL
+Buscar una estética:
+estrategia + economía + innovación + educación
+No infantil.
+82. COLORES SEMÁNTICOS
+
+```
+Primary
+Secondary
+Accent
+Success
+Warning
+Danger
+Info
+```
+
+83. CARDS
+Crear profundidad visual mediante:
+
+* bordes;
+* elevación;
+* contraste;
+* estados.
+
+Sin exceso de sombras.
+84. DASHBOARD
+Rediseñar.
+Priorizar:
+
+* etapa;
+* presupuesto;
+* tiempo;
+* riesgo;
+* progreso;
+* alternativa.
+
+85. TABLAS
+Especialmente:
+
+* presupuesto;
+* flujo;
+* comparación.
+
+Mejorar legibilidad.
+86. FLUJO TIPO EXCEL
+Diferenciar visualmente:
+Entrada jugador
+Dato del proyecto
+Calculado
+Advertencia
+Error
+PARTE IX — PERSONAJES
+87. PERSONAJES ANIMADOS
+Crear estados:
+
+```
+idle
+thinking
+speaking
+concerned
+positive
+warning
+celebrating
+```
+
+88. PERSONAJES FUNCIONALES
+Roles:
+Tutor
+Analista
+Comunidad
+Regulador
+Evaluador
+89. ANIMACIONES
+Agregar:
+
+* entrada;
+* reacción;
+* speaking;
+* thinking;
+* celebración.
+
+Mantener ligeras.
+90. NO TAPAR INFORMACIÓN
+Personajes no deben ocupar espacio crítico.
+PARTE X — ANIMACIONES DE LA EXPERIENCIA
+91. MICROINTERACCIONES
+Animar:
+
+* presupuesto;
+* tiempo;
+* riesgo;
+* puntuación;
+* progreso;
+* eventos.
+
+92. CONSECUENCIAS
+Ejemplo:
+
+```
+PRESUPUESTO
+500 → 430
+
+RIESGO
+35% → 48%
+```
+
+Animar transición.
+93. MAPA DEL PROYECTO
+Animar conexiones completadas.
+94. EVENTOS
+Crear entrada visual diferenciada.
+95. LOGROS
+Animación breve.
+96. REDUCED MOTION
+Respetar:
+`prefers-reduced-motion`
+PARTE XI — CENTRO DE APRENDIZAJE
+97. INTEGRACIÓN
+Desde Project Builder:
+si el usuario no entiende:
+
+* impacto;
+* VPN;
+* RPC;
+* valoración;
+
+permitir abrir explicación contextual.
+98. NO SACARLO DEL FLUJO
+Abrir en:
+
+* panel;
+* modal;
+* drawer;
+
+cuando sea posible.
+99. EJEMPLOS
+Los ejemplos del Centro de Aprendizaje pueden ayudar a llenar el proyecto.
+Pero nunca rellenar automáticamente sin confirmación.
+PARTE XII — ASISTENTE INTELIGENTE DEL PROJECT BUILDER
+100. NUEVA FUNCIÓN
+Agregar:
+REVISAR MI PROYECTO
+Antes de generar una partida.
+101. QUÉ REVISA
+
+* claridad del problema;
+* causalidad;
+* objetivos;
+* alternativas;
+* cadena;
+* impactos;
+* costos;
+* beneficios;
+* coherencia.
+
+102. NO RESOLVER
+Debe decir:
+El objetivo específico 2 parece no responder a ninguna causa identificada.
+No:
+Cámbialo exactamente por esta respuesta.
+103. NIVEL DE PREPARACIÓN
+Mostrar:
+
+```
+Listo para simular
+```
+
+o
+
+```
+Recomendamos revisar 3 elementos
+```
+
+104. CHECKLIST
+Ejemplo:
+
+```
+✓ Problema
+✓ Causas
+✓ Objetivos
+! Alternativa 2
+✓ Impactos
+! Costos O&M
+```
+
+PARTE XIII — CREAR PROYECTO COMO EXPERIENCIA DE APRENDIZAJE
+105. PRINCIPIO
+Crear el proyecto desde cero también debe enseñar.
+No es solo un editor.
+Mientras construye:
+el usuario aprende a formular.
+106. FEEDBACK CONTEXTUAL
+Ejemplo:
+Si crea:
+Comprar buses
+como problema:
+mostrar:
+Esto parece una solución. Intenta expresar primero la situación negativa que quieres resolver.
+107. PROGRESIÓN
+A medida que construye:
+mostrar visualmente:
+
+```
+Problema
+↓
+Objetivo
+↓
+Alternativas
+↓
+Proyecto
+```
+
+108. TRANSFORMACIÓN EN JUEGO
+Después de terminar:
+el usuario puede pulsar:
+CONVERTIR EN SIMULACIÓN
+y jugar su propio proyecto.
+PARTE XIV — COMPARTIR PROYECTOS
+109. PREPARAR ARQUITECTURA
+Sin construir todavía una plataforma cloud compleja:
+preparar posibilidad futura de:
+
+* exportar proyecto;
+* importar proyecto;
+* compartir configuración.
+
+110. FORMATO PORTABLE
+Considerar un formato JSON versionado interno.
+Ejemplo:
+
+```
+.project-sim.json
+```
+
+No tiene que ser exactamente esa extensión.
+Debe contener datos, no código ejecutable.
+111. IMPORTACIÓN SEGURA
+Validar esquema antes de aceptar.
+PARTE XV — FUTURO MODO PROFESOR
+112. NO IMPLEMENTAR LMS COMPLETO
+Pero preparar:
+
+```
+TeacherProject
+Assignment
+StudentAttempt
+Result
+```
+
+o arquitectura equivalente.
+113. FUTURO
+Esto permitirá posteriormente:
+
+```
+Profesor crea proyecto
+↓
+Genera misión
+↓
+Comparte
+↓
+Estudiante juega
+↓
+Profesor revisa resultado
+```
+
+Documentar.
+PARTE XVI — TESTS
+114. TESTS PROJECT BUILDER
+Probar:
+
+* proyecto vacío;
+* proyecto parcial;
+* proyecto completo;
+* múltiples alternativas;
+* validaciones.
+
+115. NORMALIZATION
+Probar:
+
+```
+Manual
+→ NormalizedProject
+
+PDF
+→ NormalizedProject
+
+Excel
+→ NormalizedProject
+```
+
+116. MISMA SALIDA
+Los tres orígenes deben ser compatibles con:
+`MissionGenerator`.
+117. RESET
+Crear proyecto.
+Guardar.
+Jugar.
+Resetear.
+Reload.
+Debe desaparecer.
+118. OFICIALES
+Después del reset:
+las misiones oficiales deben continuar.
+119. PERSISTENCIA
+Guardar borrador.
+Cerrar.
+Abrir.
+Continuar.
+120. IMPORTACIÓN
+Probar PDF y XLSX.
+121. MISIÓN GENERADA
+Verificar:
+
+* puzzles;
+* scoring;
+* dependencias;
+* navegación;
+* resultado.
+
+PARTE XVII — PRIORIDADES
+P0 — ARQUITECTURA
+
+1. NormalizedProject
+2. ProjectSource
+3. MissionGenerator
+4. persistencia
+5. reset
+6. migraciones.
+
+P1 — PROJECT BUILDER
+
+7. asistente;
+8. borradores;
+9. validación;
+10. alternativas;
+11. impactos;
+12. costos;
+13. preview;
+14. generación.
+
+P2 — IMPORTACIÓN
+
+15. PDF;
+16. Excel;
+17. normalización;
+18. revisión;
+19. integración Builder.
+
+P3 — EXPERIENCIA
+
+20. centro proyectos;
+21. UI;
+22. paleta;
+23. dashboard;
+24. personajes;
+25. animaciones.
+
+P4 — FUTURO
+
+26. exportar;
+27. compartir;
+28. modo profesor avanzado;
+29. comparación intentos.
+
+PARTE XVIII — README
+122. ACTUALIZAR README
+Agregar:
+Formas de jugar
+Historia
+Importar proyecto
+Crear proyecto
+123. DOCUMENTAR PROJECT BUILDER
+Explicar cada fase.
+124. DOCUMENTAR IMPORTACIÓN
+PDF/XLSX.
+125. DOCUMENTAR RESET
+Explicar exactamente qué borra.
+126. DOCUMENTAR ARQUITECTURA
+Mostrar:
+
+```
+Official
+Imported
+Manual
+↓
+NormalizedProject
+↓
+MissionGenerator
+↓
+MissionEngine
+```
+
+PARTE XIX — MANUAL
+127. MANUAL_CREACION.md
+Agregar capítulos:
+
+* Project Builder;
+* NormalizedProject;
+* ProjectSource;
+* importación;
+* MissionGenerator;
+* validaciones;
+* personajes;
+* animaciones;
+* reset;
+* sharing architecture.
+
+Registrar este prompt.
+PARTE XX — CRITERIOS DE ACEPTACIÓN
+Antes de terminar:
+¿Historia sigue funcionando?
+¿Puedo importar PDF?
+¿Puedo importar Excel?
+¿Puedo crear proyecto desde cero?
+¿Puedo guardar borrador?
+¿Puedo continuar?
+¿Puedo crear varias alternativas?
+¿Puedo definir impactos?
+¿Puedo introducir información financiera?
+¿Puedo generar una partida?
+¿Las tres fuentes usan el mismo motor?
+¿Puedo corregir un proyecto importado?
+¿No se inventan datos?
+¿Puedo resetear?
+¿Reset deja las misiones oficiales?
+¿Puedo preparar el simulador para compartir?
+¿La interfaz mejoró?
+¿Los colores tienen contraste?
+¿Los personajes están animados?
+¿Las animaciones tienen propósito?
+¿La partida generada tiene puzzles?
+¿La puntuación funciona?
+¿La trazabilidad funciona?
+Si P0/P1 falla:
+NO declarar V2.4 terminada.
+PARTE XXI — PRUEBA END-TO-END
+Realizar obligatoriamente:
+TEST A
+Jugar misión oficial.
+TEST B
+Crear proyecto desde cero.
+Guardar borrador.
+Cerrar.
+Continuar.
+Terminar.
+Generar simulación.
+Jugar.
+TEST C
+Importar PDF.
+Revisar.
+Editar.
+Generar.
+Jugar.
+TEST D
+Importar Excel.
+Verificar números.
+Generar flujo.
+Jugar.
+TEST E
+Reset global.
+Reload.
+Confirmar:
+
+```
+0 partidas
+0 borradores
+0 proyectos importados
+0 proyectos manuales
+```
+
+y:
+
+```
+misiones oficiales intactas
+```
+
+PARTE XXII — REPORTE FINAL
+Entregar:
+V2.4 RESUMEN
+ARQUITECTURA
+NORMALIZED PROJECT
+MISSION GENERATOR
+PROJECT BUILDER
+MODO ESTUDIANTE
+MODO CREADOR
+PDF
+EXCEL
+CENTRO DE PROYECTOS
+RESET
+COMPARTIR
+UX
+PALETA
+PERSONAJES
+ANIMACIONES
+PUZZLES
+SCORING
+TESTS
+BUILD
+DOCUMENTACIÓN
+PENDIENTES
+DEUDA TÉCNICA
+V2.5 RECOMENDADA
+Cada apartado:
+IMPLEMENTADO / PARCIAL / PREPARADO / PENDIENTE
+REGLA ARQUITECTÓNICA FINAL
+El sistema debe evolucionar hacia:
+
+```
+                 FUENTES DE PROYECTO
+
+         ┌────────────┼────────────┐
+         ▼            ▼            ▼
+
+     OFICIAL       PDF/EXCEL     MANUAL
+         │            │            │
+         │            ▼            ▼
+         │         PARSER       BUILDER
+         │            │            │
+         └────────────┼────────────┘
+                      ▼
+              NORMALIZED PROJECT
+                      │
+                      ▼
+                VALIDATION
+                      │
+                      ▼
+              MISSION GENERATOR
+                      │
+                      ▼
+                MISSION ENGINE
+                      │
+                      ▼
+        ┌─────────────┼─────────────┐
+        ▼             ▼             ▼
+      PUZZLES       FLUJOS       DECISIONES
+        │             │             │
+        └─────────────┼─────────────┘
+                      ▼
+                  SCORING
+                      │
+                      ▼
+              COMITÉ EVALUADOR
+                      │
+                      ▼
+                   RESULTADO
+```
+
+PRINCIPIO FINAL
+No quiero que Crear proyecto sea simplemente:
+“Llenar un formulario y guardar.”
+Debe ser:
+“Aprendo a formular un proyecto mientras lo construyo, el sistema revisa su coherencia y después puedo convertirlo en una simulación para poner a prueba mis propias decisiones.”
+No quiero que Importar proyecto sea:
+“Subir un PDF y responder preguntas.”
+Debe ser:
+“Transformar un proyecto existente en una estructura académica editable y después convertirla en una simulación.”
+Y no quiero que las misiones oficiales desaparezcan.
+Las tres experiencias deben coexistir:
+APRENDER CON UN CASO + ANALIZAR UN PROYECTO REAL + CONSTRUIR MI PROPIO PROYECTO.
+COMIENZA AHORA
+
+1. Revisa el estado actual después de V2.2/V2.3.
+2. Ejecuta baseline.
+3. Identifica qué parte de V2.3 ya existe.
+4. No vuelvas a implementar funcionalidades que ya funcionan.
+5. Diseña `NormalizedProject`.
+6. Diseña migraciones.
+7. Diseña `MissionGenerator`.
+8. Implementa Project Builder.
+9. Integra importación.
+10. Implementa reset seguro.
+11. Integra Centro de Proyectos.
+12. Después mejora UX.
+13. Después personajes.
+14. Después animaciones.
+15. Ejecuta tests.
+16. Realiza pruebas end-to-end.
+17. Corrige.
+18. Actualiza documentación.
+19. Registra este prompt completo.
+
+No pidas aprobación para decisiones técnicas rutinarias.
+No destruyas funcionalidades existentes.
+No inventes datos.
+No dupliques motores.
+No ejecutes macros.
+No agregues servicios de pago sin autorización.
+No declares una característica implementada sin probarla.
+Arquitectura primero. Integración después. Experiencia visual después.
+
+</details>
+
+### Cambios y validación
+
+Resumen en la sección «Evolución V2.4» de este manual y estados en `IMPLEMENTATION_PLAN_V2.md`. Validación: `pnpm typecheck`, `pnpm test` (220 pruebas en 20 archivos), `pnpm build` y pruebas de extremo a extremo A–E en navegador.
 
 ---
 
