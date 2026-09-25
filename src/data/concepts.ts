@@ -663,6 +663,160 @@ export const concepts: Concept[] = [
     ]),
   },
 ];
+/**
+ * Two extra plausible traps per mini exercise (5 options in total, as required for every question).
+ * They reuse the vocabulary of the right answer with a conceptual error.
+ */
+const extraTraps: Record<string, [string, string, boolean, string][]> = {
+  formulacion: [
+    ["d", "Definir el presupuesto disponible y ajustar el problema a ese monto", false, "El presupuesto restringe la solución, pero el problema se identifica primero."],
+    ["e", "Escoger la alternativa que prefieren los financiadores", false, "Sin problema y causas no hay forma de saber si esa alternativa responde a algo."],
+  ],
+  arbol: [
+    ["d", "Construir un tanque de almacenamiento", false, "Es una solución, no una causa."],
+    ["e", "Pérdida de productividad y bienestar", false, "Es una consecuencia del problema: va en los efectos."],
+  ],
+  "causa-efecto": [
+    ["d", "Una causa indirecta", false, "La pérdida de productividad ocurre porque existe el problema: es consecuencia, no origen."],
+    ["e", "Un producto del proyecto", false, "Un producto es un bien o servicio que entrega el proyecto."],
+  ],
+  objetivos: [
+    ["d", "Construir un acueducto regional", false, "Es un producto de una alternativa, no un objetivo."],
+    ["e", "Aumentar la publicidad institucional", false, "No responde a ninguna causa del problema."],
+  ],
+  actores: [
+    ["d", "Recibir la decisión final sin consulta previa", false, "Un actor poderoso e interesado puede bloquear el proyecto si no se involucra."],
+    ["e", "Asumir la operación del proyecto automáticamente", false, "El poder y el interés no implican capacidad ni responsabilidad de operar."],
+  ],
+  alternativas: [
+    ["d", "Sumar todos los costos sin descontarlos", false, "Un peso de hoy no vale lo mismo que uno de dentro de diez años."],
+    ["e", "Elegir la de menor costo anual de operación", false, "Ignora la diferencia de inversión y el momento en que ocurre cada costo."],
+  ],
+  "costo-oportunidad": [
+    ["d", "Los intereses del crédito que financia la obra", false, "Eso es un costo financiero; el de oportunidad es el mejor uso alternativo."],
+    ["e", "La depreciación contable de la obra", false, "La depreciación es contable; el costo de oportunidad es económico."],
+  ],
+  "costo-hundido": [
+    ["d", "Sí, repartido en todos los años", false, "Ya se pagó: no cambia con la decisión, en ningún periodo."],
+    ["e", "Solo en el flujo económico", false, "Es irrelevante en ambos flujos."],
+  ],
+  "cadena-valor": [
+    ["d", "Un producto entregado", false, "Firmar un contrato no entrega ningún bien o servicio a la población."],
+    ["e", "Un insumo", false, "Es un paso de gestión dentro de las actividades."],
+  ],
+  "producto-resultado": [
+    ["d", "Un impacto de largo plazo", false, "El impacto es el cambio en bienestar (por ejemplo, menos enfermedades)."],
+    ["e", "Un insumo", false, "Los insumos son los recursos que se usan para producir."],
+  ],
+  "efectos-impactos": [
+    ["d", "Un efecto del proyecto", false, "Describe la situación actual, no un cambio producido por el proyecto."],
+    ["e", "Una causa directa", false, "Es consecuencia del problema del agua, no su origen."],
+  ],
+  "doble-conteo": [
+    ["d", "Sí, porque lo mide otro método distinto", false, "Cambiar de método no evita contar dos veces el mismo beneficio."],
+    ["e", "Sí, pero solo en el flujo financiero", false, "El mayor valor de las viviendas no es un ingreso del proyecto."],
+  ],
+  distributiva: [
+    ["d", "Un ingreso que aumenta el VPN económico", false, "En el flujo económico la tarifa se excluye: solo redistribuye."],
+    ["e", "Un costo hundido", false, "Se paga cada año y depende del uso: no está hundida."],
+  ],
+  valoracion: [
+    ["d", "Un impacto valorado en pesos", false, "Todavía no tiene precio: falta aplicar un valor unitario."],
+    ["e", "Un producto del proyecto", false, "Es un cambio medido en la población, no un bien entregado."],
+  ],
+  reveladas: [
+    ["d", "Transferencia de beneficios", false, "Usa estudios previos; no es un método de valoración como tal."],
+    ["e", "Una encuesta de disposición a pagar", false, "Preguntar es preferencia declarada."],
+  ],
+  "costo-viaje": [
+    ["d", "La opinión de los visitantes sobre el paisaje", false, "Sin comportamiento observado (viajes y costos) no hay costo de viaje."],
+    ["e", "El presupuesto de la entidad que administra el sitio", false, "Eso es un costo de gestión, no la valoración de la recreación."],
+  ],
+  hedonicos: [
+    ["d", "Se reemplazan por el avalúo catastral", false, "El avalúo no revela la disposición a pagar por el atributo."],
+    ["e", "Se aplican con precios de otra ciudad sin ajustes", false, "Eso sería una transferencia de beneficios, con sus propios requisitos."],
+  ],
+  declaradas: [
+    ["d", "Los costos evitados", false, "Los costos evitados son un método basado en gastos observados."],
+    ["e", "El valor residual", false, "No es un concepto de valoración de preferencias."],
+  ],
+  contingente: [
+    ["d", "Usar datos de mercado reales", false, "Precisamente no usa mercados: pregunta en escenarios hipotéticos."],
+    ["e", "Depender del número de visitas registradas", false, "Eso corresponde al costo de viaje."],
+  ],
+  eleccion: [
+    ["d", "10 pesos", false, "600 pesos entre 10 minutos son 60 pesos por minuto."],
+    ["e", "No se puede saber sin una encuesta de opinión", false, "La elección revela el intercambio entre dinero y tiempo."],
+  ],
+  "metodos-costos": [
+    ["d", "Una medida exacta de la disposición a pagar", false, "Los métodos basados en costos no miden el bienestar completo."],
+    ["e", "Irrelevante para la evaluación", false, "Es útil como límite inferior cuando no hay otra información."],
+  ],
+  transferencia: [
+    ["d", "Que el sitio sea el mismo del estudio original", false, "Si fuera el mismo no habría transferencia."],
+    ["e", "Que el valor transferido sea el más alto disponible", false, "Elegir el valor más alto sesga la evaluación."],
+  ],
+  "flujo-caja": [
+    ["d", "En el primer año de operación", false, "La inversión ocurre antes de operar."],
+    ["e", "Fuera del flujo, porque ya está aprobada", false, "La inversión es el costo principal del proyecto."],
+  ],
+  "valor-residual": [
+    ["d", "0 M", false, "A la obra le quedan 5 años de vida útil al final del horizonte."],
+    ["e", "250 M", false, "Revisa: 5.000 × (20 − 15) / 20."],
+  ],
+  om: [
+    ["d", "Una reinversión", false, "La reinversión reemplaza componentes; el mantenimiento anual los conserva."],
+    ["e", "Un valor residual", false, "El residual es el valor remanente al final del horizonte."],
+  ],
+  "flujo-economico": [
+    ["d", "Se resta como costo", false, "No es un uso de recursos reales: se excluye."],
+    ["e", "Se ajusta con la RPC de mano de obra", false, "Una transferencia tiene RPC 0."],
+  ],
+  transferencias: [
+    ["d", "La energía consumida por la planta", false, "Es un recurso real: se ajusta con su RPC."],
+    ["e", "Los equipos importados", false, "Son recursos reales valorados con la RPC de la divisa."],
+  ],
+  rpc: [
+    ["d", "2.032 M", false, "Multiplica: 2.000 × 1,032."],
+    ["e", "1.032 M", false, "La RPC se aplica al valor, no lo reemplaza."],
+  ],
+  "tasa-descuento": [
+    ["d", "La tasa de interés del crédito del proyecto", false, "Esa es financiera; el flujo económico usa la tasa social."],
+    ["e", "12 %, igual que el flujo financiero", false, "La tasa social de descuento del DNP es 9 %."],
+  ],
+  vpn: [
+    ["d", "120", false, "Sumaste sin descontar ni restar la inversión."],
+    ["e", "−100", false, "Faltan los flujos de los años 1 y 2."],
+  ],
+  "evaluacion-exante": [
+    ["d", "Porque garantiza que el proyecto será exitoso", false, "Reduce el riesgo de decidir mal, pero no garantiza resultados."],
+    ["e", "Porque reemplaza la evaluación ex post", false, "Ambas son necesarias: antes para decidir y después para aprender."],
+  ],
+  sensibilidad: [
+    ["d", "La demanda debe crecer 30 % para ser viable", false, "El valor de quiebre indica cuánto puede empeorar antes de volverse inviable."],
+    ["e", "El VPN aumenta 30 % si la demanda sube", false, "El valor de quiebre no es una elasticidad."],
+  ],
+  regulacion: [
+    ["d", "Cuando el mercado está concentrado", false, "La concentración no basta: hay que medir el daño y el costo de intervenir."],
+    ["e", "Cuando lo pide el operador dominante", false, "Eso sugiere riesgo de captura, no evidencia."],
+  ],
+  externalidad: [
+    ["d", "Un beneficio del proyecto", false, "Es un costo que soportan terceros."],
+    ["e", "Un costo de operación del proyecto", false, "El proyecto no lo paga: por eso es externalidad."],
+  ],
+  captura: [
+    ["d", "Reuniones privadas frecuentes con el operador", false, "Aumentan el riesgo de captura."],
+    ["e", "Aumentar el presupuesto del regulador sin controles", false, "Los recursos sin transparencia no reducen la captura."],
+  ],
+  ods: [
+    ["d", "ODS 8 · Trabajo decente, por los empleos de la obra", false, "Es un efecto temporal; la contribución directa es al agua y saneamiento."],
+    ["e", "ODS 16 · Instituciones sólidas", false, "No es la relación causal directa del servicio de agua."],
+  ],
+};
+for (const c of concepts) {
+  const extra = extraTraps[c.id] ?? [];
+  c.exercise.options.push(...extra.map(([id, text, correct, feedback]) => ({ id, text, correct, feedback })));
+}
 export const conceptById = (id: string) => concepts.find((c) => c.id === id);
 /** Concepts to review, derived only from the game's weakest dimensions. */
 export const dimensionConcepts: Record<string, string[]> = {

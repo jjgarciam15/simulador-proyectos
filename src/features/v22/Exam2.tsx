@@ -10,6 +10,7 @@ import { Panel, Button } from "../../components/ui";
 import { FlowTable, initialDraft, toRows, type Draft } from "./FlowSheet";
 import NpvCalculator from "./NpvCalculator";
 import { Status } from "./common";
+import { stableShuffle } from "../../domain/shuffle";
 
 const steps = ["Caso", "Objetivos", "Alternativas", "Datos", "Flujo financiero", "VPN", "Efectos e impactos", "Valoración", "RPC", "Flujo económico", "Comparación", "Sensibilidad", "Decisión"];
 const KEY = "proyecta-exam2-v1";
@@ -33,10 +34,10 @@ function saveAttempt(a: ExamAttempt) {
     /* storage unavailable: the result is still shown */
   }
 }
-function Radio({ name, options, value, onChange }: { name: string; options: { id: string; text: string }[]; value?: string; onChange: (id: string) => void }) {
+function Radio({ name, options, value, onChange, shuffle = true }: { name: string; options: { id: string; text: string }[]; value?: string; onChange: (id: string) => void; shuffle?: boolean }) {
   return (
     <div className="v22-choice">
-      {options.map((o) => (
+      {(shuffle ? stableShuffle(name, options) : options).map((o) => (
         <label key={o.id} className={value === o.id ? "chosen" : ""}>
           <input type="radio" name={name} checked={value === o.id} onChange={() => onChange(o.id)} />
           {o.text}
@@ -257,9 +258,12 @@ export default function Exam2({ onExit }: { onExit: () => void }) {
               options={[
                 { id: "A", text: "A tiene mayor VPN económico" },
                 { id: "B", text: "B tiene mayor VPN económico" },
+                { id: "igual", text: "Tienen el mismo VPN económico porque protegen el mismo humedal" },
+                { id: "financiero", text: "Gana la de mayor VPN financiero; el económico no se compara" },
+                { id: "barata", text: "B, porque la alternativa de menor inversión siempre tiene mayor VPN" },
               ]}
               value={a.compare}
-              onChange={(id) => set({ compare: id as "A" | "B" })}
+              onChange={(id) => set({ compare: id })}
             />
           </>
         );
@@ -275,6 +279,7 @@ export default function Exam2({ onExit }: { onExit: () => void }) {
           <>
             <Radio
               name="dec"
+              shuffle={false}
               options={[
                 { id: "A", text: "Elijo A" },
                 { id: "B", text: "Elijo B" },

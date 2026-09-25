@@ -4,6 +4,7 @@ import { concepts, conceptCategories, conceptById, type Concept } from "../../da
 import { rpcTable } from "../../data/rpc";
 import { npv } from "../../domain/flows";
 import { fmtMoney } from "../../domain/format";
+import { stableShuffle } from "../../domain/shuffle";
 
 function Exercise({ c }: { c: Concept }) {
   const [pick, setPick] = useState("");
@@ -13,7 +14,7 @@ function Exercise({ c }: { c: Concept }) {
       <h4>Mini ejercicio · no afecta la partida</h4>
       <p>{c.exercise.question}</p>
       <div className="v22-choice">
-        {c.exercise.options.map((o) => (
+        {stableShuffle(c.id, c.exercise.options).map((o) => (
           <label key={o.id} className={pick === o.id ? "chosen" : ""}>
             <input type="radio" name={"ex" + c.id} checked={pick === o.id} onChange={() => setPick(o.id)} />
             {o.text}

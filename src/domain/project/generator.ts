@@ -92,7 +92,9 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
     alts = p.alternatives.filter((a) => a.name.trim());
   const add = (a: Omit<GeneratedActivity, "status" | "options"> & { options: { id: string; text: string }[] }) => {
     const status = answerStatus(p, a.source);
-    acts.push({ ...a, options: shuffle(a.id, a.options), status, score: status === "esperada" ? a.score : status === "plausible" ? Math.round(a.score / 2) : 0 });
+    const options = a.options.filter((o, i, all) => o.text.trim() && all.findIndex((x) => x.text.trim().toLowerCase() === o.text.trim().toLowerCase()) === i).slice(0, 7);
+    if (options.length < 5) return;
+    acts.push({ ...a, options: shuffle(a.id, options), status, score: status === "esperada" ? a.score : status === "plausible" ? Math.round(a.score / 2) : 0 });
   };
   if (p.problem.trim() && causes.length && effects.length && alts.length)
     add({
@@ -106,6 +108,8 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         { id: "causa", text: causes[0].text },
         { id: "efecto", text: effects[0].text },
         { id: "solucion", text: `Falta de ${lower(alts[0].name)}` },
+        { id: "objetivo", text: p.generalObjective || `Construir ${lower(alts[0].name)}` },
+        ...(effects[1] ? [{ id: "efecto2", text: effects[1].text }] : []),
       ],
       validAnswers: ["ok"],
       feedback: "El problema central es la situación negativa que se quiere resolver; la causa la explica, el efecto es su consecuencia y la «falta de» una obra es una solución disfrazada.",
@@ -124,6 +128,8 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         { id: "e1", text: effects[0].text },
         { id: "e2", text: effects[1].text },
         ...(p.generalObjective.trim() ? [{ id: "obj", text: p.generalObjective }] : []),
+        { id: "problema", text: p.problem || "El problema central" },
+        ...(alts[0] ? [{ id: "solucion", text: `Falta de ${lower(alts[0].name)}` }] : []),
       ],
       validAnswers: ["ok"],
       feedback: "Las causas explican por qué existe el problema; los efectos son sus consecuencias. Un objetivo es la situación deseada, no una causa.",
@@ -142,6 +148,8 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         { id: "producto", text: `Construir ${lower(alts[0].name)}` },
         { id: "especifico", text: p.specificObjectives.find((o) => o.text.trim())!.text },
         ...(p.ends[0]?.text ? [{ id: "fin", text: p.ends[0].text }] : []),
+        { id: "problema", text: p.problem },
+        { id: "financiar", text: `Conseguir financiación para ${lower(alts[0].name)}` },
       ],
       validAnswers: ["ok"],
       feedback: "El objetivo general transforma el problema central en situación deseada. Un producto es parte de una alternativa, un objetivo específico atiende una causa y un fin atiende un efecto.",
@@ -158,7 +166,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         concept: "Costo de oportunidad",
         difficulty: "Básica",
         question: "¿Qué alternativa exige la mayor inversión inicial?",
-        options: [...withInv.map((a) => ({ id: a.id, text: a.name })), { id: "iguales", text: "Todas requieren una inversión similar" }],
+        options: [...withInv.map((a) => ({ id: a.id, text: a.name })), { id: "iguales", text: "Todas requieren una inversión similar" }, { id: "vpn", text: "No se puede saber sin calcular el VPN" }, { id: "cobertura", text: "La que tiene mayor cobertura, porque siempre cuesta más" }].slice(0, 7),
         validAnswers: [max.id],
         feedback: `${max.name} requiere ${Math.round(max.investment!).toLocaleString("es-CO")} M. Mayor inversión significa renunciar a otros usos de esos recursos: compárala con su cobertura y beneficios.`,
         source: withInv.map((a) => `alternatives.${a.id}.investment`),
@@ -175,7 +183,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         concept: "Alternativas de solución",
         difficulty: "Básica",
         question: "¿Qué alternativa llega a una mayor parte de la población objetivo?",
-        options: [...withCov.map((a) => ({ id: a.id, text: a.name })), { id: "iguales", text: "Todas llegan a la misma población" }],
+        options: [...withCov.map((a) => ({ id: a.id, text: a.name })), { id: "iguales", text: "Todas llegan a la misma población" }, { id: "inversion", text: "La de mayor inversión, porque siempre llega a más personas" }, { id: "total", text: "Ninguna: la cobertura se mide sobre la población total" }].slice(0, 7),
         validAnswers: [best.id],
         feedback: `${best.name} cubre ${Math.round(best.coverage! * 100)} %. Mayor cobertura no la hace automáticamente mejor: revisa su costo y riesgo.`,
         source: withCov.map((a) => `alternatives.${a.id}.coverage`),
@@ -193,7 +201,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         concept: "Presupuesto",
         difficulty: "Básica",
         question: `¿Cómo se clasifica el costo «${c.label}»?`,
-        options: (Object.keys(costLabels) as (keyof typeof costLabels)[]).map((k) => ({ id: k, text: costLabels[k] })),
+        options: [...(Object.keys(costLabels) as (keyof typeof costLabels)[]).map((k) => ({ id: k, text: costLabels[k] })), { id: "hundido", text: "Costo hundido (no entra al flujo)" }],
         validAnswers: [c.category],
         feedback: "La inversión ocurre antes de operar; la operación se repite cada año para prestar el servicio; el mantenimiento conserva la capacidad del activo.",
         source: [`costs.${c.id}`],
@@ -211,7 +219,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         concept: "Evaluación financiera vs económica",
         difficulty: "Intermedia",
         question: `En este proyecto, «${b.label}» es…`,
-        options: (Object.keys(benefitLabels) as (keyof typeof benefitLabels)[]).map((k) => ({ id: k, text: benefitLabels[k] })),
+        options: [...(Object.keys(benefitLabels) as (keyof typeof benefitLabels)[]).map((k) => ({ id: k, text: benefitLabels[k] })), { id: "transferencia", text: "Una transferencia sin efecto en el bienestar" }],
         validAnswers: [b.kind],
         feedback: "Un ingreso entra a la caja del ejecutor; un beneficio económico es un aumento de bienestar para la sociedad, aunque nadie lo cobre.",
         source: [`benefits.${b.id}`],
@@ -233,6 +241,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
           { id: "impacto", text: "Un impacto (cambio en el bienestar)" },
           { id: "producto", text: "Un producto (bien o servicio entregado)" },
           { id: "problema", text: "Un efecto del problema (situación actual)" },
+          { id: "insumo", text: "Un insumo del proyecto (recurso que se usa)" },
         ],
         validAnswers: [i.kind],
         feedback: "Los productos se entregan, los efectos son cambios directos que producen y los impactos son cambios en el bienestar de un grupo.",
@@ -246,7 +255,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
     .forEach((i) => {
       const fits = methodFit[i.type!],
         best = valuationMethods.filter((m) => fits[m.id] === "optima"),
-        wrong = valuationMethods.filter((m) => !fits[m.id] && m.id !== "transferencia").slice(0, 3);
+        wrong = valuationMethods.filter((m) => !fits[m.id] && m.id !== "transferencia").slice(0, 4);
       if (!best.length || wrong.length < 2) return;
       add({
         id: "gen-metodo-" + i.id,
@@ -273,6 +282,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         { id: "uno", text: "1: el precio de mercado refleja su valor" },
         { id: "divisa", text: "La RPC de la divisa" },
         { id: "mo", text: "La RPC de mano de obra no calificada" },
+        { id: "obras", text: "La RPC de obras civiles (0,903)" },
       ],
       validAnswers: ["cero"],
       feedback: "La tarifa redistribuye recursos; el beneficio económico ya está medido en los impactos valorados. Sumarla sería doble conteo.",
@@ -296,7 +306,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
   }
   if (p.sdgs.suggested.length) {
     const right = p.sdgs.suggested[0],
-      near = [16, 17, 4, 14, 5, 1].filter((id) => !p.sdgs.suggested.includes(id)).slice(0, 3);
+      near = [16, 17, 4, 14, 5, 1].filter((id) => !p.sdgs.suggested.includes(id)).slice(0, 4);
     add({
       id: "gen-ods",
       phase: 4,

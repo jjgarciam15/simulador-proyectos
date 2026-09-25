@@ -24,6 +24,7 @@ export interface CommitteeQuestion {
 }
 const shuffle = (g: GameState, id: string, o: CommitteeOption[]) =>
   o.sort((a, b) => random(g.seed, "comite" + id + a.id) - random(g.seed, "comite" + id + b.id));
+const fitRank = { optima: 0, valida: 1, parcial: 2, inadecuada: 3 } as const;
 const fmt = (v: number) => Math.round(v).toLocaleString("es-CO") + " M";
 /**
  * Comité evaluador: questions derived from the player's game (alternative, flows, valuation, ODS).
@@ -61,6 +62,7 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
         { id: "vpne", text: "Valor económico: la otra alternativa tiene mayor VPN económico.", credit: alt.npvE > chosen.npvE ? 1 : 0, feedback: `VPN económico: ${fmt(chosen.npvE)} frente a ${fmt(alt.npvE)}.` },
         { id: "nada", text: "Nada: la alternativa más barata siempre es la mejor.", credit: 0, feedback: "Menor inversión no implica mayor valor: compara beneficios, cobertura y riesgo." },
         { id: "tiempo", text: "Tiempo: la otra alternativa se construye más rápido.", credit: alt.months < chosen.months ? 1 : 0, feedback: `Plazo: ${chosen.months} frente a ${alt.months} meses.` },
+        { id: "hundido", text: "Nada: los estudios que ya pagué compensan la diferencia.", credit: 0, feedback: "Los estudios ya pagados son costos hundidos: no cambian la comparación entre alternativas." },
       ]),
     });
   }
@@ -86,6 +88,7 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
             ]),
         { id: "igual", text: "No cambia, porque la demanda no afecta los beneficios.", credit: 0, feedback: "Los beneficios valorados dependen del uso del servicio: menos demanda, menos beneficio." },
         { id: "financiero", text: "Solo cambia el flujo financiero; el económico no.", credit: 0, feedback: "La demanda afecta los beneficios valorados del flujo económico y las tarifas del financiero." },
+        { id: "tarifa", text: "Mejora, porque se puede subir la tarifa para compensar la caída.", credit: 0, feedback: "La tarifa es una transferencia en el flujo económico: subirla no crea beneficio para la sociedad." },
       ]),
     });
     const crit = criticalVariable(c, f.rows, f.econ, f.benefits);
@@ -97,12 +100,19 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
       options: shuffle(
         g,
         "critica",
-        crit.ranked.map((r) => ({
-          id: r.id,
-          text: r.label,
-          credit: tied.includes(r.id) ? 1 : 0,
-          feedback: `Un 10 % desfavorable en ${r.label.toLowerCase()} cambia el VPN económico en ${fmt(r.delta)}.`,
-        })),
+        crit.ranked
+          .map((r): CommitteeOption => ({
+            id: r.id,
+            text: r.label,
+            credit: tied.includes(r.id) ? 1 : 0,
+            feedback: `Un 10 % desfavorable en ${r.label.toLowerCase()} cambia el VPN económico en ${fmt(r.delta)}.`,
+          }))
+          .concat(
+            [
+              { id: "tsd", text: "La tasa social de descuento", credit: 0, feedback: "La tasa social la fija el DNP (9 %): es un parámetro de evaluación, no una variable del proyecto que pueda empeorar." },
+              { id: "estudios", text: "Los estudios ya pagados", credit: 0, feedback: "Son costos hundidos: no cambian con la decisión ni con los escenarios." },
+            ].slice(0, Math.max(0, 5 - crit.ranked.length)),
+          ),
       ),
     });
   }
@@ -116,10 +126,15 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
       options: shuffle(
         g,
         "valoracion",
-        valuationMethods
-          .filter((m) => methodFitFor(card, m.id) !== "inadecuada" || m.id === valued.choice.method)
-          .concat(valuationMethods.filter((m) => methodFitFor(card, m.id) === "inadecuada").slice(0, 2))
-          .filter((m, i, all) => all.findIndex((x) => x.id === m.id) === i)
+        [
+          ...valuationMethods.filter((m) => m.id === valued.choice.method),
+          ...valuationMethods
+            .filter((m) => m.id !== valued.choice.method && methodFitFor(card, m.id) !== "inadecuada")
+            .sort((a, b) => fitRank[methodFitFor(card, a.id)] - fitRank[methodFitFor(card, b.id)]),
+        ]
+          .slice(0, 5)
+          .concat(valuationMethods.filter((m) => m.id !== valued.choice.method && methodFitFor(card, m.id) === "inadecuada"))
+          .slice(0, 6)
           .map((m) => {
             const fit = methodFitFor(card, m.id);
             return {
@@ -146,6 +161,7 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
         { id: "indirecto", text: "Porque un impacto del proyecto contribuye indirectamente y puedo medirlo.", credit: relevant && !isDirect ? 1 : isDirect ? 0.5 : 0, feedback: relevant ? "Es pertinente si el impacto se mide con un indicador." : "El proyecto no produce impactos verificables en este ODS." },
         { id: "todos", text: "Porque todos los proyectos contribuyen a todos los ODS.", credit: 0, feedback: "Seleccionar sin relación causal no demuestra contribución." },
         { id: "imagen", text: "Porque mejora la imagen del proyecto ante los financiadores.", credit: 0, feedback: "La alineación se sustenta con evidencia, no con comunicación." },
+        { id: "exige", text: "Porque el fondo que financia el proyecto exige mencionarlo.", credit: 0, feedback: "Un requisito formal no demuestra contribución: se necesita relación causal e indicador." },
       ]),
     });
   }

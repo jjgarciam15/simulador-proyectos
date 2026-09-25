@@ -16,6 +16,7 @@ export const exam2 = {
     { id: "b", text: "Construir un centro de visitantes", valid: false, why: "Es un producto de una alternativa, no un objetivo." },
     { id: "c", text: "Aumentar el turismo regional", valid: false, why: "Es un fin de largo plazo, no el objetivo general." },
     { id: "d", text: "Cobrar la entrada a los visitantes", valid: false, why: "Es un instrumento de financiación." },
+    { id: "e", text: "Prohibir el ingreso de visitantes al humedal", valid: false, why: "Es una medida posible, no el objetivo; además elimina el uso recreativo que el problema busca ordenar." },
   ],
   alternatives: [
     { id: "A", name: "Sendero y centro de visitantes", text: "Sendero elevado de 3 km, centro de interpretación y guías. Espera 12.000 visitas al año." },
@@ -36,6 +37,7 @@ export const exam2 = {
       { id: "tarifa", text: "La tarifa de entrada", correct: false, feedback: "Es un ingreso financiero del proyecto." },
       { id: "vida", text: "La vida útil de la obra", correct: false, feedback: "Determina el valor residual." },
       { id: "visitas", text: "Las visitas esperadas", correct: false, feedback: "Determinan ingresos y beneficios." },
+      { id: "mant", text: "El mantenimiento anual (3 % de la inversión)", correct: false, feedback: "Cambia con la alternativa elegida: es un costo del proyecto." },
     ],
   },
   tradeoff: {
@@ -45,6 +47,7 @@ export const exam2 = {
       { id: "b", text: "A es mejor en todo", correct: false, feedback: "A cuesta más y depende más de la demanda." },
       { id: "c", text: "B no tiene costos de operación", correct: false, feedback: "B también paga guías y mantenimiento." },
       { id: "d", text: "Ambas son iguales porque protegen el mismo humedal", correct: false, feedback: "Difieren en alcance, costo y riesgo." },
+      { id: "e", text: "B domina porque su VPN financiero es mayor", correct: false, feedback: "El trade-off compara alcance, costo y riesgo; ninguna alternativa domina en todo." },
     ],
   },
   impacts: [

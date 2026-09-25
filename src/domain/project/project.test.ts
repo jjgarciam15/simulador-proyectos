@@ -142,7 +142,8 @@ describe("MissionGenerator: una sola máquina para las tres fuentes", () => {
     expect(acts.length).toBeGreaterThanOrEqual(8);
     for (const a of acts) {
       expect(a.source.length).toBeGreaterThan(0);
-      expect(a.options.length).toBeGreaterThanOrEqual(3);
+      expect(a.options.length).toBeGreaterThanOrEqual(5);
+      expect(a.options.length).toBeLessThanOrEqual(7);
       expect(a.validAnswers.every((v) => a.options.some((o) => o.id === v))).toBe(true);
       expect(a.status).toBe("plausible"); // proyecto de estudiante: respuesta del autor, no oficial
     }

@@ -24,12 +24,13 @@ export function HowToPlay() {
     </section>
   );
 }
-const tutorial = [
-  { q: "¿Cuál describe un problema y no una solución?", o: [["Baja continuidad del servicio de agua", 1], ["Falta de una planta nueva", 0], ["Construir un tanque", 0]], why: "Un problema es una situación negativa; «falta de X» suele esconder una solución." },
-  { q: "«Hogares con agua continua» es un…", o: [["Resultado", 1], ["Producto", 0], ["Insumo", 0]], why: "Es un cambio en la población: el producto sería la planta en operación." },
-  { q: "Ahorrar 45 horas al año por persona es…", o: [["Una medición: falta valorarla", 1], ["Un valor en pesos", 0], ["Un costo hundido", 0]], why: "Medir no es valorar: falta un método, como el valor del tiempo." },
-  { q: "Un subsidio en el flujo económico…", o: [["Se excluye: es una transferencia", 1], ["Se suma como beneficio", 0], ["Se multiplica por 1,032", 0]], why: "Cambia quién paga, no los recursos de la sociedad." },
+export const tutorial = [
+  { q: "¿Cuál describe un problema y no una solución?", o: [["Baja continuidad del servicio de agua", 1], ["Falta de una planta nueva", 0], ["Construir un tanque", 0], ["Comprar carrotanques para las veredas", 0], ["Pérdida de productividad de los hogares", 0]], why: "Un problema es una situación negativa; «falta de X» suele esconder una solución y la pérdida de productividad es un efecto." },
+  { q: "«Hogares con agua continua» es un…", o: [["Resultado", 1], ["Producto", 0], ["Insumo", 0], ["Impacto valorado en pesos", 0], ["Costo de operación", 0]], why: "Es un cambio en la población: el producto sería la planta en operación." },
+  { q: "Ahorrar 45 horas al año por persona es…", o: [["Una medición: falta valorarla", 1], ["Un valor en pesos", 0], ["Un costo hundido", 0], ["Un ingreso del flujo financiero", 0], ["Una transferencia", 0]], why: "Medir no es valorar: falta un método, como el valor del tiempo." },
+  { q: "Un subsidio en el flujo económico…", o: [["Se excluye: es una transferencia", 1], ["Se suma como beneficio", 0], ["Se multiplica por 1,032", 0], ["Se resta como costo", 0], ["Se ajusta con la RPC de mano de obra", 0]], why: "Cambia quién paga, no los recursos de la sociedad." },
 ] as const;
+const order = (i: number) => [...tutorial[i].o.keys()].sort((a, b) => ((a * 7 + i * 3) % 5) - ((b * 7 + i * 3) % 5));
 /** Short interactive tutorial: four small decisions instead of a long explanation. */
 export function Tutorial() {
   const [i, setI] = useState(0),
@@ -49,12 +50,15 @@ export function Tutorial() {
       <h4>Tutorial · decisión {i + 1} de {tutorial.length}</h4>
       <p>{t.q}</p>
       <div className="v22-choice">
-        {t.o.map(([text, ok], k) => (
-          <label key={text} className={pick === k ? "chosen" : ""}>
-            <input type="radio" name={"tut" + i} checked={pick === k} disabled={pick !== null} onChange={() => { setPick(k); if (ok) setScore(score + 1); }} />
-            {text}
-          </label>
-        ))}
+        {order(i).map((k) => {
+          const [text, ok] = t.o[k];
+          return (
+            <label key={text} className={pick === k ? "chosen" : ""}>
+              <input type="radio" name={"tut" + i} checked={pick === k} disabled={pick !== null} onChange={() => { setPick(k); if (ok) setScore(score + 1); }} />
+              {text}
+            </label>
+          );
+        })}
       </div>
       {pick !== null && (
         <>

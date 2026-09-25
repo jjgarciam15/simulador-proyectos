@@ -24,7 +24,7 @@ export interface ExamAnswers {
   benefit?: number;
   rpc?: Record<string, RpcCategory>;
   benefits?: string[];
-  compare?: "A" | "B";
+  compare?: string;
   sensitivity?: string;
   decision?: "A" | "B";
   reason?: string;
@@ -41,12 +41,13 @@ export function examReference() {
 }
 export function sensitivityOptions() {
   const { sA, sB } = examReference(),
-    truth = sA.npvE < 0 && sB.npvE >= 0 ? "a" : sA.npvE >= 0 && sB.npvE >= 0 ? "b" : sA.npvE < 0 && sB.npvE < 0 ? "c" : "d";
+    truth = sA.npvE < 0 && sB.npvE >= 0 ? "a" : sA.npvE >= 0 && sB.npvE >= 0 ? "b" : sA.npvE < 0 && sB.npvE < 0 ? "c" : "e";
   return [
     { id: "a", text: "A deja de ser viable económicamente; B sigue siendo viable", correct: truth === "a" },
     { id: "b", text: "Ambas siguen siendo viables", correct: truth === "b" },
     { id: "c", text: "Ninguna es viable", correct: truth === "c" },
     { id: "d", text: "Solo cambia el flujo financiero", correct: false },
+    { id: "e", text: "B deja de ser viable económicamente; A sigue siendo viable", correct: truth === "e" },
   ];
 }
 export const decisionReasons = [
@@ -54,6 +55,7 @@ export const decisionReasons = [
   { id: "robusta", text: "Sigue siendo viable si las visitas caen 30 % y requiere menos inversión" },
   { id: "barata", text: "Es la más barata" },
   { id: "financiero", text: "Tiene VPN financiero positivo" },
+  { id: "visitantes", text: "Es la que prefieren los visitantes encuestados" },
 ];
 /** Decision credit: several strategies are valid when the justification matches the evidence. */
 export function decisionCredit(decision?: "A" | "B", reason?: string) {
