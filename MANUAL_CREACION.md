@@ -6,7 +6,7 @@ Gestión de proyectos en un territorio ficticio después del Gran Apagón. El ju
 
 ## Estado de evolución
 
-V2 funcional implementada sobre la base anterior (22–23 de septiembre de 2026) y ampliada en la iteración 2 (25 de septiembre de 2026): dilemas condicionales con consecuencias diferidas y sistémicas, laboratorio regulatorio con severidad oculta y puzzle causal, cadena de valor por misión con tarjetas parciales, planificador presupuestal con guía y diagnóstico, coherencia transversal, bonificaciones y penalizaciones explicables, aciertos y errores, preguntas con 6–7 opciones y nuevos logros. Ver la sección «Iteración 2 de la V2».
+V2 funcional implementada sobre la base anterior (22–23 de septiembre de 2026) y ampliada en la iteración 2 (25 de septiembre de 2026): dilemas condicionales con consecuencias diferidas y sistémicas, laboratorio regulatorio con severidad oculta y puzzle causal, cadena de valor por misión con tarjetas parciales, planificador presupuestal con guía y diagnóstico, coherencia transversal, bonificaciones y penalizaciones explicables, aciertos y errores, preguntas con 6–7 opciones y nuevos logros. Ver la sección «Iteración 2 de la V2». La V2.2 (misma fecha) agrega objetivos, efectos e impactos, valoración económica, flujos financiero y económico con RPC, sensibilidad, comparador, comité, Centro de aprendizaje y Examen 2: ver «Evolución V2.2».
 
 Validación de la iteración 2: 156 pruebas automatizadas en 14 archivos, tipos y compilación sin errores; revisión en navegador del inicio y la comparación de dificultades, un dilema resuelto, el panel lateral, el planificador presupuestal, el laboratorio regulatorio, el resultado con aciertos y errores, y la vista móvil de 390 px sin desbordamiento horizontal. No sustituye un piloto con estudiantes.
 
@@ -124,6 +124,110 @@ Centralizada en `difficultyRules`: fondo, información inicial, incertidumbre re
 ### Reglas de balance
 
 No debe existir presupuesto suficiente para maximizar todo. Ninguna alternativa domina en todas las dimensiones (prueba de catálogo). Los dilemas tienen al menos dos opciones con efectos distintos. Los efectos monetarios de un dilema no superan el 5 % del presupuesto. La regulación no siempre es correcta.
+
+
+## Evolución V2.2 · académica, económica y de simulación · 25 de septiembre de 2026
+
+La V2.2 lleva el simulador de «formular un proyecto» a «demostrar que un proyecto crea valor»: objetivos derivados del Árbol del problema, efectos e impactos, valoración económica, flujos financiero y económico, sensibilidad, comparación y defensa ante un comité. Todo se agrega sobre el mismo motor (`act`) y el mismo estado (`GameState.v2.v22`, versión 1); las partidas antiguas siguen funcionando con la puntuación V2.
+
+### Modelo pedagógico
+
+Cada herramienta sigue la secuencia **contexto → dato → decisión → consecuencia → explicación**. Cada módulo abre con una introducción (qué es, por qué importa, qué decides, con qué se conecta). En modo Aprendizaje la retroalimentación es inmediata; en modo Evaluación se difiere hasta el final y solo se permite una pista por pregunta (`src/domain/help.ts`). El Centro de aprendizaje (`src/data/concepts.ts`, 33 conceptos en 15 categorías) se abre desde cualquier herramienta con el evento `proyecta:learn` y no afecta la partida.
+
+### Trazabilidad
+
+`src/domain/traceability.ts` enlaza causa → objetivo específico → alternativa → producto de la cadena de valor → rubro del presupuesto → impacto → método de valoración → beneficio en el flujo económico → ODS. Cada vacío se reporta con su eslabón; el nivel es Alta, Media o Baja y pesa 40 % de la dimensión «Coherencia y trazabilidad». La pantalla «Trazabilidad del proyecto» muestra la cadena en el panel central.
+
+### Objetivos y alternativas
+
+Los objetivos se construyen con los nodos del Árbol del problema: el general debe corresponder al problema central y los específicos a causas (`objectiveOptions`, `objectivesScore`). Las alternativas muestran trade-offs en una tabla (inversión, O&M, vida útil, residual, plazo, cobertura, VPN financiero y económico, riesgo, confianza de la valoración, complejidad regulatoria y ambiente); ninguna domina en todas (prueba de catálogo).
+
+### Efectos, impactos y valoración
+
+- Tarjetas por misión (`src/data/impacts.ts`) para clasificar en problema, producto, efecto, impacto positivo o negativo; incluyen tarjetas de doble conteo (`overlap`) y un efecto de empleo.
+- Biblioteca de 10 métodos (`src/data/valuationMethods.ts`): precios de mercado, cambios en la productividad, costo de la enfermedad, valor del tiempo, costo de viaje, precios hedónicos, gastos defensivos/costos evitados, valoración contingente, experimentos de elección y transferencia de beneficios; cada uno con cuándo usarlo, datos, ventajas, limitaciones, costo y tiempo de estudio, y nivel de confianza.
+- Árbol de decisión de métodos: ¿hay mercado? → ¿se observa comportamiento? → ¿se requiere preferencia declarada? → ¿hay estudios comparables?
+- Elegir un método cuesta dinero y tiempo según el método (`valuationCharge`); la idoneidad se evalúa por impacto (`methodFit`, `fitReason`), la medición debe coincidir con la fórmula y el resultado lleva **confianza** (alta/media/baja/proyectada).
+- **Diferencia documentada:** la guía de MinAmbiente ubica los métodos basados en costos dentro de las preferencias reveladas y advierte que no dan una medida técnicamente correcta del bienestar; la transferencia de beneficios «no es un método de valoración como tal». El simulador los muestra como familias separadas, con esa nota visible, para que el estudiante no los confunda con una medida de disposición a pagar.
+
+### Flujos financiero y económico
+
+- Motor único `src/domain/flows.ts`: `FlowCase` (rubros, horizonte, tasas), `RowInput` (clasificación, monto, momento y ediciones manuales de celdas), `netFlow`, `npvSteps`, `economicNet`, `evaluate`, `detectFlowErrors`, `detectEconomicErrors`, `errorScore` (−12 por error grave, −5 por alerta).
+- Convención: costos negativos, ingresos y residual positivos; periodo 0 = construcción; residual al final.
+- Caso de cada misión (`src/domain/missionFlow.ts`): horizonte = vida útil de la alternativa; obras civiles con vida de 25 años, residual = obras × (25 − horizonte) / 25; reposición a mitad del horizonte; estudios ya pagados como costo hundido; aportes y cofinanciación se excluyen (financiación, no flujo del proyecto); tarifas como transferencia en el flujo económico.
+- Hoja tipo Excel (`FlowSheet`/`FlowTable`): colores por tipo de celda (dato entregado, debes calcular, debes ingresar, calculado automáticamente), línea de tiempo, explicación de cada celda al seleccionarla y calculadora pedagógica de VPN paso a paso.
+- Flujo económico: cada rubro × RPC, beneficios valorados (sin doble conteo) y tasa social de descuento del 9 %.
+
+### RPC y tasa social de descuento
+
+| Categoría | RPC | Fuente |
+|---|---|---|
+| Divisa (bienes importados) | 1,032 | DNP, Archivos de Economía 497 (2019) |
+| Obras de ingeniería civil | 0,903 | AE 497 |
+| Edificaciones no residenciales | 0,905 | AE 497 |
+| Energía eléctrica | 0,901 | AE 497 |
+| Agua | 0,826 | AE 497 |
+| Combustibles | 0,822 | AE 497 |
+| Cemento | 0,875 | AE 497 |
+| Transporte | 0,874 | AE 497 |
+| Mano de obra calificada urbana | 1,018 | DNP, Archivos de Economía 498, cuadro 11 (2018) |
+| Mano de obra no calificada urbana | 0,607 | AE 498 |
+| Mano de obra rural | 0,722 | AE 498 |
+| Transferencias (impuestos, subsidios, tarifas) | 0 | Criterio de evaluación económica |
+
+Tasa social de descuento: 9 % (DNP, Resolución 1092 de 2022). Tasa financiera de las misiones: la del caso (tasa de oportunidad del ejecutor). Los valores de las RPC están en `src/data/rpc.ts` con su fuente y nota.
+
+### Cálculos y precisión
+
+`src/domain/format.ts`: montos en millones con 0 decimales (« M»), porcentajes con 1 decimal, RPC con 3, factores de descuento con 4, cantidades sin ruido de coma flotante. Tolerancia de respuestas numéricas: ±1 % o ±1 M. Escenarios (`scenarioShocks`), pruebas de estrés (`stressTests`), variable crítica (`criticalVariable`, con empates aceptados) y valor de quiebre por bisección (`switchingValue`).
+
+### Distribución, comparación y comité
+
+- Impacto distributivo (`distribution`): quién gana y quién pierde por grupo, con la advertencia de que el VPN económico agregado no lo muestra.
+- Comparador y matriz de decisión ponderada (`src/domain/comparison.ts`): todas las alternativas con el mismo horizonte, tasas y RPC; los pesos los ajusta el jugador y la matriz muestra qué alternativa gana con cada criterio.
+- Comité evaluador (`src/domain/committee.ts`): hasta cinco preguntas generadas desde la partida (costo de oportunidad, sensibilidad a la demanda, variable crítica, método de valoración, ODS), cada una con 4–5 opciones y retroalimentación. Si el VPN económico ya es negativo, la pregunta de demanda se reformula.
+
+### Puntuación V3
+
+12 dimensiones con pesos por rol (`scoringWeightsV3` en `src/data/balance.ts`) y multiplicadores por perfil de misión (`src/data/missionProfiles.ts`). Si un módulo no aplica (por ejemplo, comité o valoración en una misión privada), su peso se reparte. Nota final = (base − penalizaciones + bonificaciones) × factor de dificultad. Lo que se reconfirma no suma: se puntúa el estado confirmado (`attempts` solo informa). Un módulo construido para otra alternativa vale la mitad hasta que se reconstruye.
+
+### Modos, perfil de misión y práctica
+
+- Modo Aprendizaje o Evaluación al iniciar; perfil de misión con los módulos habilitados (`moduleEnabled`: valoración, flujo económico, distributiva, estrés, valor de quiebre, comité).
+- Práctica rápida (VPN y RPC con ejercicios reproducibles), mini ejercicios por concepto y tutorial de tres minutos.
+
+### Examen 2
+
+Caso aplicado independiente («Sendero ecológico del humedal La Esperanza», `src/data/exam2.ts`): 13 pasos (caso, objetivos, alternativas, datos y costo hundido, flujo financiero en la misma plantilla, VPN, efectos e impactos, valoración, RPC, flujo económico, comparación, sensibilidad y decisión). Los resultados de referencia se calculan con el mismo motor de flujos. La alternativa A tiene mayor VPN económico; la B sigue siendo viable si las visitas caen 30 %: ambas decisiones son defendibles si la justificación coincide con la evidencia. Cada intento se guarda en `proyecta-exam2-v1`; no se acumulan puntos.
+
+### UX y diseño
+
+Tokens en `src/tokens.css` (fondo, superficie, primario, éxito, alerta, peligro, información, textos, bordes, foco y tipos de celda). Estados siempre con texto además de color. Revisión de contraste en navegador de las pantallas nuevas (textos secundarios, enlaces y chips corregidos). Navegación por secciones dentro de cada etapa; vista de 390 px sin desbordamiento horizontal (las hojas de flujo se desplazan dentro de su contenedor).
+
+### Pruebas
+
+192 pruebas en 17 archivos: `flows.test.ts` (VPN, residual, RPC, escenarios, valor de quiebre, errores), `v22.test.ts` (objetivos, impactos, valoración, trazabilidad, comité, requiere revisión, puntuación V3), `exam2.test.ts` (referencia, sensibilidad, créditos, flujo vacío) y las pruebas previas del motor y del catálogo. Revisión en navegador con Playwright de objetivos, impactos, valoración, flujos, comparador, comité (aprendizaje y evaluación), Centro de aprendizaje y Examen 2 completo.
+
+### Límites conocidos de la V2.2
+
+- Los eventos de ejecución anteriores no se migraron todos al modelo condicional.
+- Catálogo de instrumentos regulatorios limitado a tres familias.
+- El tiempo se modela en meses; no hay calendario por semanas.
+- El tutor contextual es parcial; la analítica no mide tiempo por etapa.
+- Modo docente preparado en datos, sin interfaz propia.
+- El Examen 2 es independiente de las misiones.
+- El arrastrar y soltar se verificó con eventos sintéticos en navegador sin interfaz; hay alternativa accesible por selección.
+
+## Referencias académicas
+
+- Departamento Nacional de Planeación (2019). *Actualización de la estimación de los indicadores «Razón Precio–Cuenta»*. Archivos de Economía 497. https://mgaayuda.dnp.gov.co/Recursos/Estimacion_indicadores_razon_precio_cuenta.pdf
+- Departamento Nacional de Planeación (2019). *Estimación del precio cuenta de la mano de obra*. Archivos de Economía 498. https://mgaayuda.dnp.gov.co/Recursos/Estimacion_precio_cuenta_mano_de_obra.pdf
+- Departamento Nacional de Planeación (2022). Resolución 1092 de 2022, adopción de la tasa social de descuento (9 %). https://www.dnp.gov.co/publicaciones/Revista-Juridica/Paginas/Adopci%C3%B3n-de-la-Tasa-Social-de-Descuento-para-la-evaluaci%C3%B3n-de-proyectos-de-inversi%C3%B3n.aspx
+- Departamento Nacional de Planeación. *Documento conceptual de la Metodología General Ajustada (MGA)*. https://mgaayuda.dnp.gov.co/Recursos/Documento_conceptual_2023.pdf
+- Ministerio de Ambiente y Desarrollo Sostenible (2018). *Guía de aplicación de la valoración económica ambiental* (Resolución 1084 de 2018). https://archivo.minambiente.gov.co/images/NegociosVerdesysostenible/pdf/valoracion_economica_ambiental/Gu%C3%ADa_de_aplicaci%C3%B3n_de_la_VEA_Comprimida.pdf
+- OECD (2018). *Cost-Benefit Analysis and the Environment: Further Developments and Policy Use*. OECD Publishing. https://www.oecd.org/en/publications/2018/06/cost-benefit-analysis-and-the-environment_g1g8b70e.html
+
+Los valores monetarios de las misiones son simulados; solo las RPC y la tasa social de descuento provienen de las fuentes citadas.
 
 
 # Historial de prompts
@@ -4697,6 +4801,2087 @@ Prioridad absoluta: arquitectura sólida + integración pedagógica + decisiones
 Resumen en la sección «Iteración 2 de la V2» de este manual y en `IMPLEMENTATION_PLAN_V2.md` (resultado, estados y pendientes). Validación: `pnpm test` (156 pruebas), `pnpm typecheck`, `pnpm build` y revisión en navegador.
 
 ---
+
+## 2026-09-25 · Evolución académica, económica y de simulación V2.2
+
+<details><summary>Prompt completo recibido</summary>
+
+cuando termines sigue con esto,
+CLAUDE CODE — EVOLUCIÓN ACADÉMICA, ECONÓMICA Y DE SIMULACIÓN V2.2
+Esta instrucción es una AMPLIACIÓN OBLIGATORIA del Prompt Maestro V2 que ya recibiste.
+Sustituye cualquier ampliación V2.1 anterior, pero NO sustituye el Prompt Maestro V2.
+Debes combinar:
+PROMPT MAESTRO V2 + ESTA AMPLIACIÓN V2.2
+y trabajar sobre el repositorio actual.
+0. MISIÓN DE ESTA EVOLUCIÓN
+Quiero llevar el simulador a un nivel académico y estratégico considerablemente superior.
+Hasta ahora hemos trabajado:
+
+* formulación;
+* problema;
+* árbol del problema;
+* actores;
+* población;
+* alternativas;
+* cadena de valor;
+* recursos;
+* presupuesto;
+* evaluación ex ante;
+* regulación económica;
+* ODS;
+* puntuación;
+* eventos;
+* riesgo;
+* navegación;
+* persistencia.
+
+Ahora quiero integrar profundamente:
+
+* objetivos;
+* productos;
+* efectos;
+* impactos;
+* valoración económica;
+* bienes sin mercado;
+* preferencias reveladas;
+* preferencias declaradas;
+* metodologías de valoración;
+* flujo financiero;
+* flujo económico;
+* Razones Precio Cuenta — RPC;
+* VPN;
+* tasa de descuento;
+* valor residual;
+* operación y mantenimiento;
+* análisis de sensibilidad;
+* escenarios;
+* comparación de alternativas;
+* trazabilidad completa;
+* evaluación distributiva;
+* incertidumbre de estimaciones.
+
+El objetivo fundamental es que el estudiante comprenda:
+cómo una situación problemática termina convirtiéndose en un proyecto estructurado, valorado, evaluado y comparado con otras alternativas.
+1. CONTEXTO ACADÉMICO PARA CLAUDE
+Este proyecto pertenece a una asignatura universitaria de:
+FORMULACIÓN Y EVALUACIÓN DE PROYECTOS
+y además integra conocimientos de:
+REGULACIÓN ECONÓMICA.
+El simulador debe permitir aprender mediante decisiones.
+No debe reemplazar el contenido académico por gamificación superficial.
+La gamificación debe servir para que el estudiante tenga que aplicar los conceptos.
+2. MODELO CONCEPTUAL CENTRAL
+Todo el simulador debe girar alrededor de esta lógica:
+
+```
+SITUACIÓN
+    ↓
+PROBLEMA
+    ↓
+CAUSAS
+    ↓
+EFECTOS DEL PROBLEMA
+    ↓
+ÁRBOL DEL PROBLEMA
+    ↓
+ACTORES
+    ↓
+POBLACIÓN
+    ↓
+OBJETIVO GENERAL
+    ↓
+OBJETIVOS ESPECÍFICOS
+    ↓
+ALTERNATIVAS
+    ↓
+RECURSOS
+    ↓
+ACTIVIDADES
+    ↓
+PRODUCTOS
+    ↓
+EFECTOS DEL PROYECTO
+    ↓
+IMPACTOS
+    ↓
+MEDICIÓN
+    ↓
+VALORACIÓN
+    ↓
+COSTOS Y BENEFICIOS
+    ↓
+FLUJO FINANCIERO
+    ↓
+AJUSTES ECONÓMICOS / RPC
+    ↓
+IMPACTOS ECONÓMICOS
+    ↓
+FLUJO ECONÓMICO
+    ↓
+INDICADORES
+    ↓
+ESCENARIOS
+    ↓
+SENSIBILIDAD
+    ↓
+REGULACIÓN
+    ↓
+SOSTENIBILIDAD / ODS
+    ↓
+COMPARACIÓN
+    ↓
+DECISIÓN
+```
+
+No tienes que convertir esto en 25 pantallas.
+Debes diseñar una experiencia fluida.
+Pero conceptualmente debe existir esta trazabilidad.
+3. PRINCIPIO DE TRAZABILIDAD
+Esta será una de las características más importantes del simulador.
+Debe poder rastrearse:
+
+```
+Problema
+→ Objetivo
+→ Alternativa
+→ Recurso
+→ Actividad
+→ Producto
+→ Efecto
+→ Impacto
+→ Método de valoración
+→ Valor económico
+→ Flujo
+→ Indicador
+→ Decisión
+```
+
+Si un elemento aparece en una etapa y debería afectar otra, debe existir conexión.
+Evitar datos muertos.
+4. MATRIZ DE TRAZABILIDAD
+Crear internamente una estructura capaz de representar relaciones.
+Ejemplo conceptual:
+
+```
+TraceabilityLink {
+    sourceType
+    sourceId
+    targetType
+    targetId
+    relationship
+    validity
+}
+```
+
+No utilizar necesariamente esta implementación literal.
+Debe permitir detectar:
+
+* impactos sin valoración;
+* objetivos sin alternativa;
+* productos sin actividad;
+* beneficios sin impacto;
+* costos sin actividad;
+* valores económicos sin fuente;
+* ODS sin impacto relacionado.
+
+5. MAPA VISUAL DEL PROYECTO
+Crear una visualización opcional:
+MAPA DEL PROYECTO
+Debe permitir observar progresivamente:
+
+```
+Problema
+   ↓
+Objetivo
+   ↓
+Alternativa
+   ↓
+Cadena de valor
+   ↓
+Efectos
+   ↓
+Impactos
+   ↓
+Valoración
+   ↓
+Flujos
+   ↓
+Evaluación
+```
+
+No mostrar toda la complejidad desde el principio.
+El mapa se construye conforme avanza la partida.
+6. DIFERENCIAR DOS TIPOS DE EFECTOS
+Evitar confusión conceptual.
+Existen:
+Efectos del problema
+Consecuencias de que el problema exista.
+y
+Efectos del proyecto
+Cambios generados por la intervención.
+La interfaz debe diferenciarlos claramente.
+7. OBJETIVOS
+Agregar o fortalecer la construcción de:
+
+* objetivo general;
+* objetivos específicos.
+
+Conectar el árbol del problema con los objetivos.
+Cuando pedagógicamente corresponda:
+
+```
+situación negativa
+↓
+transformación
+↓
+situación deseada
+```
+
+El jugador debe identificar o construir objetivos.
+Agregar distractores.
+Evaluar coherencia.
+8. ALTERNATIVAS
+Cada problema debe tener varias alternativas plausibles.
+Cada alternativa tendrá características propias.
+Ejemplo conceptual:
+
+```
+Alternative {
+    id
+    name
+    description
+
+    initialInvestment
+    operatingCosts
+    maintenanceCosts
+
+    implementationTime
+    usefulLife
+    residualValue
+
+    capacity
+    coverage
+
+    financialBenefits
+    economicImpacts
+
+    risks
+    environmentalEffects
+    socialEffects
+    regulatoryEffects
+
+    uncertainty
+}
+```
+
+Adapta el modelo al proyecto existente.
+9. ALTERNATIVAS CON TRADE-OFFS
+Evitar:
+A = buena
+B = mala
+C = absurda.
+Crear:
+A
+Mayor inversión inicial pero menores costos futuros.
+B
+Menor inversión pero mayores costos de mantenimiento.
+C
+Mayor cobertura pero mayor riesgo.
+D
+Menor impacto ambiental pero menor capacidad.
+El estudiante debe comparar.
+10. PROPAGACIÓN DE ALTERNATIVAS
+La alternativa seleccionada debe modificar realmente:
+
+* presupuesto;
+* recursos;
+* tiempo;
+* cadena;
+* productos;
+* efectos;
+* impactos;
+* riesgos;
+* valoración;
+* flujo financiero;
+* flujo económico;
+* regulación;
+* ODS;
+* evaluación;
+* puntuación.
+
+No duplicar manualmente datos.
+Utilizar una fuente consistente.
+11. CADENA DE VALOR
+Mantener:
+
+```
+INSUMOS
+↓
+ACTIVIDADES
+↓
+PRODUCTOS
+↓
+RESULTADOS
+↓
+IMPACTOS
+```
+
+Pero conectarla ahora con el resto del proyecto.
+Los productos construidos deben ayudar a determinar efectos.
+12. PRODUCTO → EFECTO → IMPACTO
+Agregar una mecánica explícita.
+Ejemplo:
+
+```
+PRODUCTO
+
+20 km de vía mejorados
+
+↓
+
+EFECTO
+
+reducción de tiempos de viaje
+
+↓
+
+IMPACTO
+
+mayor productividad / acceso / bienestar
+```
+
+El jugador debe construir estas relaciones.
+13. NUEVA ETAPA: EFECTOS E IMPACTOS
+Después de construir/seleccionar la alternativa:
+presentar un conjunto amplio de tarjetas.
+El estudiante debe identificar:
+
+* productos;
+* efectos;
+* impactos positivos;
+* impactos negativos;
+* elementos irrelevantes.
+
+14. EFECTOS ECONÓMICOS
+Incluir según misión:
+
+* empleo;
+* reducción de precios;
+* ahorro de tiempo;
+* aumento de producción;
+* productividad;
+* reducción de costos;
+* acceso;
+* cambios de consumo.
+
+15. IMPACTOS SOCIALES Y AMBIENTALES
+Incluir cuando corresponda:
+
+* contaminación;
+* ruido;
+* emisiones;
+* calidad ambiental;
+* bienestar;
+* seguridad;
+* salud;
+* inclusión;
+* acceso;
+* cambios territoriales.
+
+No asumir que todos son positivos.
+16. DISTRIBUCIÓN DE IMPACTOS
+Agregar una dimensión adicional:
+¿QUIÉN RECIBE EL IMPACTO?
+El jugador debe poder identificar:
+
+* usuarios;
+* consumidores;
+* productores;
+* gobierno;
+* comunidad;
+* trabajadores;
+* población objetivo;
+* terceros.
+
+Esto prepara la evaluación distributiva.
+17. MAGNITUD DEL IMPACTO
+Cuando corresponda distinguir:
+
+* pequeño;
+* medio;
+* alto;
+
+o utilizar una magnitud cuantitativa.
+También considerar:
+
+* duración;
+* población afectada;
+* probabilidad;
+* reversibilidad.
+
+18. MEDICIÓN VS VALORACIÓN
+Enseñar claramente:
+Medir ≠ valorar económicamente.
+Ejemplo:
+
+```
+Se ahorran 15 minutos por viaje
+```
+
+es una medición.
+Convertir ese ahorro en un valor económico es otra etapa.
+19. NUEVO MÓDULO — VALORACIÓN ECONÓMICA
+Crear una etapa profunda dedicada a:
+VALORACIÓN ECONÓMICA DE IMPACTOS
+Debe explicar que determinados bienes, servicios e impactos:
+
+* tienen precios observables;
+* tienen mercados relacionados;
+* no tienen mercado directo.
+
+20. ÁRBOL DE DECISIÓN DE VALORACIÓN
+Crear una herramienta pedagógica visual.
+Ejemplo:
+
+```
+¿Existe precio observable?
+        ↓
+      Sí / No
+
+¿Existe comportamiento observable relacionado?
+        ↓
+Preferencias reveladas
+
+¿Necesitamos preguntar directamente?
+        ↓
+Preferencias declaradas
+
+¿Existe información secundaria transferible?
+        ↓
+Transferencia de beneficios
+
+¿El impacto puede aproximarse mediante costos evitados/reposición?
+        ↓
+Métodos basados en costos
+```
+
+No presentar esto como una regla universal inflexible.
+Debe servir como guía.
+21. INVESTIGACIÓN ACADÉMICA OBLIGATORIA
+Antes de fijar definiciones y categorías:
+investiga fuentes académicas o institucionales confiables.
+Verifica:
+
+* market prices;
+* revealed preferences;
+* stated preferences;
+* travel cost;
+* hedonic pricing;
+* contingent valuation;
+* choice experiments;
+* conjoint analysis;
+* avoided cost;
+* replacement cost;
+* restoration cost;
+* mitigation cost;
+* benefit transfer;
+* opportunity cost cuando corresponda.
+
+Si el curso utiliza una clasificación diferente, mantener compatibilidad conceptual.
+No inventar definiciones.
+22. PREFERENCIAS REVELADAS
+Crear categoría:
+Preferencias reveladas
+Explicar:
+inferimos preferencias observando decisiones reales.
+Incluir principalmente:
+Costo de viaje
+Precios hedónicos
+y otros que resulten pertinentes según investigación y material del curso.
+23. COSTO DE VIAJE
+Explicar:
+
+* qué mide;
+* qué información requiere;
+* cuándo se utiliza;
+* ejemplo;
+* limitaciones;
+* error común.
+
+Crear casos.
+Ejemplo:
+valor recreativo de:
+
+* parque;
+* reserva;
+* playa;
+* atractivo natural.
+
+24. PRECIOS HEDÓNICOS
+Explicar cómo determinadas características pueden reflejarse en precios observables.
+Casos posibles:
+
+* vivienda;
+* calidad ambiental;
+* ruido;
+* accesibilidad;
+* características urbanas.
+
+Agregar ejemplos y limitaciones.
+25. PREFERENCIAS DECLARADAS
+Crear:
+Preferencias declaradas
+Explicar:
+obtenemos información preguntando a las personas sobre escenarios hipotéticos.
+Incluir:
+Valoración contingente
+Experimentos de elección
+Análisis conjunto / conjoint cuando corresponda.
+26. VALORACIÓN CONTINGENTE
+Explicar:
+
+* disposición a pagar;
+* disposición a aceptar cuando corresponda;
+* escenario hipotético;
+* encuestas;
+* sesgos/limitaciones.
+
+Crear casos prácticos.
+27. EXPERIMENTOS DE ELECCIÓN / CONJOINT
+Explicar:
+
+* atributos;
+* niveles;
+* alternativas;
+* elecciones;
+* valoración implícita.
+
+Crear una mini interacción donde el jugador observe cómo funciona.
+28. MÉTODOS BASADOS EN COSTOS
+Incluir según rigor académico:
+
+* costos evitados;
+* reposición/reemplazo;
+* restauración;
+* mitigación.
+
+Explicar que no siempre equivalen exactamente a una medida de bienestar.
+29. TRANSFERENCIA DE BENEFICIOS
+Si la investigación confirma que es pertinente al enfoque del curso:
+incorporar:
+Transferencia de beneficios
+Explicar cómo valores estimados en estudios existentes pueden adaptarse a otro contexto.
+Incluir sus limitaciones.
+30. BIBLIOTECA DE METODOLOGÍAS
+Crear una biblioteca visual.
+Cada tarjeta debe tener:
+Nombre
+Familia
+Qué hace
+Qué información necesita
+Cuándo usar
+Cuándo NO usar
+Ejemplo
+Limitaciones
+31. JUEGO DE SELECCIÓN DE METODOLOGÍA
+En una misión:
+presentar un impacto.
+Después:
+
+```
+¿Qué metodología utilizarías?
+```
+
+Mostrar varias tarjetas.
+Normalmente 5–7 en niveles avanzados.
+El estudiante selecciona.
+32. RETROALIMENTACIÓN
+Después de seleccionar:
+explicar:
+
+* por qué puede ser correcta;
+* por qué no;
+* qué información necesitaría;
+* qué alternativa metodológica podría existir.
+
+No limitarse a correcto/incorrecto.
+33. MÁS DE UNA METODOLOGÍA POSIBLE
+Algunos casos pueden admitir más de una metodología.
+El scoring debe permitir:
+
+* óptima;
+* válida;
+* parcialmente adecuada;
+* inadecuada.
+
+No obligar artificialmente a una única respuesta cuando metodológicamente existan alternativas.
+34. NIVEL DE CONFIANZA DE LA VALORACIÓN
+Nueva mecánica.
+Cada estimación puede tener:
+
+```
+Confianza alta
+Confianza media
+Confianza baja
+```
+
+dependiendo de:
+
+* calidad de datos;
+* metodología;
+* supuestos;
+* información disponible.
+
+Esto puede alimentar el riesgo.
+35. COSTO DE OBTENER UNA MEJOR VALORACIÓN
+El jugador puede decidir:
+hacer un estudio mejor
+a cambio de:
+
+* presupuesto;
+* tiempo.
+
+Ejemplo:
+Encuesta básica:
+barata / menor confianza.
+Estudio completo:
+costoso / mayor confianza.
+Esto genera un trade-off.
+36. DEL IMPACTO AL BENEFICIO
+Cuando corresponda:
+
+```
+Impacto identificado
+↓
+Magnitud
+↓
+Metodología
+↓
+Valor unitario
+↓
+Población/unidades
+↓
+Beneficio económico
+```
+
+Mostrar esta trazabilidad.
+37. FLUJO FINANCIERO
+Crear una herramienta interactiva tipo hoja de cálculo.
+No utilizar un formulario tradicional.
+Columnas:
+
+```
+Periodo 0
+Periodo 1
+Periodo 2
+...
+Periodo N
+```
+
+38. FILAS DEL FLUJO
+Configurable por misión.
+Ejemplo:
+
+```
+Inversión inicial
+Ingresos
+Costos de operación
+Mantenimiento
+Reinversiones
+Otros costos
+Valor residual
+Flujo neto
+```
+
+39. DATOS DEL CASO
+Diferenciar:
+Datos entregados
+Datos que debe calcular el jugador
+Datos que debe ingresar
+Valores calculados automáticamente
+Usar diseño visual diferente.
+40. CÁLCULOS REACTIVOS
+Al modificar una entrada:
+actualizar automáticamente:
+
+* flujo;
+* totales;
+* indicadores;
+* gráficos.
+
+Mantener cálculos fuera de componentes visuales.
+Crear funciones puras y testeables.
+41. CALCULADORA PEDAGÓGICA
+Agregar una herramienta contextual.
+No simplemente una calculadora matemática.
+Debe poder mostrar:
+
+```
+Fórmula
+↓
+Variables
+↓
+Valores
+↓
+Sustitución
+↓
+Resultado
+↓
+Interpretación
+```
+
+Utilizarla para:
+
+* VPN;
+* valor presente;
+* transformaciones;
+* RPC;
+* otros cálculos pertinentes.
+
+42. VPN
+Enseñar y calcular:
+Valor Presente Neto
+Mostrar fórmula matemáticamente correcta.
+Explicar:
+
+* flujo;
+* periodo;
+* tasa;
+* descuento;
+* inversión;
+* interpretación.
+
+43. PASO A PASO DEL VPN
+Permitir ver:
+
+```
+Periodo 1
+Flujo = X
+Factor descuento = Y
+Valor presente = Z
+```
+
+y repetir por periodo.
+Después:
+
+```
+Σ valores presentes = ...
+VPN = ...
+```
+
+44. NO REDUCIR LA DECISIÓN AL VPN
+Un VPN mayor no debe automáticamente resolver todo.
+El jugador también debe considerar:
+
+* riesgo;
+* restricciones;
+* distribución;
+* impactos;
+* regulación;
+* sostenibilidad;
+* presupuesto;
+* capacidad institucional.
+
+Esto permite decisiones más realistas.
+45. VALOR RESIDUAL
+Incluirlo cuando corresponda.
+Explicar:
+
+* qué representa;
+* cuándo aparece;
+* por qué se incorpora al final del horizonte.
+
+46. OPERACIÓN Y MANTENIMIENTO
+Diferenciar:
+Inversión
+vs.
+Operación
+vs.
+Mantenimiento
+El estudiante debe clasificar correctamente rubros.
+Errores afectan puntuación.
+47. LÍNEA DE TIEMPO DEL PROYECTO
+Crear una visualización temporal.
+Mostrar:
+
+```
+Preparación
+Construcción
+Operación
+Mantenimiento
+Cierre / residual
+```
+
+Los costos y beneficios deben aparecer en el tiempo.
+Esto ayudará a comprender el flujo.
+48. FLUJO ECONÓMICO
+Crear una etapa posterior o vista comparativa.
+Explicar claramente:
+Flujo financiero
+vs.
+Flujo económico
+La diferencia debe comprenderse visualmente.
+49. VISTA COMPARATIVA
+Crear una vista:
+
+```
+FINANCIERO                ECONÓMICO
+
+Valor de mercado          Valor económico
+       ↓                         ↓
+Ajustes                    RPC / ajustes
+       ↓                         ↓
+Flujo financiero          Flujo económico
+```
+
+Utilizar ejemplos reales de la misión.
+50. RPC
+Integrar:
+Razones Precio Cuenta
+El jugador debe aprender a transformar valores cuando corresponda.
+Ejemplo:
+
+```
+Valor financiero
+×
+RPC
+=
+Valor económico
+```
+
+51. TABLA RPC
+Proporcionar una tabla según el caso.
+El jugador debe identificar:
+
+* rubro;
+* categoría;
+* RPC;
+* transformación.
+
+No resolver automáticamente al principio.
+52. MODO APRENDIZAJE RPC
+Primeros ejercicios:
+guiados.
+Después:
+menos ayuda.
+Finalmente:
+el jugador aplica los RPC dentro del flujo económico.
+53. IMPACTOS EN EL FLUJO ECONÓMICO
+Los impactos valorados anteriormente deben alimentar el flujo económico cuando corresponda.
+Ejemplo:
+
+```
+Ahorro de tiempo
+↓
+valor económico por hora
+↓
+número de usuarios
+↓
+beneficio anual
+↓
+flujo económico
+```
+
+54. EVITAR DOBLE CONTEO
+Agregar una mecánica pedagógica importante:
+DOBLE CONTEO
+El jugador debe evitar incluir dos veces el mismo beneficio.
+Crear casos donde:
+dos impactos aparentemente distintos representan parcialmente el mismo beneficio.
+Advertir y penalizar cuando corresponda.
+55. COSTOS HUNDIDOS
+Cuando sea pertinente:
+introducir conceptualmente:
+Costos hundidos
+y enseñar cuándo no deberían afectar determinadas decisiones futuras.
+No forzarlo en todas las misiones.
+56. COSTO DE OPORTUNIDAD
+Reforzar:
+Costo de oportunidad
+No solo como definición.
+Integrarlo a decisiones.
+Elegir una alternativa implica renunciar a otra utilización de recursos.
+57. EVALUACIÓN FINANCIERA VS ECONÓMICA
+Crear una comparación clara.
+Un proyecto puede:
+
+* ser atractivo financieramente;
+* no serlo económicamente;
+
+o viceversa.
+Crear casos donde esta diferencia realmente aparezca.
+58. EVALUACIÓN DISTRIBUTIVA
+Nueva capa avanzada.
+Preguntar:
+¿Quién gana y quién pierde?
+Mostrar impactos por grupos.
+Ejemplo:
+
+```
+Usuarios        +80
+Productores     -20
+Gobierno        -30
+Sociedad        +60
+```
+
+No utilizar números arbitrarios sin relación con el caso.
+59. MAPA DE BENEFICIADOS Y PERJUDICADOS
+Crear una visualización sencilla.
+Esto conecta:
+
+* actores;
+* impactos;
+* regulación;
+* bienestar.
+
+60. ESCENARIOS
+Mantener:
+
+* optimista;
+* base;
+* pesimista.
+
+Pero ahora deben alterar variables reales.
+Ejemplo:
+
+```
+Demanda
+Costos
+Tiempo
+Valoración
+Beneficios
+```
+
+61. ESCENARIOS DE ESTRÉS
+Agregar en avanzado:
+Stress test
+Ejemplos:
+
+* costos +30%;
+* beneficios -25%;
+* retraso 2 años;
+* demanda -20%;
+* combinación de shocks.
+
+El jugador debe observar resiliencia.
+62. SENSIBILIDAD
+Permitir modificar individualmente:
+
+* inversión;
+* O&M;
+* demanda;
+* beneficios;
+* tasa;
+* horizonte;
+* residual.
+
+Mostrar resultados dinámicamente.
+63. VARIABLE CRÍTICA
+Cuando sea posible identificar:
+¿Qué variable amenaza más la viabilidad?
+Convertirlo en una pregunta.
+Esto aumenta razonamiento.
+64. PUNTO DE QUIEBRE / SWITCHING VALUE
+En dificultad avanzada y cuando metodológicamente sea apropiado:
+permitir explorar:
+¿Cuánto tendría que cambiar esta variable para que cambie la decisión?
+Puede presentarse como herramienta avanzada.
+65. COMPARADOR DE ALTERNATIVAS
+Crear un panel comparativo.
+Mostrar:
+
+```
+                         A       B       C
+
+Inversión
+O&M
+Vida útil
+Residual
+Tiempo
+Cobertura
+VPN financiero
+VPN económico
+Riesgo
+Impacto
+Confianza
+Regulación
+Sostenibilidad
+```
+
+No seleccionar automáticamente.
+66. MATRIZ DE DECISIÓN
+En dificultad intermedia/avanzada permitir comparar alternativas mediante criterios.
+El estudiante puede observar:
+
+* económico;
+* financiero;
+* social;
+* ambiental;
+* riesgo;
+* implementación.
+
+No convertirla en una fórmula que automáticamente declare una alternativa universalmente correcta.
+Debe ayudar al razonamiento.
+67. DECISIÓN FINAL
+El estudiante debe elegir.
+Después justificar.
+Evaluar:
+
+* coherencia;
+* evidencia;
+* indicadores;
+* riesgo;
+* impactos;
+* restricciones.
+
+68. DECISIONES REVERSIBLES E IRREVERSIBLES
+Nueva mecánica.
+Algunas decisiones pueden modificarse fácilmente.
+Otras deben tener costo.
+Ejemplo:
+Cambiar una clasificación:
+reversible.
+Cambiar tecnología después de comprometer inversión:
+costoso.
+Esto puede integrarse en partidas avanzadas.
+69. COMITÉ EVALUADOR FINAL
+Agregar una experiencia final.
+Después de estructurar el proyecto:
+el jugador presenta su alternativa ante un:
+Comité Evaluador
+No necesita IA conversacional.
+Puede ser una secuencia de preguntas generadas según sus decisiones.
+Ejemplos:
+¿Por qué seleccionaste esta alternativa si tiene mayor inversión inicial?
+Tu proyecto depende mucho de la demanda. ¿Qué ocurre si cae 20%?
+¿Cómo valoraste el impacto ambiental?
+¿Por qué seleccionaste este ODS?
+Las preguntas deben derivarse de la partida.
+70. DEFENSA DEL PROYECTO
+El jugador responde mediante:
+
+* opciones;
+* argumentos;
+* datos;
+* interpretación.
+
+La defensa puede aportar una pequeña parte de la nota.
+Esto genera un cierre más interesante que simplemente pulsar “Finalizar”.
+71. EXAMEN 2 — NUEVO DISEÑO
+Rediseñar completamente el examen aplicado.
+Presentar:
+Contexto
+Problema
+Objetivo
+Alternativas
+Datos
+Restricciones
+Después:
+una plantilla de flujo.
+72. EXAMEN 2 — SECUENCIA
+
+```
+CASO
+↓
+OBJETIVOS
+↓
+ALTERNATIVAS
+↓
+DATOS
+↓
+FLUJO FINANCIERO
+↓
+VPN
+↓
+IMPACTOS
+↓
+VALORACIÓN
+↓
+RPC
+↓
+FLUJO ECONÓMICO
+↓
+COMPARACIÓN
+↓
+SENSIBILIDAD
+↓
+DECISIÓN
+```
+
+73. PLANTILLA TIPO EXCEL
+Crear una tabla editable.
+Debe sentirse como:
+Excel educativo simplificado
+con:
+
+* celdas;
+* filas;
+* periodos;
+* fórmulas;
+* resultados;
+* validación;
+* feedback.
+
+74. FÓRMULAS INSPECCIONABLES
+Cuando una celda sea calculada:
+permitir consultar:
+¿Cómo se calculó?
+Mostrar fórmula y variables.
+Esto es fundamental para aprender.
+75. DETECTOR DE ERRORES CONCEPTUALES
+No corregir solamente valores.
+Detectar errores como:
+
+* inversión ubicada en periodo incorrecto;
+* ingreso tratado como costo;
+* mantenimiento omitido;
+* residual mal ubicado;
+* RPC incorrecto;
+* beneficio duplicado.
+
+El feedback debe explicar el error.
+76. MODO APRENDIZAJE VS MODO EVALUACIÓN
+Crear arquitectura clara para dos experiencias.
+APRENDIZAJE
+
+* pistas;
+* feedback inmediato;
+* biblioteca;
+* intentos;
+* fórmulas visibles.
+
+EVALUACIÓN
+
+* menos ayuda;
+* decisiones registradas;
+* feedback diferido;
+* nota final.
+
+77. MODO EXAMEN
+Cuando esté activo:
+
+* no mostrar respuesta correcta inmediatamente;
+* limitar pistas;
+* registrar intentos;
+* bloquear ayudas específicas si así lo configura la misión;
+* mostrar retroalimentación completa al final.
+
+78. APRENDER — RECONSTRUCCIÓN
+Transformar:
+Aprender
+en:
+CENTRO DE APRENDIZAJE
+No un glosario.
+79. ESTRUCTURA DE CONCEPTO
+Cada concepto debe poder tener:
+Definición
+Explicación amplia
+¿Para qué sirve?
+Ejemplo
+Dentro del simulador
+Error frecuente
+Relación con otros conceptos
+Mini ejercicio
+Ilustración / diagrama cuando aporte valor
+80. CATEGORÍAS DEL CENTRO DE APRENDIZAJE
+Formulación
+Árbol del problema
+Objetivos
+Actores
+Alternativas
+Cadena de valor
+Efectos e impactos
+Valoración económica
+Flujo financiero
+Flujo económico
+RPC
+Evaluación
+Sensibilidad
+Regulación económica
+ODS
+81. BUSCADOR DE CONCEPTOS
+Agregar búsqueda dentro de Aprender.
+Ejemplo:
+buscar:
+`VPN`
+y acceder directamente.
+82. CONCEPTOS RELACIONADOS
+Al abrir:
+VPN
+mostrar:
+Relacionado:
+
+* flujo;
+* tasa de descuento;
+* valor presente;
+* sensibilidad.
+
+Esto convierte la biblioteca en una red de conocimiento.
+83. MINI EJERCICIOS
+Agregar pequeños ejercicios opcionales.
+No deben afectar necesariamente la partida principal.
+Sirven para practicar:
+
+* causa vs efecto;
+* producto vs impacto;
+* método de valoración;
+* RPC;
+* VPN.
+
+84. CÓMO JUGAR
+Rediseñar completamente.
+Debe explicar visualmente:
+
+```
+1. Analiza
+2. Formula
+3. Compara
+4. Presupuesta
+5. Valora
+6. Evalúa
+7. Decide
+```
+
+85. TUTORIAL INTERACTIVO
+Agregar un tutorial opcional.
+Debe durar pocos minutos.
+En lugar de explicar:
+hacer que el jugador tome pequeñas decisiones.
+86. README — DOCUMENTACIÓN ACADÉMICA Y FUNCIONAL
+El README debe contener:
+Flujo completo del simulador
+Documentar todas las fases.
+Para cada fase:
+Objetivo académico
+Qué recibe el jugador
+Qué hace
+Qué decide
+Qué genera
+Qué etapa utiliza ese resultado
+Cómo se evalúa
+87. README — MAPA DE FASES
+Agregar una tabla o diagrama:
+
+```
+Fase
+Objetivo
+Entrada
+Actividad del jugador
+Salida
+Dependencias
+Puntuación
+```
+
+Debe permitir comprender todo el simulador.
+88. MANUAL DE CREACIÓN
+Actualizar:
+`MANUAL_CREACION.md`
+Crear capítulos específicos para:
+
+* modelo pedagógico;
+* trazabilidad;
+* valoración;
+* flujos;
+* RPC;
+* cálculos;
+* scoring;
+* modos;
+* contenido;
+* alternativas;
+* examen.
+
+89. FUENTES Y REFERENCIAS
+Crear una sección:
+Referencias académicas
+Registrar fuentes utilizadas para validar:
+
+* conceptos;
+* metodologías;
+* fórmulas;
+* clasificaciones.
+
+No llenar la interfaz con citas innecesarias.
+Pero mantener trazabilidad académica en documentación.
+90. DISEÑO VISUAL — PROBLEMA ACTUAL
+Actualmente existen colores con poco contraste.
+Realiza auditoría completa.
+Revisar:
+
+* background;
+* cards;
+* typography;
+* borders;
+* inputs;
+* buttons;
+* charts;
+* disabled;
+* hover;
+* focus;
+* alerts;
+* stage states.
+
+91. DESIGN TOKENS
+Centralizar:
+
+```
+background
+surface
+surfaceElevated
+primary
+secondary
+accent
+success
+warning
+danger
+info
+textPrimary
+textSecondary
+border
+```
+
+No utilizar colores arbitrarios repetidos.
+92. CONTRASTE
+Garantizar legibilidad.
+No depender solamente del color.
+Estados deben combinar:
+color + icono + texto.
+93. JERARQUÍA VISUAL
+El jugador debe distinguir inmediatamente:
+
+1. qué está haciendo;
+2. qué información tiene;
+3. qué debe decidir;
+4. qué recursos posee;
+5. cómo continuar.
+
+94. FEEDBACK DE VARIABLES
+Cuando una decisión cambie algo:
+mostrar discretamente:
+
+```
+Presupuesto -25 M
+Tiempo +2 semanas
+Riesgo -8%
+```
+
+Esto hace tangible la consecuencia.
+95. INFORMACIÓN DESBLOQUEABLE
+Nueva mecánica.
+Algunas decisiones pueden revelar información.
+Ejemplo:
+Contratar estudio:
+desbloquea:
+
+* demanda estimada;
+* rango;
+* confianza.
+
+Consultar comunidad:
+desbloquea:
+
+* aceptación;
+* preocupaciones.
+
+96. NIVEL DE INCERTIDUMBRE
+Algunos valores pueden mostrarse como:
+
+```
+Demanda estimada:
+8.000–11.000 usuarios
+
+Confianza:
+Media
+```
+
+En lugar de falsa precisión.
+97. DATOS CON FUENTE
+Dentro del caso diferenciar:
+
+* supuesto;
+* estimación;
+* dato observado;
+* decisión del jugador.
+
+Esto mejora pensamiento crítico.
+98. SISTEMA DE SUPUESTOS
+Crear una sección:
+Supuestos del proyecto
+Ejemplo:
+
+* crecimiento demanda;
+* inflación;
+* vida útil;
+* tasa;
+* costos.
+
+El jugador debe poder observarlos.
+En avanzado algunos pueden modificarse.
+99. SUPUESTOS Y SENSIBILIDAD
+Los supuestos importantes deben poder alimentar automáticamente el análisis de sensibilidad.
+Evitar valores duplicados.
+100. VALIDACIÓN DE COHERENCIA AUTOMÁTICA
+Crear reglas capaces de detectar:
+
+* objetivo no relacionado con problema;
+* alternativa que no atiende causa;
+* producto sin actividad;
+* impacto sin efecto;
+* valoración sin impacto;
+* beneficio sin valoración;
+* flujo sin fuente;
+* ODS sin relación;
+* regulación desconectada.
+
+No bloquear siempre.
+Puede penalizar o marcar revisión.
+101. INDICADOR DE COHERENCIA
+Mostrar opcionalmente:
+
+```
+Coherencia del proyecto
+Alta / Media / Baja
+```
+
+No revelar necesariamente la solución.
+En avanzado puede mostrarse menos información.
+102. SCORING V3
+Extender puntuación.
+Evaluar:
+
+* diagnóstico;
+* árbol del problema;
+* objetivos;
+* actores;
+* población;
+* alternativas;
+* cadena;
+* efectos;
+* impactos;
+* valoración;
+* presupuesto;
+* flujo financiero;
+* VPN;
+* RPC;
+* flujo económico;
+* sensibilidad;
+* regulación;
+* ODS;
+* decisión;
+* coherencia.
+
+103. PESOS CONFIGURABLES
+No hardcodear pesos globalmente.
+Cada misión/modo puede configurar pesos.
+Pero debe existir normalización consistente.
+104. EVITAR “FARMEO” DE PUNTOS
+No permitir que repetir acciones fáciles genere puntuación infinita.
+Registrar:
+
+* intentos;
+* mejor intento;
+* puntuación máxima.
+
+105. COMITÉ FINAL EN PUNTUACIÓN
+El comité puede evaluar:
+
+* comprensión;
+* interpretación;
+* defensa;
+* reconocimiento de riesgos.
+
+No debe representar una parte excesiva de la nota.
+106. RESULTADO FINAL
+Mostrar:
+Nota
+Resultado del proyecto
+Coherencia
+Eficiencia
+Riesgo
+Impacto
+Valoración
+Evaluación financiera
+Evaluación económica
+Regulación
+Sostenibilidad
+107. EXPLICAR ERRORES
+Ejemplo:
+Identificaste correctamente el impacto ambiental, pero seleccionaste una metodología que requiere información sobre precios de vivienda que este caso no proporciona.
+Mucho mejor que:
+Incorrecto.
+108. RECOMENDACIONES PERSONALIZADAS
+Al finalizar, basándose únicamente en errores de la partida:
+mostrar:
+Te recomendamos repasar:
+
+* preferencias reveladas;
+* RPC;
+* análisis de sensibilidad.
+
+Cada elemento debe enlazar al Centro de Aprendizaje.
+109. REJUGABILIDAD ACADÉMICA
+Una segunda partida puede modificar:
+
+* datos;
+* costos;
+* demanda;
+* impactos;
+* eventos;
+* alternativas;
+* metodologías relevantes.
+
+Así el jugador no memoriza simplemente respuestas.
+110. CASOS DIFERENTES
+Diseñar motor capaz de soportar:
+Transporte
+Ambiente
+Infraestructura
+Educación
+Turismo
+Servicios públicos
+Empresa privada
+Energía
+Desarrollo regional
+Cada uno puede activar diferentes mecánicas.
+111. NO TODAS LAS ETAPAS SON OBLIGATORIAS EN TODAS LAS MISIONES
+El motor debe permitir:
+
+```
+enabledStages
+```
+
+o mecanismo equivalente.
+Una misión sencilla puede omitir valoración avanzada.
+Una misión avanzada puede incluir todo.
+112. PERFIL DE MISIÓN
+Cada misión debería poder definir:
+
+* nivel;
+* duración estimada;
+* conceptos;
+* etapas;
+* metodologías;
+* cálculos;
+* dificultad.
+
+Mostrar esta información antes de comenzar.
+113. DURACIÓN ESTIMADA
+Ejemplo:
+
+```
+Caso introductorio
+15–20 min
+
+Caso intermedio
+30–40 min
+
+Caso avanzado
+60–90 min
+```
+
+No debe bloquear nada; sirve como orientación.
+114. MODO PRÁCTICA RÁPIDA
+Preparar una modalidad:
+Práctica rápida
+para practicar solamente:
+
+* VPN;
+* RPC;
+* impactos;
+* valoración;
+* regulación;
+
+sin jugar una misión completa.
+Puede quedar preparada si implementarla ahora perjudica prioridades.
+115. TESTS FINANCIEROS
+Crear pruebas determinísticas para:
+
+* flujo;
+* VPN;
+* descuento;
+* residual;
+* O&M;
+* RPC;
+* flujo económico;
+* sensibilidad.
+
+Usar ejemplos verificables manualmente.
+116. TESTS DE TRAZABILIDAD
+Probar:
+
+```
+alternative change
+→ effects invalidated
+→ valuation requires review
+→ economic flow requires review
+→ evaluation requires review
+```
+
+No borrar información.
+117. TESTS DE SCORING
+Probar:
+
+* respuestas parciales;
+* metodologías alternativas válidas;
+* penalizaciones;
+* pistas;
+* coherencia;
+* examen.
+
+118. PRECISIÓN
+Definir una política para:
+
+* moneda;
+* decimales;
+* tasas;
+* porcentajes;
+* redondeo;
+* valores grandes.
+
+No permitir inconsistencias entre pantallas.
+119. PERFORMANCE
+Las hojas de flujo y actualizaciones reactivas no deben provocar renders innecesarios o congelamiento.
+Optimizar solamente donde exista necesidad real.
+120. RESPONSIVE
+El flujo tipo Excel puede necesitar espacio.
+Diseñar especialmente para escritorio.
+Pero mantener una experiencia razonable en tamaños menores.
+No destruir la tabla intentando meterla completa en una pantalla pequeña.
+Utilizar scroll horizontal o vistas alternativas cuando corresponda.
+121. ACCESIBILIDAD DEL DRAG & DROP
+Toda interacción drag & drop importante debe tener alternativa mediante:
+
+* botones;
+* teclado;
+* selectores.
+
+No depender exclusivamente de arrastrar.
+122. VALIDACIÓN DE CONTENIDO
+Antes de terminar revisar:
+
+* ortografía;
+* terminología;
+* definiciones;
+* fórmulas;
+* unidades;
+* respuestas;
+* feedback.
+
+123. PRIORIDAD DE ESTA AMPLIACIÓN
+P0 — FUNDAMENTAL
+
+* trazabilidad;
+* objetivos;
+* alternativas;
+* efectos;
+* impactos;
+* valoración;
+* flujo financiero;
+* VPN;
+* flujo económico;
+* RPC.
+
+P1 — INTEGRACIÓN
+
+* sensibilidad;
+* escenarios;
+* scoring;
+* requires review;
+* regulación;
+* ODS.
+
+P2 — EXPERIENCIA
+
+* Aprender;
+* Cómo jugar;
+* visual;
+* gráficos;
+* mapa;
+* comité.
+
+P3 — AVANZADO
+
+* distribución;
+* stress tests;
+* switching values;
+* práctica rápida.
+
+No sacrifiques P0 por P3.
+124. NUEVA REVISIÓN DE LA ESTRUCTURA DE PARTIDA
+Después de implementar los conceptos nuevos, revisa la navegación completa.
+Una estructura candidata:
+
+```
+01. Misión
+
+02. Problema
+
+03. Árbol del problema
+
+04. Actores y población
+
+05. Objetivos
+
+06. Alternativas
+
+07. Cadena de valor
+
+08. Recursos
+
+09. Efectos e impactos
+
+10. Valoración económica
+
+11. Presupuesto
+
+12. Flujo financiero
+
+13. Flujo económico / RPC
+
+14. Evaluación ex ante
+
+15. Escenarios y sensibilidad
+
+16. Regulación económica
+
+17. ODS
+
+18. Comparación
+
+19. Decisión
+
+20. Comité evaluador
+
+21. Resultado
+```
+
+Analiza si algunas deben agruparse.
+No crear una experiencia innecesariamente larga.
+125. EXPERIENCIA DE UNA DECISIÓN IDEAL
+Una buena interacción debería seguir:
+
+```
+CONTEXTO
+↓
+INFORMACIÓN
+↓
+DECISIÓN
+↓
+CONSECUENCIA
+↓
+FEEDBACK
+↓
+CONEXIÓN CON SIGUIENTE ETAPA
+```
+
+Utiliza esta lógica como patrón de diseño.
+126. README — OBLIGATORIO
+Actualizar profundamente `README.md`.
+Debe contener:
+Qué es el simulador
+Objetivos
+Cómo jugar
+Modos
+Fases
+Mecánicas
+Puntuación
+Arquitectura
+Instalación
+Ejecución
+Tests
+Build
+Despliegue
+Estructura
+Troubleshooting
+127. README — FASES DETALLADAS
+Para CADA fase:
+
+```
+Nombre
+Objetivo
+Conceptos
+Entrada
+Qué recibe el jugador
+Qué debe hacer
+Decisiones
+Salida
+Dependencias
+Puntuación
+```
+
+Esto es obligatorio.
+128. MANUAL_CREACION.md
+Actualizar con:
+
+* arquitectura;
+* decisiones;
+* modelos;
+* contenido;
+* fórmulas;
+* fuentes;
+* metodología;
+* valoración;
+* flujos;
+* RPC;
+* scoring;
+* UX;
+* testing.
+
+Registrar este prompt completo en:
+Historial de prompts
+129. IMPLEMENTATION_PLAN_V2.md
+Actualizar.
+Cada característica debe aparecer como:
+
+```
+IMPLEMENTADA
+PARCIAL
+PREPARADA
+PENDIENTE
+```
+
+No maquillar el estado.
+130. INVESTIGACIÓN ANTES DE IMPLEMENTAR CONTENIDO
+Cuando una definición, fórmula o metodología requiera validación:
+investiga primero.
+Priorizar fuentes:
+
+* documentos oficiales;
+* organismos multilaterales;
+* literatura académica;
+* textos reconocidos.
+
+No utilizar blogs genéricos como base académica principal.
+131. NO CAMBIAR LA METODOLOGÍA DEL CURSO ARBITRARIAMENTE
+Si encuentras diferencias entre literatura general y los materiales existentes del curso:
+documentarlas.
+No sustituyas silenciosamente la metodología enseñada en la asignatura.
+Cuando sea posible:
+mantén el enfoque del curso y agrega aclaraciones.
+132. REVISAR DOCUMENTOS EXISTENTES DEL PROYECTO
+Si dentro del repositorio existen documentos, notas, PDFs, configuraciones o contenido académico del curso:
+revísalos antes de fijar las definiciones.
+No ignores conocimiento existente.
+133. CRITERIO DE ÉXITO ACADÉMICO
+Al terminar una misión avanzada, un estudiante debería poder explicar:
+
+1. cuál era el problema;
+2. cuáles eran sus causas;
+3. qué objetivo tenía;
+4. qué alternativas existían;
+5. por qué eligió una;
+6. qué recursos requería;
+7. qué producía;
+8. qué efectos generaba;
+9. cuáles eran sus impactos;
+10. cómo se midieron;
+11. cómo se valoraron;
+12. cómo se construyó el flujo;
+13. cómo se calculó el VPN;
+14. cómo se pasó al análisis económico;
+15. para qué se utilizaron RPC;
+16. qué variables eran críticas;
+17. qué riesgos existían;
+18. qué implicaciones regulatorias había;
+19. qué relación existía con los ODS;
+20. por qué tomó la decisión final.
+
+Si el simulador no ayuda a construir esa comprensión, todavía necesita trabajo.
+134. CRITERIO DE ÉXITO COMO JUEGO
+También debe poder responderse SÍ:
+¿Tengo decisiones reales?
+¿Puedo equivocarme?
+¿Puedo recuperarme?
+¿Existen trade-offs?
+¿Tengo recursos limitados?
+¿Hay incertidumbre?
+¿Mis decisiones anteriores importan?
+¿Puedo probar otra estrategia?
+¿Las alternativas realmente son diferentes?
+¿Existen eventos?
+¿Puedo descubrir información?
+¿Veo las consecuencias?
+¿La puntuación tiene sentido?
+¿La interfaz es clara?
+¿Hay razones para volver a jugar?
+135. REGLA FINAL
+No conviertas esta ampliación en:
+más formularios + más texto + más preguntas.
+Debe convertirse en:
+más razonamiento + más decisiones + más conexiones + más simulación.
+La arquitectura conceptual final debe ser:
+
+```
+FORMULAR
+↓
+ESTRUCTURAR
+↓
+MEDIR
+↓
+VALORAR
+↓
+MODELAR
+↓
+EVALUAR
+↓
+COMPARAR
+↓
+DECIDIR
+```
+
+INSTRUCCIÓN DE EJECUCIÓN PARA CLAUDE CODE
+Comienza ahora.
+PASO 1
+Lee:
+
+* `README.md`
+* `MANUAL_CREACION.md`
+* `IMPLEMENTATION_PLAN_V2.md`
+
+si existen.
+PASO 2
+Inspecciona la implementación actual completa relacionada con:
+
+* estado;
+* misiones;
+* alternativas;
+* scoring;
+* navegación;
+* persistencia;
+* evaluación;
+* regulación;
+* ODS.
+
+PASO 3
+Ejecuta baseline:
+
+* tests;
+* lint;
+* typecheck;
+* build;
+
+según los scripts reales disponibles.
+Registra el estado inicial.
+PASO 4
+Investiga y valida los nuevos conceptos académicos necesarios.
+PASO 5
+Actualiza:
+`IMPLEMENTATION_PLAN_V2.md`
+incluyendo V2.2.
+PASO 6
+Diseña primero:
+
+* modelos;
+* trazabilidad;
+* dependencias;
+* motor de cálculo;
+* scoring.
+
+ANTES de crear todas las pantallas.
+PASO 7
+Implementa por prioridades:
+P0 → P1 → P2 → P3.
+PASO 8
+Después de cada bloque:
+
+* tests;
+* typecheck;
+* lint;
+* revisión.
+
+PASO 9
+Realiza una partida completa.
+No pruebes solamente componentes aislados.
+PASO 10
+Prueba también una estrategia mala deliberadamente.
+El simulador debe detectar errores y explicar consecuencias.
+PASO 11
+Prueba cambio de alternativa a mitad de partida.
+Verifica:
+
+* preservación;
+* invalidación;
+* requires review;
+* recalculado.
+
+PASO 12
+Prueba cálculos manualmente.
+Especialmente:
+
+* VPN;
+* descuento;
+* residual;
+* RPC;
+* sensibilidad.
+
+PASO 13
+Revisa visualmente toda la aplicación.
+Corrige:
+
+* contraste;
+* jerarquía;
+* estados;
+* tablas;
+* feedback.
+
+PASO 14
+Actualiza:
+
+* README;
+* MANUAL_CREACION;
+* IMPLEMENTATION_PLAN.
+
+PASO 15
+Registra este prompt completo en el historial.
+REPORTE FINAL
+Entrégame:
+RESUMEN
+ARQUITECTURA
+MODELO PEDAGÓGICO
+TRAZABILIDAD
+ALTERNATIVAS
+EFECTOS E IMPACTOS
+VALORACIÓN ECONÓMICA
+METODOLOGÍAS
+PRESUPUESTO
+FLUJO FINANCIERO
+VPN
+FLUJO ECONÓMICO
+RPC
+ESCENARIOS
+SENSIBILIDAD
+REGULACIÓN
+ODS
+EXAMEN 2
+CENTRO DE APRENDIZAJE
+CÓMO JUGAR
+COMITÉ EVALUADOR
+PUNTUACIÓN
+DISEÑO
+TESTS
+BUILD
+DOCUMENTACIÓN
+PENDIENTES
+DEUDA TÉCNICA
+RECOMENDACIÓN PARA V2.3
+Para cada elemento indicar:
+IMPLEMENTADO / PARCIAL / PREPARADO / PENDIENTE
+No declarar nada terminado sin haberlo validado.
+RESULTADO QUE BUSCAMOS
+El estudiante ya no debería pensar:
+“Tengo que adivinar cuál respuesta quiere el simulador.”
+Debe pensar:
+“Tengo un problema, varias alternativas y recursos limitados. Necesito entender qué produce cada alternativa, cuáles son sus efectos e impactos, cómo puedo medirlos y valorarlos, cómo cambian mis flujos, qué riesgos existen y cuál decisión puedo defender con evidencia.”
+Ese es el estándar de calidad de esta versión.
+Analiza profundamente. Implementa progresivamente. Prueba cada fase. Mantén el rigor académico. Conserva lo que funciona. No construyas complejidad sin propósito.
+
+</details>
+
+### Cambios y validación
+
+Resumen en la sección «Evolución V2.2» de este manual y estados en `IMPLEMENTATION_PLAN_V2.md`. Validación: `pnpm typecheck`, `pnpm test` (192 pruebas en 17 archivos), `pnpm build` y revisión en navegador.
+
+---
+
 
 ## Plantilla para próximas instrucciones
 

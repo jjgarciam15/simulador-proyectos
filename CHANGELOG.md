@@ -1,5 +1,16 @@
 # Cambios
 
+## 2.2.0 · evolución académica, económica y de simulación (25 de septiembre de 2026)
+
+- Objetivos general y específicos desde el Árbol del problema; clasificación de efectos e impactos con doble conteo.
+- Módulo de valoración económica: 10 métodos, árbol de decisión, costo de estudio, idoneidad y confianza; experimento de elección didáctico.
+- Hoja de flujo financiero tipo Excel, VPN paso a paso, línea de tiempo, flujo económico con RPC (DNP) y tasa social de descuento del 9 %.
+- Escenarios, estrés, variable crítica, valor de quiebre, supuestos y evaluación distributiva.
+- Comparador de alternativas, matriz de decisión ponderada y comité evaluador.
+- Puntuación V3 de 12 dimensiones con pesos por rol y perfil de misión; trazabilidad del proyecto.
+- Modos Aprendizaje y Evaluación, Centro de aprendizaje, práctica rápida, Cómo jugar, tutorial y Examen 2.
+- Documentación: fases detalladas en README, capítulos académicos y referencias en la memoria.
+
 ## 2.1.0 · iteración 2 de la V2 (25 de septiembre de 2026)
 
 - Dilemas condicionales previos a la inversión, con consecuencias inmediatas, diferidas y sistémicas, reproducibles por semilla.

@@ -184,3 +184,53 @@ Diferencia documentada: la guía de MinAmbiente ubica los métodos basados en co
 - **Valoración** (`src/domain/valuation.ts`): medición → método → valor unitario → unidades → beneficio anual; ajuste por idoneidad del método (óptima, válida, parcial, inadecuada), confianza (alta, media, baja) según método y calidad del estudio, y detección de doble conteo.
 - **Trazabilidad** (`src/domain/traceability.ts`): vínculos problema → objetivo → alternativa → actividad → producto → efecto → impacto → método → valor → flujo → indicador → decisión, con detección de vacíos.
 - **Puntuación V3**: dimensiones nuevas para objetivos, efectos, valoración, flujos, RPC y comité; pesos por perfil de misión, normalizados. Las partidas V2 anteriores conservan su fórmula.
+
+## Resultado V2.2
+
+Validación final: `pnpm typecheck` sin errores; `pnpm test` 192 pruebas aprobadas en 17 archivos; `pnpm build` correcto. Revisión en navegador (Playwright, 1440 px y 390 px): objetivos, efectos e impactos, valoración, hojas de flujo financiero y económico, comparador, comité (aprendizaje y evaluación), Cómo jugar, tutorial, Centro de aprendizaje y Examen 2 completo en modo práctica, sin errores de consola ni desbordamiento horizontal en móvil.
+
+### Estado por requisito
+
+| Área | Estado | Evidencia o límite |
+|---|---|---|
+| Trazabilidad problema → decisión | IMPLEMENTADA | `traceability.ts`, pantalla «Trazabilidad», 40 % de la dimensión de coherencia |
+| Objetivos general y específicos | IMPLEMENTADA | `ObjectivesBuilder`, requisito para cerrar Formulación |
+| Alternativas con trade-offs | IMPLEMENTADA | Detalle en Formulación y comparador con 14 criterios |
+| Efectos e impactos (incluye doble conteo y empleo) | IMPLEMENTADA | `impacts.ts`, `ImpactsBuilder` |
+| Módulo de valoración, biblioteca y árbol de decisión | IMPLEMENTADA | 10 métodos, costo de estudio, confianza, idoneidad por impacto |
+| Experimento de elección didáctico | IMPLEMENTADA | `ChoiceExperiment` |
+| Presupuesto (O&M, residual, reposición, contingencia) | IMPLEMENTADA | Planificador V2 + caso de flujo |
+| Flujo financiero tipo hoja de cálculo | IMPLEMENTADA | `FlowSheet`, colores por tipo de celda, explicación por celda |
+| Calculadora de VPN paso a paso | IMPLEMENTADA | `NpvCalculator` |
+| Línea de tiempo del proyecto | IMPLEMENTADA | `Timeline` |
+| Flujo económico con RPC y TSD 9 % | IMPLEMENTADA | `EconomicFlow`, `rpc.ts` con fuentes |
+| Costos hundidos, costo de oportunidad, financiero vs. económico, doble conteo | IMPLEMENTADA | Detección de errores y preguntas del comité |
+| Escenarios, estrés, sensibilidad, variable crítica y valor de quiebre | IMPLEMENTADA | `SensitivityLab` |
+| Supuestos y procedencia de datos | IMPLEMENTADA | `AssumptionsPanel`, etiquetas de tipo de dato |
+| Rangos de incertidumbre | PARCIAL | Escenarios y estrés; no hay simulación Monte Carlo |
+| Evaluación distributiva | IMPLEMENTADA | `Distribution` |
+| Comparador y matriz de decisión | IMPLEMENTADA | Pesos del jugador; no elige automáticamente |
+| Comité evaluador | IMPLEMENTADA | 5 preguntas derivadas de la partida |
+| Regulación | IMPLEMENTADA (V2) | Sin cambios en la V2.2 salvo trazabilidad; catálogo de instrumentos limitado |
+| ODS | IMPLEMENTADA (V2) | Pregunta del comité y eslabón de trazabilidad |
+| Examen 2 | IMPLEMENTADA | 13 pasos, dos modos, intentos guardados; independiente de las misiones |
+| Modos Aprendizaje / Evaluación | IMPLEMENTADA | `help.ts`: retroalimentación diferida y una pista en evaluación |
+| Centro de aprendizaje | IMPLEMENTADA | 33 conceptos, búsqueda, categorías, relacionados, mini ejercicios |
+| Práctica rápida | IMPLEMENTADA | VPN y RPC |
+| Cómo jugar y tutorial | IMPLEMENTADA | Siete pasos y tutorial de cuatro decisiones |
+| Perfil de misión y módulos habilitados | IMPLEMENTADA | `missionProfiles.ts` |
+| Puntuación V3 con pesos configurables | IMPLEMENTADA | 12 dimensiones, renormalización |
+| Anti-farming | IMPLEMENTADA | Se puntúa el estado confirmado |
+| Recomendaciones y rejugabilidad | IMPLEMENTADA | Recomendaciones por dimensión débil; semilla |
+| Tokens de diseño y contraste | PARCIAL | Tokens aplicados a los módulos V2.2; las pantallas antiguas conservan sus estilos |
+| Arrastrar y soltar accesible | PARCIAL | Alternativa por selección; DnD verificado con eventos sintéticos |
+| Tutor contextual | PARCIAL | Introducciones y pistas por módulo; sin tutor conversacional |
+| Modo docente | PREPARADA | Datos y reglas reutilizables; sin interfaz |
+| Analítica de tiempo por etapa | PENDIENTE | Solo intentos, pistas y cambios |
+| Validación de contenido | IMPLEMENTADA | Pruebas de catálogo: tarjetas de impacto con método idóneo y flujos de las nueve misiones |
+
+### Deuda técnica
+
+- `engine.ts` mezcla código original compacto con bloques nuevos legibles; conviene separarlo por etapa.
+- `App.tsx` concentra navegación y modales; conviene extraer un enrutador de vistas.
+- El paquete de producción supera 500 kB; conviene dividirlo por etapa con importación dinámica.
