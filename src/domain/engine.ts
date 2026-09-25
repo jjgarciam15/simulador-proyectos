@@ -212,7 +212,7 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
   invalidateV2(next,label);
   if(v2Actions.includes(action.type))record(next,'Expediente V2 confirmado',label+' registrado; consulta las dependencias pendientes.');
   if(original.v2?.completed.includes(original.phase)&&['nodes','target','objective','alternative','budget','activities','indicators','assumptions','policy','alignment','chain','regulatory','sdgReasons','resetStage',...v22Actions].includes(action.type)){
-   const fee=scenarioById(next.scenarioId).budget*.002;spend(next,fee);advanceTime(next,1);record(next,'Revisión confirmada','Se conservó el trabajo. Revisa etapas afectadas: 0,2 % del presupuesto base y un mes.',fee,1);
+   if(next.v2?.v22?.exploration)record(next,'Revisión confirmada','Modo exploración: el cambio no consume recursos. Revisa etapas afectadas.',0,0);else{const fee=scenarioById(next.scenarioId).budget*.002;spend(next,fee);advanceTime(next,1);record(next,'Revisión confirmada','Se conservó el trabajo. Revisa etapas afectadas: 0,2 % del presupuesto base y un mes.',fee,1);}
   }
  }
  return next;

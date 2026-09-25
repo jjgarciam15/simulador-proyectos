@@ -66,6 +66,8 @@ export interface V2State {
 export interface V22State {
   version: 1;
   mode: "aprendizaje" | "evaluacion";
+  /** Modo exploración (V2.4): immediate feedback and free changes; the score is marked as not comparable. */
+  exploration?: boolean;
   objectives?: { general: string; specific: string[] };
   impacts?: { placements: import("./valuation").ImpactPlacement[]; builtFor: string };
   valuation?: {

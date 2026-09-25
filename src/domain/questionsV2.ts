@@ -3,6 +3,7 @@ import { learningChallenges } from "./learning";
 import { random } from "./finance";
 import { difficultyRules, retryFactors } from "../data/balance";
 import {appliedCases} from './appliedCases';
+import { generatedQuestions } from './project/activityRegistry';
 export interface QuestionV2 {
   id: string;
   phase: number;
@@ -145,7 +146,7 @@ export function questionsV2(g: GameState):QuestionV2[] {
           ],
         }
       : q,
-  ).concat(appliedCases(g));
+  ).concat(appliedCases(g), generatedQuestions(g.scenarioId));
 }
 export type QuestionAction =
   | { type: "answerV2"; id: string; choices: string[] }
