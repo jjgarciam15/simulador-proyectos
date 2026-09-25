@@ -229,3 +229,31 @@
     grid-template-columns: 1fr;
   }
 }
+/* Side panel uses the dark Aurora palette. */
+.context-panel .alt-detail dt,
+.context-panel .live-vars small {
+  color: #88a78e;
+}
+.context-panel .alt-detail dd,
+.context-panel .live-vars strong {
+  color: #d1d8bd;
+}
+.context-panel .alt-detail {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+.context-panel .alt-detail dd {
+  margin-bottom: 6px;
+}
+.context-panel .live-vars div {
+  background: #21484a;
+}
+.context-panel .info-item {
+  border-top-color: #36554b;
+}
+.context-panel .review-inline {
+  color: #3b2a0c;
+}
+.context-panel .command-tool h4 {
+  color: #d1dec5;
+}

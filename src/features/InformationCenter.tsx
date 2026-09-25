@@ -56,7 +56,7 @@ export default function InformationCenter({
         <dt>Costo de referencia de alternativas</dt>
         <dd>
           {money(Math.min(...s.alternatives.map((a) => a.capex)))} –{" "}
-          {money(Math.max(...s.alternatives.map((a) => a.capex)))} M
+          {money(Math.max(...s.alternatives.map((a) => a.capex)))}
         </dd>
         <dt>Estructura del mercado</dt>
         <dd>
@@ -79,7 +79,7 @@ export default function InformationCenter({
                 <span className="badge">Disponible</span>
               ) : (
                 <small>
-                  {money(st.cost)} M · {st.months} meses
+                  {money(st.cost)} · {st.months} meses
                 </small>
               )}
             </p>
@@ -100,7 +100,7 @@ export default function InformationCenter({
                       setConfirm("");
                     }}
                   >
-                    Pagar {money(st.cost)} M y {st.months} meses
+                    Pagar {money(st.cost)} y {st.months} meses
                   </Button>
                 </div>
               ) : (

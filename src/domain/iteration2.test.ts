@@ -183,7 +183,7 @@ describe("Presupuesto, coherencia y resultado", () => {
       g = toStage(g, 2);
       const guide = budgetGuide(g);
       expect(guide).toHaveLength(6);
-      const max = Object.fromEntries(guide.map((r) => [r.key, r.high])) as GameState["budget"];
+      const max = Object.fromEntries(guide.map((r) => [r.key, r.high])) as unknown as GameState["budget"];
       expect(projectCost({ ...g, budget: max })).toBeGreaterThan(projectCost(g));
     }
     expect(createGameV2("agua").budget.operation).toBe(0);

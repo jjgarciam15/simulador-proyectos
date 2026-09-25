@@ -1,6 +1,8 @@
 import type {GameState} from '../domain/types';
 export const world={name:'Aurora',era:'Año 12 después del Gran Apagón',intro:'Las redes cayeron. Los caminos se quebraron. Pero la gente se quedó. Ahora nueve territorios esperan decisiones que los ayuden a volver a empezar.'};
-export const assets={nation:'/art/aurora-nation.png',mara:'/art/mara.png',ivo:'/art/ivo.png'};
+// Respect Vite's base path so the build also works under a subpath (e.g. GitHub Pages).
+const base=import.meta.env.BASE_URL;
+export const assets={nation:base+'art/aurora-nation.png',mara:base+'art/mara.png',ivo:base+'art/ivo.png'};
 export const missions:Record<string,{chapter:string;district:string;hook:string;stakes:string;position:[number,number];character:'mara'|'ivo'}>={
  energia:{chapter:'Encender la esperanza',district:'Cumbres del Sol',hook:'El hospital necesita luz esta noche. Construye una energía que dure.',stakes:'Continuidad, emisiones y autonomía compiten por recursos escasos.',position:[70,30],character:'mara'},
  alimentos:{chapter:'Sembrar el mañana',district:'Huertas del Renacer',hook:'La próxima cosecha decidirá qué llega a las mesas. Recupera producción y suelos.',stakes:'Más producción no siempre significa menos pérdidas o mejores ingresos.',position:[30,75],character:'ivo'},

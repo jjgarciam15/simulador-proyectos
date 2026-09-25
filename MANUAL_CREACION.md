@@ -6,9 +6,9 @@ Gestión de proyectos en un territorio ficticio después del Gran Apagón. El ju
 
 ## Estado de evolución
 
-V2 funcional implementada sobre la base anterior: mapa de etapas y revisiones, conservación al cambiar alternativa, partidas en pausa, cadena de valor construida con tarjetas y enlaces, clasificación de actores, presupuesto desde cero y calculadora cantidad × costo, justificaciones ODS, laboratorio de incentivos, práctica con pistas y reintentos, perfil de puntuación e informe. Reinicio controlado de etapas 1–5 antes de invertir, con confirmación, sin reembolsos y con revisión de dependencias. La práctica posterior al cierre conserva el resultado original.
+V2 funcional implementada sobre la base anterior (22–23 de septiembre de 2026) y ampliada en la iteración 2 (25 de septiembre de 2026): dilemas condicionales con consecuencias diferidas y sistémicas, laboratorio regulatorio con severidad oculta y puzzle causal, cadena de valor por misión con tarjetas parciales, planificador presupuestal con guía y diagnóstico, coherencia transversal, bonificaciones y penalizaciones explicables, aciertos y errores, preguntas con 6–7 opciones y nuevos logros. Ver la sección «Iteración 2 de la V2».
 
-Validación: 136 pruebas automatizadas pasaron en la última ejecución registrada; una misión de agua se recorrió completa por interfaz, incluyendo eventos, cierre, historial tras recarga y copia de estrategia. La copia permitió comprobar el reinicio de preparación y su costo de 76 M COP/mes en ese escenario. Se revisaron capturas de escritorio y móvil. El resto de misiones se recorrió mediante el motor, no manualmente. Consultar ENTREGA_V2.md para alcance y limitaciones: esto no equivale a certificar todos los criterios del prompt ni a validar aprendizaje con estudiantes.
+Validación de la iteración 2: 156 pruebas automatizadas en 14 archivos, tipos y compilación sin errores; revisión en navegador del inicio y la comparación de dificultades, un dilema resuelto, el panel lateral, el planificador presupuestal, el laboratorio regulatorio, el resultado con aciertos y errores, y la vista móvil de 390 px sin desbordamiento horizontal. No sustituye un piloto con estudiantes.
 
 ## Reglas V2 y límites pedagógicos
 
@@ -45,6 +45,86 @@ VPN, TIR, B/C, CAUE, recuperación simple/descontada; flujos anuales y ejecució
 ## Persistencia y extensión
 
 localStorage, QA aislado y errores visibles. Estado anterior se conserva sin activar silenciosamente V2. Futuros modos docente, editor y reto deben usar configuraciones de misión y exportaciones del mismo estado, no un segundo motor. No hay LMS, cuentas, multijugador ni analítica externa. El piloto educativo y la calibración empírica siguen siendo necesarios.
+
+## Iteración 2 de la V2 · 25 de septiembre de 2026
+
+Esta sección describe la evolución ejecutada a partir de la solicitud «Implementación integral V2» (ver Historial de prompts). El detalle de la ejecución, riesgos y estados está en `IMPLEMENTATION_PLAN_V2.md`. Estados: **IMPLEMENTADA**, **PARCIAL**, **PREPARADA / NO IMPLEMENTADA**.
+
+### Flujo de juego
+
+Problema (Diagnóstico) → Árbol del problema → Actores → Alternativas (Formulación) → Cadena de valor → Presupuesto (Preparación) → Evaluación ex ante → Regulación → ODS → Decisión de inversión → Ejecución → Resultado. Cada etapa empieza con «Qué vas a hacer / Por qué importa / Qué debes decidir / Cómo afecta el proyecto» y «Aprender más» (`src/features/CommandCenter.tsx`).
+
+### Motor de dilemas y consecuencias (IMPLEMENTADA)
+
+- Contenido: `src/data/dilemmas.ts`. Once plantillas declarativas con `conditions` (estudio faltante o disponible, apoyo, rol, política, presión ambiental, contingencia), `probability` (base × modificadores que dependen de decisiones × dificultad), `choices` con `effects` inmediatos y `delayed` diferidos, `concept` y `explanation`. Los textos usan marcadores de la misión ({mission}, {alternative}, {actor0}…).
+- Motor: `src/domain/dilemmas.ts` (selección por semilla, condiciones, textos, efectos) e integración en `act` (`src/domain/engine.ts`). Se sortea como máximo un dilema al completar por primera vez una etapa previa a la inversión. Un dilema pendiente bloquea avanzar y comprometer la inversión, pero no borra ni bloquea el resto del trabajo.
+- Efectos inmediatos: caja (fracción del presupuesto de la misión, escalada por dificultad), meses, apoyo, legitimidad, información, capacidad, sostenibilidad. Los ingresos (cofinanciación, crédito de proveedor) se registran en `v2.inflows` para conservar la contabilidad.
+- Consecuencias diferidas: se guardan en `v2.delayed` y se aplican una sola vez al comprometer la inversión. Consecuencias sistémicas: `v2.eventRisk` modifica la probabilidad de los eventos de ejecución; `performance` cambia el desempeño observado.
+- Bitácora del proyecto: el diario ahora se llama Bitácora e incluye `v2.consequences` (inmediatas, diferidas y sistémicas) además de cada decisión con mes, costo y tiempo.
+- Aleatoriedad controlada: `random(seed, "dilemma:"+id)`; misma semilla y decisiones ⇒ mismos dilemas. Un dilema no se repite al volver a completar una etapa.
+
+### Laboratorio regulatorio (IMPLEMENTADA)
+
+- `src/domain/regulationLab.ts` y `src/features/RegulatoryPuzzle.tsx`.
+- Severidad oculta de la falla por semilla (0,3–1,4). El jugador ve un rango: ±0,1 con estudio de demanda; ±0,35/0,40/0,50 sin estudio según dificultad. Valor de la información: estudiar puede cambiar la decisión.
+- Valor neto educativo por instrumento = daño corregido − costo regulatorio − efectos secundarios (captura y barreras, mayores cuando la capacidad administrativa es baja). Los instrumentos a menos de 8 puntos del mejor son defendibles. **No intervenir es correcto cuando la falla es leve** (verificado con semillas en pruebas).
+- Puzzle causal de ocho eslabones: Problema → Evidencia → Falla → Instrumento → Incentivo → Comportamiento → Resultado → Efecto adverso, con 29 tarjetas (distractores creíbles). La clave depende del instrumento elegido, por lo que admite varias estrategias coherentes. Tras el primer eslabón roto, los siguientes valen la mitad.
+- Fallo regulatorio al invertir: sobrerregulación (barreras, menor inversión), costo regulatorio sin beneficio, persistencia de la falla (más exposición a eventos) e incentivo perverso por diagnóstico equivocado. Todo queda en la bitácora.
+- Puntuación regulatoria de partidas con puzzle: 60 % cadena causal + 40 % proporcionalidad, multiplicado por 0,6 si el diagnóstico no es coherente. Las partidas anteriores conservan la regla previa.
+
+### Cadena de valor (IMPLEMENTADA)
+
+`chainBank` construye 21 tarjetas por misión desde el Árbol del problema y la alternativa: correctas, parcialmente relacionadas (media nota, p. ej. «Contrato de obra firmado») y distractores. Se barajan por semilla. El jugador arrastra tarjetas a los niveles (o usa el selector accesible) y conecta relaciones. Retroalimentación según dificultad: fácil explica cada error, intermedio señala qué falla, difícil solo da la nota. Se conservan los identificadores anteriores para no invalidar partidas guardadas.
+
+### Presupuesto y recursos (IMPLEMENTADA)
+
+- Sin valores precargados: el presupuesto empieza en cero y las actividades sin costo.
+- Guía de referencia por categoría (rangos calculados con la alternativa y la población objetivo) y diagnóstico en vivo (`src/domain/budgetReview.ts`): suficiencia de la inversión técnica, operación, mantenimiento, contingencia (3–20 %, prudente 5–12 %), supervisión, gestión ambiental, acuerdos negociados, coherencia con la cadena y viabilidad financiera. Llenar todos los máximos cuesta más que un presupuesto equilibrado: hay que priorizar.
+- Escasez: fondo inicial 100 % / 92 % / 85 % del presupuesto base según dificultad (antes 108 / 100 / 92 %). Las pruebas del catálogo confirman que cada misión y dificultad conserva al menos una estrategia viable.
+- Planificador de recursos y centro de información en el panel derecho; los estudios pueden contratarse en cualquier etapa antes de invertir.
+
+### Evaluación ex ante (IMPLEMENTADA)
+
+`src/features/ExAnteBrief.tsx` explica qué es, para qué sirve, por qué ocurre antes de ejecutar y qué papel cumple en la partida, con los datos reales: alternativa, población y cobertura, costo a comprometer, costo y beneficio anual, tiempo, riesgo, diagnóstico del presupuesto, sostenibilidad y decisiones con efectos pendientes. Escenarios y sensibilidad siguen usando el modelo del motor con las decisiones del jugador.
+
+### ODS (IMPLEMENTADA)
+
+17 ODS sin preselección; cada elegido requiere relación, evidencia y argumento. Tras confirmar, `sdgReview` valora cada ODS (bien sustentado, pertinente mal sustentado, sin relación), informa omisiones y exceso. Seleccionar todos penaliza.
+
+### Preguntas (IMPLEMENTADA)
+
+Práctica V2: 16 preguntas con 7 opciones (cuatro trampas por etapa), una de selección múltiple con 7 opciones y cinco casos aplicados con 6 opciones. Pistas en tres niveles, intentos 100/80/60 %. El módulo de aprendizaje de tres opciones solo existe para partidas guardadas anteriores a la V2.
+
+### Puntuación V2 (IMPLEMENTADA)
+
+- Nueve dimensiones: diagnóstico, alternativa, cadena y presupuesto, evaluación ex ante, regulación y ODS, compromisos y riesgo, ejecución, valor observado y **coherencia transversal** (15 %). Pesos en `src/data/balance.ts`.
+- Coherencia transversal (`src/domain/coherence.ts`): problema ↔ alternativa, alternativa ↔ cadena, cadena ↔ presupuesto, presupuesto ↔ evaluación, problema ↔ regulación, proyecto ↔ ODS y actores ↔ estrategia, cada una con su razón.
+- Bonificaciones (tope +6) y penalizaciones (tope −8) explicables (`adjustmentRules`).
+- Nota = redondear(limitar(Σ valor × peso − penalizaciones + bonificaciones, 0, 100) × factor de cierre).
+- Resultado: historia por reglas, radar, tabla de aportes, bonificaciones y penalizaciones, matriz de coherencia, diagnóstico del presupuesto aprobado, conceptos dominados y a repasar, y **aciertos y errores** por etapa (`src/domain/ledger.ts`).
+
+### Logros (IMPLEMENTADA)
+
+Planificador, Analista, Regulador, Gestor de riesgo y Proyecto sostenible, además de los cinco anteriores. Todos exigen evidencia observable; ninguno se otorga por avanzar.
+
+### Dificultad (IMPLEMENTADA)
+
+Centralizada en `difficultyRules`: fondo, información inicial, incertidumbre regulatoria, probabilidad de eventos y dilemas, costo de los dilemas, penalización de pistas, detalle de la retroalimentación y aviso de consecuencias diferidas. La pantalla de inicio muestra la comparación con los valores reales.
+
+### Validación de misiones (IMPLEMENTADA)
+
+`validateMission`, `validateDilemmas` y `validateRegulationLab` (`src/domain/missions.ts`) detectan identificadores duplicados, probabilidades o efectos inválidos, tiempos negativos, dilemas sin trade-off o sin explicación e instrumentos sin configuración. Se ejecutan en las pruebas.
+
+### Preparado para el futuro (PREPARADA / NO IMPLEMENTADA)
+
+- **Modo docente:** crear y asignar misiones podrá reutilizar `Spec`, `dilemmaTemplates` y `balance.ts`; un código de partida ya existe (semilla); resultados, promedios y errores frecuentes pueden derivarse de `Outcome.assessment` y `outcomeLedger`. Falta: almacenamiento compartido, cuentas y exportación agregada.
+- **Modo reto:** ya existe con configuración versionada (`src/domain/challenges.ts`); se puede endurecer con `difficultyRules` y restricciones. No hay multijugador.
+- **Analítica local:** se registran intentos, pistas, cambios, dilemas y consecuencias. No se mide el tiempo por etapa.
+
+### Reglas de balance
+
+No debe existir presupuesto suficiente para maximizar todo. Ninguna alternativa domina en todas las dimensiones (prueba de catálogo). Los dilemas tienen al menos dos opciones con efectos distintos. Los efectos monetarios de un dilema no superan el 5 % del presupuesto. La regulación no siempre es correcta.
+
 
 # Historial de prompts
 
@@ -2542,3 +2622,2098 @@ Se implementó el apartado 63 mediante configuraciones versionadas en `src/domai
 Se añadieron `budgetLines.ts`, `appliedCases.ts`, `negotiationProfiles.ts` y regresiones del catálogo completo. El detalle se valida antes de confirmar, se guarda y se incluye en el informe. Los términos de negociación anteriores se conservan. Cinco nuevos ejercicios ofrecen feedback específico; no cambian puntuaciones históricas.
 
 Se fijaron Node 24 y pnpm 11.19.0, se preparó CI de solo validación y se inicializó Git local. `.gitignore` excluye dependencias, registros, cachés y compilaciones. No se creó repositorio remoto ni se concedió una licencia abierta. Documentos de subida, contribución, recursos y protocolo de piloto en la carpeta `docs`.
+
+
+## 2026-09-25 · Implementación integral V2 (iteración 2)
+
+Ejecutada con Claude Code en una sesión en la nube sobre la rama `main-zkuwe9`. Se registran las dos instrucciones recibidas: la lista original de cambios del usuario (de la que se derivó el prompt) y el prompt completo.
+
+### Lista original de cambios solicitados por el usuario
+
+<details><summary>Texto recibido</summary>
+
+> Quiero crear un promt para realizar varios cambios a el simulador, dame el promt para que códex realice todos los cambios.
+> Necesito crear un archivo readme que explique el despliegue de la app, además de otro en la que se almacene toda la documentación y promts usados (manual de creación),
+>
+> - no referirse a árbol si no a árbol del problema en todo las menciones dentro del simulador
+> - en todas las preguntas principalmente en el modulo de aprender y en las demás cajas de preguntas mínimo deben de salir 5-7 respuestas para hacer más difícil su respuesta, además de mejorar su estructura, además de que las respuestas allá una o varias trampa para aumentar la dificultad
+> - en la parte de cadena de valor el usuario deberá crear su propia cadena de valor. Por lo que deberán aver muchas opciones para que el la construya y el resultado forma parte de la calificación
+> - al final cuando el usuario obtiene el puntaje, desglosar errores y aciertos y su aporte a la calificación
+> - la alternativa seleccionada se podrá observar en la pantalla de información del lado derecho, detallando la misma. Además el jugador podrá cambiarla en cualquier momento sin que se borre El Progreso de las demás etapas.
+> - si el usuario quiero devolverse a una de las etapas podrá hacerlo sin tener que volver a pasar por el recorrido
+> - en la parte de presupuesto, ajustar los recursos de cada misión para que sea más difícil lograr el objetivo. Además se necesita que el usuario tenga interacción en esta parte y pueda tomar decisión en esta parte (no traer valores Pre establecidos) crear guía , pero que el usuario sea el que complete los valores
+> - en la pantalla de inicio donde se selecciona la dificultad, describir cuál es la diferencia entre los modos
+> - en lado derecho poner un botón donde el usuario pueda planear la administración de los recursos que sirva de guía para no estar devolviéndose
+> - mejorar el sistema de puntuación
+> - en la evaluación ex ante, explicar cuál es la función dentro de la partida y en general en los proyectos, todo tiene que estar orquestado
+> - pasar a el siguiente nivel la etapa de regulación, esta tiene que ser la mejor con relaicon a el curso de regulación economía, agregar puzzle, mejorar interacción del usuario con las decisiones y el simulador
+> - en la parte de los ODS, no traer nada Pre seleccionada el usuario debe donar decision y esta ser valorada . Mejorar la interacción con el usuario
+
+</details>
+
+### Prompt completo recibido
+
+<details><summary>CLAUDE CODE — IMPLEMENTACIÓN INTEGRAL V2 DEL SIMULADOR DE FORMULACIÓN Y EVALUACIÓN DE PROYECTOS</summary>
+
+CLAUDE CODE — IMPLEMENTACIÓN INTEGRAL V2 DEL SIMULADOR DE FORMULACIÓN Y EVALUACIÓN DE PROYECTOS
+
+Actúa como arquitecto de software senior, desarrollador full-stack, diseñador UX/UI de productos educativos y especialista en simuladores de toma de decisiones.
+
+Vas a trabajar directamente sobre un proyecto existente: un simulador educativo de Formulación y Evaluación de Proyectos.
+
+Tu tarea NO es crear otro proyecto desde cero.
+
+Tu tarea es:
+
+auditar → comprender → diseñar → implementar → integrar → probar → corregir → documentar
+
+una evolución profunda del simulador actual.
+
+Quiero que ejecutes realmente los cambios sobre el repositorio.
+
+No quiero solamente recomendaciones, pseudocódigo, propuestas ni documentación de lo que “se podría hacer”.
+
+**1. OBJETIVO DE ESTA VERSIÓN**
+
+Transformar el simulador actual desde una experiencia principalmente académica hacia:
+
+un simulador estratégico de gestión de proyectos donde el jugador administra recursos limitados, analiza información, toma decisiones, enfrenta incertidumbre y observa las consecuencias de sus decisiones.
+
+Debe combinar:
+
+- Formulación y Evaluación de Proyectos.
+- MGA.
+- Economía.
+- Regulación Económica.
+- Gestión de recursos.
+- Evaluación ex ante.
+- Riesgo.
+- ODS.
+- Estrategia.
+- Simulación.
+- Gamificación educativa.
+
+El jugador debe sentir:
+
+“Estoy administrando un proyecto y mis decisiones tienen consecuencias.”
+
+NO:
+
+“Estoy contestando un cuestionario.”
+
+**2. REGLA FUNDAMENTAL**
+
+NO empieces inmediatamente modificando componentes.
+
+Primero inspecciona el repositorio completo.
+
+Debes comprender la arquitectura existente antes de decidir cómo implementar esta versión.
+
+No reescribas funcionalidades que actualmente funcionan si pueden evolucionarse.
+
+No cambies stack, framework o arquitectura principal sin una razón técnica fuerte.
+
+No elimines funcionalidades existentes sin comprobar primero su función.
+
+**3. PRIMERA FASE OBLIGATORIA — AUDITORÍA**
+
+Inspecciona:
+
+- estructura de carpetas;
+- package/config files;
+- frontend;
+- backend;
+- rutas;
+- componentes;
+- modelos;
+- tipos;
+- servicios;
+- stores;
+- hooks;
+- persistencia;
+- misiones;
+- preguntas;
+- navegación;
+- sistema de puntuación;
+- dificultad;
+- presupuesto;
+- cadena de valor;
+- árbol del problema;
+- alternativas;
+- actores;
+- evaluación ex ante;
+- regulación;
+- ODS;
+- tests;
+- documentación;
+- build;
+- lint;
+- typecheck.
+
+Busca también:
+
+- código duplicado;
+- lógica hardcodeada;
+- componentes demasiado acoplados;
+- estados locales que deberían centralizarse;
+- dependencias entre módulos;
+- deuda técnica que impida esta evolución.
+
+**4. CREA UN PLAN ANTES DE IMPLEMENTAR**
+
+Después de la auditoría crea o actualiza:
+
+`IMPLEMENTATION_PLAN_V2.md`
+
+Debe contener:
+
+Estado actual — Arquitectura encontrada.
+
+Funcionalidades existentes — Qué funciona actualmente.
+
+Problemas encontrados — Técnicos y funcionales.
+
+Arquitectura objetivo — Cómo evolucionará el sistema.
+
+Fases — Divide la implementación en fases pequeñas.
+
+Riesgos — Posibles regresiones.
+
+Estrategia de compatibilidad — Cómo preservarás partidas o funcionalidades existentes cuando sea razonable.
+
+Después comienza la implementación.
+
+No te quedes esperando mi aprobación salvo que exista un bloqueo real que haga imposible continuar responsablemente.
+
+**5. DOCUMENTACIÓN PRINCIPAL**
+
+Crear o mejorar:
+
+`README.md`
+
+Debe explicar:
+
+- proyecto;
+- propósito;
+- stack;
+- arquitectura;
+- requisitos;
+- instalación;
+- variables de entorno;
+- desarrollo;
+- ejecución;
+- tests;
+- build;
+- despliegue;
+- persistencia;
+- estructura;
+- troubleshooting.
+
+No inventes comandos.
+
+Verifica que los comandos documentados realmente existan.
+
+**6. MANUAL DE CREACIÓN**
+
+Crear:
+
+`MANUAL_CREACION.md`
+
+Este documento será la memoria técnica y conceptual del simulador.
+
+Debe contener:
+
+- visión;
+- metodología;
+- objetivos pedagógicos;
+- arquitectura;
+- flujo de juego;
+- motor de misiones;
+- estado;
+- persistencia;
+- puntuación;
+- dificultad;
+- presupuesto;
+- recursos;
+- cadena de valor;
+- actores;
+- eventos;
+- riesgos;
+- evaluación ex ante;
+- regulación;
+- ODS;
+- gamificación;
+- decisiones arquitectónicas;
+- reglas de balance;
+- funcionalidades implementadas;
+- funcionalidades futuras.
+
+Crear:
+
+Historial de prompts
+
+Registrar este prompt completo y dejar preparada una estructura cronológica para prompts posteriores.
+
+**7. TERMINOLOGÍA GLOBAL**
+
+Buscar todas las referencias donde la herramienta metodológica aparezca simplemente como:
+
+`Árbol`
+
+Cambiarla por:
+
+`Árbol del problema`
+
+Aplicar en:
+
+- UI;
+- navegación;
+- preguntas;
+- ayudas;
+- títulos;
+- tooltips;
+- resultados;
+- documentación.
+
+También actualizar nombres internos cuando sea seguro y mejore la consistencia.
+
+No romper imports o datos persistidos innecesariamente por cambios cosméticos.
+
+**8. ARQUITECTURA DEL ESTADO DE PARTIDA**
+
+Necesitamos una fuente de verdad consistente.
+
+Analiza el mecanismo actual y evolúcionalo.
+
+El estado debe poder representar como mínimo:
+
+```
+gameId
+seed
+
+mission
+difficulty
+
+currentStage
+unlockedStages
+completedStages
+reviewRequiredStages
+
+problem
+problemTree
+
+actors
+targetPopulation
+
+alternatives
+selectedAlternative
+
+valueChain
+
+resources
+budget
+contingency
+time
+
+costs
+benefits
+risks
+
+exAnteEvaluation
+
+regulation
+
+selectedSDGs
+sdgJustifications
+
+events
+decisions
+consequences
+
+hints
+attempts
+
+scores
+bonuses
+penalties
+
+achievements
+```
+
+Adapta nombres y estructura al lenguaje y arquitectura existente.
+
+No copies esta estructura literalmente si existe una solución mejor compatible con el proyecto.
+
+**9. PERSISTENCIA**
+
+El jugador debe poder:
+
+- iniciar partida;
+- guardar automáticamente;
+- cerrar;
+- recargar;
+- continuar.
+
+Persistir:
+
+- progreso;
+- decisiones;
+- recursos;
+- presupuesto;
+- tiempo;
+- alternativa;
+- cadena de valor;
+- actores;
+- evaluación;
+- regulación;
+- ODS;
+- eventos;
+- seed;
+- puntuación;
+- etapas que requieren revisión.
+
+Agregar cuando corresponda:
+
+Nueva partida
+
+Continuar partida
+
+Evitar pérdida accidental de progreso.
+
+**10. NAVEGACIÓN ENTRE ETAPAS**
+
+Una etapa desbloqueada debe poder visitarse nuevamente sin repetir todo el recorrido.
+
+Estados:
+
+- bloqueada;
+- pendiente;
+- en progreso;
+- completada;
+- requiere revisión.
+
+Crear un mapa/progreso visual del proyecto.
+
+Ejemplo conceptual:
+
+```
+Problema
+   ↓
+Árbol del problema
+   ↓
+Actores
+   ↓
+Alternativas
+   ↓
+Cadena de valor
+   ↓
+Presupuesto
+   ↓
+Evaluación ex ante
+   ↓
+Regulación
+   ↓
+ODS
+   ↓
+Resultado
+```
+
+La navegación debe respetar las dependencias necesarias.
+
+**11. SISTEMA DE DEPENDENCIAS**
+
+Las etapas deben estar conectadas.
+
+Ejemplo:
+
+```
+Problema
+→ Árbol del problema
+→ Alternativas
+→ Alternativa seleccionada
+→ Cadena de valor
+→ Recursos
+→ Presupuesto
+→ Costos/beneficios
+→ Evaluación ex ante
+→ Regulación
+→ ODS
+→ Resultado
+```
+
+Las decisiones anteriores deben alimentar etapas posteriores.
+
+**12. SISTEMA “REQUIERE REVISIÓN”**
+
+Este mecanismo es obligatorio.
+
+Cuando el jugador modifica una decisión anterior:
+
+NO eliminar automáticamente el trabajo posterior.
+
+Conservarlo.
+
+Analizar dependencias.
+
+Marcar etapas afectadas:
+
+Requiere revisión
+
+Ejemplo:
+
+Cambio de alternativa.
+
+El presupuesto existente permanece.
+
+Pero mostrar:
+
+Este presupuesto fue construido utilizando otra alternativa. Revisa si continúa siendo coherente.
+
+Estados posibles:
+
+```
+valid
+needs_review
+inconsistent
+```
+
+Adaptarlos a la arquitectura.
+
+Debe existir una razón visible que explique por qué una etapa requiere revisión.
+
+**13. ALTERNATIVA SELECCIONADA**
+
+Mostrar permanentemente en el panel lateral:
+
+- nombre;
+- descripción;
+- costos;
+- población;
+- beneficios;
+- riesgos;
+- restricciones.
+
+Agregar:
+
+Cambiar alternativa
+
+Puede modificarse sin destruir automáticamente el progreso.
+
+Disparar el sistema de dependencias.
+
+**14. DASHBOARD DE PARTIDA**
+
+Convertir el panel principal/lateral en un verdadero centro de mando.
+
+Mostrar según disponibilidad:
+
+- misión;
+- alternativa;
+- progreso;
+- presupuesto;
+- presupuesto comprometido;
+- contingencia;
+- tiempo;
+- cobertura;
+- riesgo;
+- aceptación;
+- viabilidad;
+- impacto;
+- sostenibilidad.
+
+No revelar necesariamente toda la información desde el inicio.
+
+**15. VARIABLES VIVAS**
+
+Implementar un sistema de variables de simulación.
+
+Como mínimo estudiar:
+
+```
+budget
+time
+coverage
+socialAcceptance
+risk
+viability
+expectedImpact
+sustainability
+```
+
+Las decisiones pueden modificar varias variables.
+
+Ejemplo:
+
+```
+Realizar estudio técnico
+
+budget -30
+time -2 semanas
+information +20
+risk -15
+```
+
+Los valores concretos deben provenir de configuración de misión.
+
+**16. TIEMPO**
+
+Incorporar tiempo como recurso cuando corresponda.
+
+Una misión puede tener:
+
+```
+18 meses
+```
+
+Las decisiones pueden consumir:
+
+- días;
+- semanas;
+- meses.
+
+Crear trade-offs:
+
+```
+más barato + lento
+
+más caro + rápido
+```
+
+**17. PLANIFICADOR DE RECURSOS**
+
+Agregar en el panel derecho:
+
+Planificar recursos
+
+Debe permitir visualizar:
+
+```
+Disponible
+Planeado
+Comprometido
+Utilizado
+Reserva
+```
+
+Debe funcionar durante toda la partida.
+
+No reemplaza la etapa formal de presupuesto.
+
+**18. PREGUNTAS MÁS DIFÍCILES**
+
+Revisar todas las preguntas.
+
+En Aprender y demás quizzes utilizar normalmente:
+
+5–7 alternativas.
+
+Los distractores deben ser plausibles.
+
+Incluir errores relacionados con:
+
+- causa/efecto;
+- actividad/producto;
+- producto/resultado;
+- resultado/impacto;
+- costos/beneficios;
+- eficiencia/eficacia;
+- regulación;
+- presupuesto;
+- ODS;
+- población;
+- actores.
+
+Permitir preguntas multirrespuesta cuando corresponda.
+
+Indicarlo claramente.
+
+**19. MODELO REUTILIZABLE DE PREGUNTAS**
+
+Crear o evolucionar una estructura como:
+
+```
+id
+question
+context
+concept
+difficulty
+options
+correctAnswers
+explanation
+score
+penalty
+hints
+tags
+```
+
+No hardcodear preguntas dentro de componentes si puede evitarse.
+
+**20. FEEDBACK PEDAGÓGICO**
+
+Eliminar feedback pobre como:
+
+Incorrecto.
+
+Utilizar explicaciones contextuales.
+
+Ejemplo:
+
+La alternativa reduce el costo inicial, pero deja sin atender una causa directa del problema.
+
+No entregar siempre la solución inmediatamente.
+
+**21. PISTAS**
+
+Crear tres niveles.
+
+```
+Hint 1 → orientación conceptual
+Hint 2 → información adicional
+Hint 3 → orientación fuerte
+```
+
+Cada uso puede reducir ligeramente el puntaje.
+
+La penalización depende de dificultad.
+
+**22. INTENTOS**
+
+Para puzzles y actividades pedagógicas:
+
+```
+1.er intento → 100%
+2.º intento → ~80%
+3.er intento → ~60%
+```
+
+Después mostrar explicación cuando corresponda.
+
+No aplicar esto mecánicamente a decisiones estratégicas.
+
+**23. CADENA DE VALOR — RECONSTRUCCIÓN**
+
+Esta etapa debe cambiar profundamente.
+
+NO entregar una cadena preconstruida.
+
+El jugador debe construirla.
+
+Banco de tarjetas:
+
+- correctas;
+- incorrectas;
+- parcialmente relacionadas;
+- distractores.
+
+Clasificación conceptual:
+
+```
+Insumos
+↓
+Actividades
+↓
+Productos
+↓
+Resultados
+↓
+Impactos
+```
+
+Permitir:
+
+- seleccionar;
+- ordenar;
+- clasificar;
+- relacionar.
+
+Utilizar drag & drop cuando sea apropiado y crear alternativa accesible mediante controles.
+
+Evaluar:
+
+- elementos;
+- clasificación;
+- orden;
+- relaciones;
+- coherencia.
+
+Debe aportar directamente a la calificación.
+
+**24. PRESUPUESTO — RECONSTRUCCIÓN**
+
+NO entregar valores completamente resueltos.
+
+El jugador construye el presupuesto.
+
+El simulador proporciona:
+
+- categorías;
+- recursos disponibles;
+- rangos;
+- costos de referencia;
+- restricciones;
+- información;
+- cantidades estimadas.
+
+El jugador decide:
+
+- cantidades;
+- valores;
+- distribución;
+- prioridades;
+- reservas.
+
+Crear un verdadero:
+
+Planificador presupuestal
+
+**25. EVALUACIÓN DEL PRESUPUESTO**
+
+Evaluar:
+
+- viabilidad;
+- suficiencia;
+- eficiencia;
+- coherencia;
+- sobrecostos;
+- subestimaciones;
+- desperdicio;
+- restricciones;
+- coherencia con alternativa;
+- coherencia con cadena de valor.
+
+No limitar la validación a:
+
+`total <= presupuesto`.
+
+**26. ESCASEZ Y COSTO DE OPORTUNIDAD**
+
+Rebalancear misiones.
+
+No debe existir presupuesto suficiente para maximizar todo.
+
+El jugador debe elegir.
+
+Nunca debería poder maximizar simultáneamente:
+
+- cobertura;
+- calidad;
+- rapidez;
+- bajo costo;
+- bajo riesgo.
+
+**27. CONTINGENCIA**
+
+Permitir decidir cuánto reservar.
+
+Ejemplo:
+
+```
+Presupuesto: 1.000
+Asignado: 910
+Contingencia: 90
+```
+
+Una reserva puede ayudar frente a eventos.
+
+Pero reservar demasiado reduce recursos disponibles para impacto.
+
+**28. INFORMACIÓN IMPERFECTA**
+
+No entregar toda la información gratuitamente.
+
+Permitir comprar/obtener información mediante:
+
+- estudios;
+- análisis;
+- consultas;
+- investigación.
+
+Ejemplo:
+
+```
+Estudio de demanda
+Costo: 25
+Tiempo: 3 semanas
+Efecto: reduce incertidumbre
+```
+
+Esto introduce el concepto de valor de la información.
+
+**29. CENTRO DE INFORMACIÓN**
+
+Crear una sección para consultar:
+
+- datos;
+- estadísticas;
+- estudios;
+- antecedentes;
+- población;
+- territorio;
+- regulación;
+- costos;
+- restricciones.
+
+Algunos recursos pueden ser gratuitos.
+
+Otros consumen tiempo o presupuesto.
+
+**30. ACTORES**
+
+Los actores no deben desaparecer después de identificarlos.
+
+Cada actor puede tener:
+
+```
+interest
+power
+influence
+position
+needs
+support
+```
+
+Ejemplos:
+
+- comunidad;
+- gobierno;
+- regulador;
+- usuarios;
+- empresas;
+- proveedores;
+- organizaciones;
+- competidores.
+
+**31. MAPA DE ACTORES**
+
+Crear matriz:
+
+Poder × Interés
+
+El jugador ubica actores.
+
+Después decide estrategias:
+
+- informar;
+- consultar;
+- involucrar;
+- negociar;
+- monitorear.
+
+Estas decisiones deben afectar variables posteriores.
+
+**32. ACEPTACIÓN SOCIAL**
+
+Cuando aplique:
+
+```
+support = 72
+```
+
+Una decisión puede producir:
+
+```
+72 → 53
+```
+
+y afectar:
+
+- riesgo;
+- retrasos;
+- costos;
+- viabilidad.
+
+**33. NEGOCIACIONES**
+
+Crear pequeñas decisiones con actores.
+
+Opciones como:
+
+- aceptar;
+- rechazar;
+- negociar;
+- modificar parcialmente;
+- solicitar información.
+
+No crear diálogos innecesariamente largos.
+
+**34. DILEMAS**
+
+Crear situaciones donde ninguna alternativa sea perfecta.
+
+Ejemplo:
+
+Solo existe presupuesto para mejorar uno:
+
+- cobertura;
+- calidad;
+- reducción de riesgo;
+- contingencia.
+
+El jugador prioriza.
+
+**35. MOTOR DE EVENTOS**
+
+Crear una arquitectura configurable de eventos.
+
+Posibles eventos:
+
+- inflación de costos;
+- retraso;
+- oposición;
+- reducción presupuestal;
+- cofinanciación;
+- nueva información;
+- impacto ambiental;
+- cambio de demanda;
+- incumplimiento;
+- tecnología nueva.
+
+No todos deben ser negativos.
+
+**36. EVENTOS CONDICIONALES**
+
+Cada evento debe poder contener:
+
+```
+id
+conditions
+probability
+context
+choices
+effects
+delayedEffects
+explanation
+```
+
+Las probabilidades deben poder depender de decisiones anteriores.
+
+Ejemplo:
+
+No realizar estudio técnico:
+
+```
+initialCost ↓
+futureOverrunRisk ↑
+```
+
+**37. ALEATORIEDAD CONTROLADA**
+
+No convertir el simulador en suerte.
+
+Utilizar probabilidades solamente cuando aporten incertidumbre realista.
+
+Las decisiones deben modificar el riesgo.
+
+Utilizar seed para reproducibilidad cuando sea posible.
+
+**38. CONSECUENCIAS**
+
+Soportar:
+
+```
+immediate
+delayed
+systemic
+```
+
+Ejemplo:
+
+Reducir diagnóstico:
+
+ahora:
+
+```
+budget ↑
+```
+
+después:
+
+```
+risk ↑
+targetingQuality ↓
+costUncertainty ↑
+```
+
+**39. BITÁCORA**
+
+Crear:
+
+Bitácora del proyecto
+
+Registrar:
+
+- etapa;
+- decisión;
+- fecha/turno;
+- recursos;
+- variables;
+- eventos;
+- consecuencias.
+
+Debe permitir reconstruir cómo se llegó al resultado.
+
+**40. EVALUACIÓN EX ANTE**
+
+Rediseñar esta etapa.
+
+Primero explicar brevemente:
+
+- qué es;
+- para qué sirve;
+- por qué ocurre antes de ejecutar;
+- qué papel cumple en esta partida.
+
+Después utilizar información real de la partida:
+
+- alternativa;
+- presupuesto;
+- costos;
+- beneficios;
+- población;
+- riesgos;
+- tiempo;
+- sostenibilidad.
+
+**41. EVALUACIÓN ECONÓMICA**
+
+Cuando la misión lo permita incorporar:
+
+- costo-beneficio;
+- costo-eficiencia;
+- indicadores;
+- escenarios;
+- sensibilidad.
+
+No convertirlo en una calculadora aislada.
+
+Debe utilizar decisiones anteriores.
+
+**42. ESCENARIOS**
+
+Crear:
+
+```
+Optimista
+Base
+Pesimista
+```
+
+Modificar:
+
+- costos;
+- demanda;
+- beneficios;
+- duración;
+- riesgo.
+
+**43. SENSIBILIDAD**
+
+Crear controles visuales sencillos.
+
+Ejemplos:
+
+```
+Costos +10%
+Demanda -15%
+Beneficios -10%
+Duración +20%
+```
+
+Mostrar cambios en viabilidad.
+
+**44. REGULACIÓN ECONÓMICA — PRIORIDAD ALTA**
+
+Esta debe ser una de las etapas más profundas y divertidas.
+
+Incorporar según la misión:
+
+- externalidades;
+- bienes públicos;
+- información asimétrica;
+- poder de mercado;
+- monopolio natural;
+- selección adversa;
+- riesgo moral;
+- captura regulatoria;
+- incentivos;
+- regulación de precios;
+- entrada;
+- estándares;
+- impuestos;
+- subsidios;
+- competencia;
+- costos regulatorios;
+- bienestar;
+- efectos no deseados;
+- falla regulatoria.
+
+No limitar a selección múltiple.
+
+**45. LABORATORIO REGULATORIO**
+
+Crear:
+
+Laboratorio Regulatorio
+
+Primero:
+
+analizar el mercado.
+
+Después:
+
+determinar si existe una falla.
+
+Debe existir:
+
+No intervenir
+
+como posible conclusión cuando corresponda.
+
+No asumir que regular siempre es correcto.
+
+**46. INSTRUMENTOS REGULATORIOS**
+
+Permitir seleccionar según la misión:
+
+- impuestos;
+- subsidios;
+- precios;
+- estándares;
+- obligaciones de información;
+- regulación de entrada;
+- competencia;
+- provisión pública;
+- autorregulación;
+- no intervención.
+
+Después simular efectos.
+
+**47. PUZZLE REGULATORIO**
+
+Crear tarjetas:
+
+```
+Problema
+↓
+Evidencia
+↓
+Falla
+↓
+Instrumento
+↓
+Incentivo
+↓
+Comportamiento
+↓
+Resultado
+↓
+Efecto adverso
+```
+
+Agregar distractores creíbles.
+
+Evaluar causalidad completa.
+
+**48. TRADE-OFF REGULATORIO**
+
+Las decisiones regulatorias pueden tener:
+
+```
++ cobertura
++ bienestar
+
+pero
+
+- costo fiscal
+- eficiencia
+```
+
+o efectos similares.
+
+Evitar instrumentos mágicos sin efectos secundarios.
+
+**49. FALLO REGULATORIO**
+
+Permitir que una regulación mal diseñada genere:
+
+- distorsiones;
+- incentivos perversos;
+- barreras;
+- costos;
+- pérdida de bienestar.
+
+Integrarlo al sistema de consecuencias.
+
+**50. ODS**
+
+Mostrar los 17 ODS.
+
+NO preseleccionar.
+
+El jugador selecciona.
+
+Después justifica.
+
+Evaluar:
+
+- pertinencia;
+- relación directa;
+- indirecta;
+- coherencia;
+- omisiones;
+- exceso.
+
+Seleccionar todos NO debe ser una estrategia válida.
+
+**51. JUSTIFICACIONES**
+
+En decisiones importantes permitir:
+
+¿Por qué tomaste esta decisión?
+
+Preferir:
+
+- selección de razones;
+- ranking;
+- argumentos;
+- texto breve.
+
+Evitar formularios largos.
+
+**52. INTRODUCCIÓN DE ETAPAS**
+
+Cada etapa debe comenzar con:
+
+Qué vas a hacer
+
+Por qué importa
+
+Qué debes decidir
+
+Cómo afecta el proyecto
+
+Muy breve.
+
+Agregar:
+
+Aprender más
+
+para explicación extendida.
+
+**53. TUTOR CONTEXTUAL**
+
+Crear ayuda contextual basada en el contenido de la misión.
+
+Ejemplos:
+
+- externalidad;
+- costo de oportunidad;
+- producto vs resultado;
+- evaluación ex ante;
+- actor;
+- ODS.
+
+Debe orientar sin entregar directamente la respuesta.
+
+**54. DIFICULTAD**
+
+Explicar en la pantalla inicial:
+
+Fácil — Más orientación, pistas, recursos y tolerancia.
+
+Intermedio — Restricciones moderadas y mayor análisis.
+
+Difícil — Escasez fuerte, menos pistas, distractores complejos, eventos exigentes y mayor necesidad de coherencia.
+
+La dificultad debe afectar:
+
+- presupuesto;
+- tiempo;
+- pistas;
+- preguntas;
+- eventos;
+- penalizaciones;
+- información;
+- incertidumbre.
+
+Centralizar estas reglas.
+
+**55. PUNTUACIÓN V2**
+
+Rediseñar el sistema.
+
+Evaluar:
+
+- problema;
+- árbol del problema;
+- actores;
+- población;
+- alternativa;
+- cadena de valor;
+- presupuesto;
+- recursos;
+- costos/beneficios;
+- riesgos;
+- evaluación ex ante;
+- regulación;
+- ODS;
+- eficiencia;
+- coherencia.
+
+**56. COHERENCIA TRANSVERSAL**
+
+Evaluar relaciones:
+
+```
+problema ↔ alternativa
+alternativa ↔ cadena
+cadena ↔ presupuesto
+presupuesto ↔ evaluación
+problema ↔ regulación
+proyecto ↔ ODS
+```
+
+Este componente debe ser importante.
+
+**57. PROCESO + RESULTADO**
+
+La evaluación final debe considerar:
+
+```
+resultado
++
+proceso
++
+coherencia
++
+eficiencia
+```
+
+No exigir una única estrategia.
+
+**58. PENALIZACIONES Y BONIFICACIONES**
+
+Penalizaciones posibles:
+
+- desperdicio;
+- incoherencia;
+- sobrecostos;
+- mala priorización;
+- exceso de pistas;
+- múltiples intentos;
+- regulación incoherente;
+- selección indiscriminada de ODS.
+
+Bonificaciones posibles:
+
+- coherencia;
+- eficiencia;
+- buena gestión de riesgo;
+- reserva adecuada;
+- decisiones consistentes.
+
+Todo debe ser explicable.
+
+**59. RESULTADO FINAL DETALLADO**
+
+No mostrar únicamente:
+
+`85/100`
+
+Mostrar:
+
+- total;
+- etapa;
+- aciertos;
+- errores;
+- decisiones;
+- recursos;
+- tiempo;
+- desperdicio;
+- riesgos;
+- penalizaciones;
+- bonificaciones;
+- conceptos dominados;
+- conceptos a repasar.
+
+**60. EXPLICABILIDAD DEL PUNTAJE**
+
+El jugador debe poder saber:
+
+¿Por qué obtuve esta nota?
+
+Mostrar el aporte de decisiones relevantes.
+
+Ejemplo:
+
+```
+Cadena de valor     16/20
+Presupuesto         13/20
+Regulación          18/20
+ODS                  8/10
+Coherencia          14/20
+```
+
+Y explicar por qué.
+
+**61. PERFIL FINAL**
+
+Crear una visualización tipo radar o alternativa equivalente:
+
+- formulación;
+- finanzas;
+- eficiencia;
+- regulación;
+- sostenibilidad;
+- riesgo;
+- impacto.
+
+No reemplaza el desglose numérico.
+
+**62. HISTORIA FINAL DEL PROYECTO**
+
+Generar mediante reglas una síntesis basada en la partida.
+
+Ejemplo:
+
+El proyecto consiguió una cobertura alta, pero el presupuesto quedó ajustado y la estrategia regulatoria aumentó los costos de implementación.
+
+No utilizar comentarios aleatorios.
+
+**63. LOGROS**
+
+Agregar logros educativos.
+
+Ejemplos:
+
+Planificador — No supera presupuesto.
+
+Analista — Cadena coherente.
+
+Regulador — Diagnóstico e instrumento coherentes.
+
+Gestor de riesgo — Supera un evento sin comprometer viabilidad.
+
+Proyecto sostenible — ODS coherentes.
+
+No otorgarlos por simplemente avanzar.
+
+**64. REJUGABILIDAD**
+
+Permitir variaciones controladas en:
+
+- presupuesto;
+- costos;
+- actores;
+- eventos;
+- riesgos;
+- restricciones;
+- preguntas;
+- información.
+
+Mantener objetivos pedagógicos.
+
+**65. MOTOR CONFIGURABLE DE MISIONES**
+
+Esta es una prioridad arquitectónica.
+
+Evolucionar progresivamente hacia misiones configurables mediante datos.
+
+Una misión debería poder definir:
+
+```
+metadata
+context
+problem
+actors
+population
+alternatives
+resources
+budget
+time
+information
+questions
+valueChain
+risks
+events
+evaluation
+regulation
+sdgs
+rules
+scoring
+difficulty
+```
+
+No es obligatorio utilizar exactamente esta estructura.
+
+Diseña la más apropiada para el código existente.
+
+**66. SEPARAR RESPONSABILIDADES**
+
+Separar claramente:
+
+```
+contenido
+reglas
+estado
+simulación
+puntuación
+persistencia
+UI
+```
+
+No colocar toda la lógica dentro de componentes React/UI.
+
+**67. BALANCE**
+
+Separar configuración de:
+
+- presupuesto;
+- tiempo;
+- costos;
+- probabilidades;
+- puntuación;
+- penalizaciones;
+- eventos;
+- pistas;
+- dificultad.
+
+Esto debe permitir balancear una misión sin modificar el motor.
+
+**68. VALIDACIÓN DE MISIONES**
+
+Crear validaciones de desarrollo.
+
+Detectar:
+
+- preguntas sin respuesta;
+- presupuesto imposible;
+- alternativa incompleta;
+- evento inválido;
+- cadena imposible;
+- ODS sin criterio;
+- puntuación incorrecta;
+- dependencia circular;
+- valores negativos;
+- configuración incompleta.
+
+**69. UX/UI**
+
+Mantener la identidad actual, pero elevar la experiencia.
+
+Debe sentirse como:
+
+dashboard estratégico + juego de gestión + simulador educativo
+
+No infantilizar.
+
+Priorizar:
+
+- claridad;
+- jerarquía;
+- accesibilidad;
+- feedback;
+- consistencia;
+- navegación.
+
+**70. MICROINTERACCIONES**
+
+Agregar animaciones discretas cuando aporten feedback.
+
+Ejemplos:
+
+- cambio de presupuesto;
+- aumento de riesgo;
+- evento;
+- etapa que requiere revisión;
+- logro;
+- consecuencia.
+
+No abusar.
+
+**71. REDUCIR CONTENIDO PASIVO**
+
+Buscar pantallas del tipo:
+
+```
+leer
+↓
+siguiente
+```
+
+Cuando sea pedagógicamente apropiado convertirlas en:
+
+- ordenar;
+- clasificar;
+- seleccionar;
+- priorizar;
+- asignar;
+- comparar;
+- negociar;
+- construir;
+- presupuestar;
+- analizar.
+
+**72. RESET CONTROLADO**
+
+Permitir reiniciar:
+
+- decisión;
+- etapa;
+- misión.
+
+Antes explicar qué dependencias se verán afectadas.
+
+**73. ANALÍTICA PEDAGÓGICA LOCAL**
+
+Registrar cuando sea razonable:
+
+- intentos;
+- errores;
+- pistas;
+- cambios;
+- tiempo por etapa;
+- conceptos difíciles.
+
+No introducir tracking externo innecesario.
+
+**74. PREPARACIÓN PARA MODO DOCENTE**
+
+NO construir un LMS completo ahora.
+
+Pero evita bloquear futuras funcionalidades:
+
+- crear misiones;
+- asignar;
+- código de partida;
+- estudiantes;
+- resultados;
+- promedio;
+- errores frecuentes;
+- exportación.
+
+Documentarlo en `MANUAL_CREACION.md`.
+
+**75. MODO RETO — PREPARACIÓN**
+
+Preparar arquitectura para un futuro:
+
+Modo Reto
+
+Con:
+
+- menos ayuda;
+- recursos estrictos;
+- incertidumbre;
+- restricciones fuertes.
+
+No es necesario implementar multijugador.
+
+**76. MÚLTIPLES SOLUCIONES**
+
+No diseñes todo alrededor de una única respuesta perfecta.
+
+Una misión puede admitir varias estrategias.
+
+Evaluar:
+
+- coherencia;
+- eficiencia;
+- justificación;
+- riesgo;
+- resultado.
+
+**77. GAMIFICACIÓN**
+
+La diversión debe surgir de:
+
+- decisiones;
+- descubrimiento;
+- restricciones;
+- recursos;
+- riesgo;
+- puzzles;
+- consecuencias;
+- eventos;
+- corrección;
+- estrategia.
+
+No de puntos arbitrarios.
+
+**78. TESTS**
+
+Crear o actualizar tests para:
+
+- scoring;
+- budget;
+- resources;
+- alternative changes;
+- persistence;
+- navigation;
+- dependencies;
+- value chain;
+- events;
+- deterministic seed;
+- regulation;
+- ODS;
+- difficulty.
+
+No reduzcas cobertura existente.
+
+**79. VALIDACIÓN POR FASES**
+
+Después de cada fase importante:
+
+1. ejecutar tests relevantes;
+2. ejecutar typecheck;
+3. ejecutar lint cuando corresponda;
+4. corregir;
+5. continuar.
+
+No acumules todos los errores hasta el final.
+
+**80. PRUEBA MANUAL COMPLETA**
+
+Antes de terminar simula una partida.
+
+Prueba:
+
+- nueva partida;
+- continuar;
+- dificultades;
+- preguntas;
+- pistas;
+- errores;
+- cambio de alternativa;
+- navegación hacia atrás;
+- modificación de decisiones;
+- requires-review;
+- presupuesto;
+- contingencia;
+- cadena de valor;
+- actores;
+- eventos;
+- ODS;
+- regulación;
+- no intervención;
+- evaluación ex ante;
+- escenarios;
+- sensibilidad;
+- puntuación;
+- resultado;
+- persistencia.
+
+**81. REVISA LA DIVERSIÓN**
+
+Pregúntate durante la prueba:
+
+- ¿hay demasiado texto?
+- ¿hay demasiados clics?
+- ¿las decisiones realmente importan?
+- ¿existe escasez?
+- ¿los distractores son creíbles?
+- ¿hay incertidumbre?
+- ¿existen trade-offs?
+- ¿las etapas están conectadas?
+- ¿los eventos tienen sentido?
+- ¿entiendo por qué perdí puntos?
+- ¿puedo corregir?
+- ¿quiero intentar otra estrategia?
+- ¿Regulación Económica requiere análisis real?
+- ¿Evaluación ex ante usa mis decisiones?
+- ¿ODS requiere razonamiento?
+- ¿realmente construyo la cadena de valor?
+
+Corrige los problemas evidentes encontrados.
+
+**82. NO HACER**
+
+No dejar:
+
+- placeholders;
+- botones muertos;
+- TODOs críticos;
+- mocks disfrazados de funcionalidad;
+- pantallas decorativas;
+- preguntas absurdamente fáciles;
+- ODS preseleccionados;
+- presupuestos solucionados;
+- decisiones falsas;
+- etapas desconectadas;
+- puntuaciones inexplicables;
+- eventos totalmente aleatorios;
+- pérdida innecesaria de progreso.
+
+**83. NO SOBREDISEÑAR**
+
+No construyas ahora sistemas enormes que todavía no necesitamos.
+
+Prioriza:
+
+1. arquitectura sólida;
+2. funcionalidades reales;
+3. integración;
+4. experiencia;
+5. extensibilidad.
+
+No implementes un LMS completo, multijugador, backend distribuido o infraestructura innecesaria solamente porque podría utilizarse en el futuro.
+
+**84. ORDEN DE IMPLEMENTACIÓN**
+
+Trabaja en este orden:
+
+FASE 1 — BASE: auditoría; documentación inicial; arquitectura; estado; persistencia; navegación; dependencias.
+
+FASE 2 — CORE EDUCATIVO: preguntas; árbol del problema; alternativa; cadena de valor; presupuesto; recursos; scoring.
+
+FASE 3 — SIMULACIÓN: variables; tiempo; actores; información; eventos; consecuencias; bitácora.
+
+FASE 4 — EVALUACIÓN: evaluación ex ante; escenarios; sensibilidad.
+
+FASE 5 — REGULACIÓN: laboratorio; puzzles; instrumentos; trade-offs; falla regulatoria.
+
+FASE 6 — ODS: selección; justificación; evaluación.
+
+FASE 7 — EXPERIENCIA: dashboard; feedback; microinteracciones; logros; resultado final; perfil.
+
+FASE 8 — HARDENING: tests; lint; typecheck; build; prueba manual; correcciones; documentación final.
+
+No saltes a FASE 7 dejando FASE 1 o 2 incompleta.
+
+**85. CRITERIOS DE ACEPTACIÓN**
+
+Antes de declarar terminada la V2 debes poder responder SÍ a:
+
+- ¿El jugador construye el presupuesto?
+- ¿Construye la cadena de valor?
+- ¿Selecciona los ODS?
+- ¿Puede cambiar de alternativa?
+- ¿Conserva progreso?
+- ¿Las etapas afectadas se marcan para revisión?
+- ¿Puede regresar a etapas anteriores?
+- ¿Existen restricciones reales?
+- ¿Las decisiones tienen consecuencias?
+- ¿Existe incertidumbre controlada?
+- ¿Los actores importan?
+- ¿Evaluación ex ante utiliza decisiones anteriores?
+- ¿Regulación Económica requiere análisis?
+- ¿Puede ser correcto no intervenir?
+- ¿Existen fallas regulatorias?
+- ¿La puntuación es explicable?
+- ¿Los modos de dificultad son realmente diferentes?
+- ¿Puede continuar una partida después de recargar?
+- ¿Existe rejugabilidad?
+- ¿Crear una misión futura será más sencillo?
+- ¿La aplicación continúa compilando correctamente?
+
+Si alguna respuesta es NO por un bug o implementación incompleta de esta versión, continúa trabajando.
+
+**86. CONTROL DE REGRESIONES**
+
+Después de cada cambio importante revisa que no hayas roto funcionalidades existentes.
+
+No sacrifiques una función estable por una mejora visual.
+
+Si necesitas hacer una migración del estado persistido, implementa una estrategia razonable de compatibilidad o fallback.
+
+**87. COMMITS / CAMBIOS MANEJABLES**
+
+Trabaja en cambios lógicos y manejables.
+
+Evita una modificación masiva de cientos de archivos sin validación intermedia.
+
+Si el entorno Git disponible lo permite, organiza el trabajo de manera que los cambios sean fáciles de revisar y revertir.
+
+No hagas operaciones destructivas de Git ni elimines trabajo existente que no hayas creado tú.
+
+**88. DOCUMENTACIÓN DURANTE LA IMPLEMENTACIÓN**
+
+No esperes hasta el final para intentar recordar qué cambiaste.
+
+Actualiza progresivamente:
+
+`IMPLEMENTATION_PLAN_V2.md`
+
+y cuando corresponda:
+
+`MANUAL_CREACION.md`
+
+Mantén sincronizados código y documentación.
+
+**89. ENTREGA FINAL**
+
+Al terminar entrégame:
+
+1. RESUMEN — Qué cambió.
+2. ARQUITECTURA — Qué decisiones tomaste.
+3. IMPLEMENTADO — Lista real.
+4. ARCHIVOS CREADOS — Archivo + función.
+5. ARCHIVOS MODIFICADOS — Principales archivos + motivo.
+6. ESTADO Y PERSISTENCIA — Cómo funcionan.
+7. MOTOR DE MISIONES — Estado de la arquitectura.
+8. SISTEMA DE DEPENDENCIAS — Cómo funciona `requires review`.
+9. PRESUPUESTO Y RECURSOS — Funcionamiento.
+10. SIMULACIÓN — Variables, eventos y consecuencias.
+11. EVALUACIÓN EX ANTE — Funcionamiento.
+12. REGULACIÓN — Qué mecánicas se implementaron.
+13. ODS — Cómo funciona.
+14. PUNTUACIÓN — Cómo se calcula y explica.
+15. UX — Principales mejoras.
+16. TESTS — Comandos realmente ejecutados. Resultados.
+17. BUILD — Resultado real.
+18. PENDIENTES — Solo lo que realmente no pudo terminarse.
+19. DEUDA TÉCNICA — Si existe.
+20. SIGUIENTE VERSIÓN — Qué evolución recomendarías.
+
+**90. DOCUMENTACIÓN FINAL OBLIGATORIA**
+
+Antes de finalizar verifica que existan y estén actualizados:
+
+`README.md`
+
+`MANUAL_CREACION.md`
+
+`IMPLEMENTATION_PLAN_V2.md`
+
+El README debe permitir desplegar el proyecto.
+
+El manual debe permitir comprender cómo fue construido.
+
+El plan debe permitir comprender cómo se ejecutó esta evolución.
+
+Registrar este prompt completo en:
+
+`MANUAL_CREACION.md → Historial de prompts`
+
+No documentes como terminada una función que no esté realmente implementada.
+
+**91. REGLA DE AUTONOMÍA**
+
+Tienes autorización para:
+
+- inspeccionar el repositorio;
+- crear archivos;
+- modificar código;
+- refactorizar;
+- ejecutar comandos;
+- ejecutar tests;
+- corregir errores;
+- reorganizar componentes;
+- mejorar arquitectura;
+- actualizar documentación;
+
+siempre que sea necesario para cumplir esta versión y no destruyas deliberadamente funcionalidades existentes.
+
+No me preguntes por decisiones técnicas rutinarias.
+
+Resuélvelas utilizando buenas prácticas y la arquitectura encontrada.
+
+Solo detente si:
+
+1. necesitas una credencial que no existe;
+2. necesitas realizar una operación irreversible peligrosa;
+3. existe una ambigüedad funcional crítica que no puede resolverse examinando el proyecto;
+4. existe un bloqueo externo real.
+
+En cualquier otro caso:
+
+analiza → decide → implementa → prueba → corrige → continúa.
+
+**92. REGLA DE CALIDAD**
+
+No confundas:
+
+“implementado”
+
+con:
+
+“dejé preparada la arquitectura”.
+
+Si una característica está únicamente preparada, indícala como:
+
+PREPARADA / NO IMPLEMENTADA
+
+Si está parcialmente terminada:
+
+PARCIAL
+
+Si funciona:
+
+IMPLEMENTADA
+
+Nunca presentes como completada una funcionalidad que no hayas validado.
+
+**93. OBJETIVO FINAL**
+
+Al terminar esta versión quiero que el cambio fundamental sea:
+
+ANTES:
+
+“Respondo actividades para avanzar.”
+
+DESPUÉS:
+
+“Administro un proyecto. Tengo recursos y tiempo limitados. Analizo información, selecciono una estrategia, construyo el proyecto, enfrento incertidumbre, tomo decisiones y después veo sus consecuencias.”
+
+El conocimiento académico debe estar integrado dentro de esas decisiones.
+
+El simulador debe recompensar:
+
+analizar + priorizar + administrar + justificar + anticipar + corregir
+
+y no solamente:
+
+memorizar + responder.
+
+**COMIENZA AHORA**
+
+Empieza inspeccionando el repositorio completo.
+
+No hagas todavía cambios cosméticos aislados.
+
+Primero:
+
+1. comprende el proyecto;
+2. identifica la arquitectura;
+3. ejecuta una línea base de tests/build si es posible;
+4. identifica riesgos;
+5. crea `IMPLEMENTATION_PLAN_V2.md`;
+6. define las fases;
+7. comienza la implementación;
+8. valida después de cada fase;
+9. corrige regresiones;
+10. continúa hasta completar la mayor cantidad posible de esta V2 con calidad.
+
+No sacrifiques estabilidad por cantidad.
+
+Si el alcance completo es demasiado grande para una única iteración, termina primero un vertical slice completamente funcional de las prioridades más altas y continúa progresivamente, dejando claramente documentado qué está IMPLEMENTADO, PARCIAL o PREPARADO.
+
+Prioridad absoluta: arquitectura sólida + integración pedagógica + decisiones reales + consecuencias + estabilidad + experiencia dinámica.
+
+</details>
+
+### Cambios y validación
+
+Resumen en la sección «Iteración 2 de la V2» de este manual y en `IMPLEMENTATION_PLAN_V2.md` (resultado, estados y pendientes). Validación: `pnpm test` (156 pruebas), `pnpm typecheck`, `pnpm build` y revisión en navegador.
+
+---
+
+## Plantilla para próximas instrucciones
+
+Copiar y completar al recibir un nuevo prompt:
+
+```
+## AAAA-MM-DD · Título breve
+
+### Prompt completo recibido
+<details><summary>Título</summary>
+(texto íntegro)
+</details>
+
+### Cambios realizados
+- …
+
+### Validación
+- Comandos ejecutados y resultados reales.
+- Estado de cada funcionalidad: IMPLEMENTADA / PARCIAL / PREPARADA / NO IMPLEMENTADA.
+```

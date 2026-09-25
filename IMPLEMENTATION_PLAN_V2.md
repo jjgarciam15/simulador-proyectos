@@ -84,4 +84,73 @@ Se actualiza al cerrar cada fase (ver sección final «Resultado de la ejecució
 
 ## Resultado de la ejecución
 
-_En curso._
+Ejecutado el 25 de septiembre de 2026 en tres commits validados (dominio → interfaz y puntuación → documentación y correcciones de la prueba manual). Cada fase terminó con `pnpm typecheck` y `pnpm test` en verde.
+
+### Validación final
+
+| Comprobación | Resultado |
+|---|---|
+| `pnpm test` | 156 pruebas en 14 archivos, todas aprobadas (línea base: 136 en 13) |
+| `pnpm typecheck` | Sin errores |
+| `pnpm build` | Correcto; paquetes de ~360, 299 y 378 kB antes de gzip |
+| Compilación en subruta (`vite build --base=/simulador-proyectos/`) | Correcta; las imágenes respetan la base |
+| Navegador (Chromium, build de producción, modo QA) | Inicio y comparación de dificultades; dilema pendiente resuelto; panel lateral con alternativa y variables; planificador presupuestal con guía y diagnóstico; laboratorio regulatorio; resultado con historia, ajustes, coherencia y aciertos/errores; vista móvil de 390 px sin desbordamiento horizontal. Único error de consola: `favicon.ico` inexistente (previo). |
+| Arrastrar y soltar en la cadena | Verificado con eventos `DragEvent` nativos (5 → 6 tarjetas). El arrastre simulado con ratón de Playwright no dispara eventos HTML5 en modo headless; el selector sigue como alternativa accesible. |
+
+Correcciones hechas a partir de la prueba manual: unidad «M» duplicada, contraste del panel lateral oscuro, redacción de la historia final, criterio de aciertos en dilemas, rutas de imágenes para despliegue en subruta y un diagnóstico de presupuesto demasiado indulgente (un presupuesto vacío obtenía 64/100; ahora queda por debajo de 60).
+
+### Estado por requisito
+
+| Requisito | Estado | Dónde |
+|---|---|---|
+| Terminología «Árbol del problema» | IMPLEMENTADA | engine, learning, Endgame, documentos |
+| Estado central, persistencia, continuar y pausa | IMPLEMENTADA (existente, ampliada con campos opcionales) | `projectV2.ts`, `storage.ts` |
+| Navegación sin repetir el recorrido | IMPLEMENTADA (existente) | `ProjectMap`, acción `visit` |
+| «Requiere revisión» con razón visible | IMPLEMENTADA (existente). No hay un estado «inconsistente» separado: las razones se muestran por etapa | `invalidateV2`, `dependencyRules` |
+| Alternativa detallada y cambiable sin perder progreso | IMPLEMENTADA | `CommandCenter.tsx` |
+| Centro de mando y variables vivas | IMPLEMENTADA | `CommandCenter.tsx`, `ResourceDeck` |
+| Tiempo como recurso | PARCIAL: meses como unidad; no hay días ni semanas | motor, dilemas |
+| Planificador de recursos | IMPLEMENTADA (existente) | panel derecho |
+| Preguntas con 5–7 opciones y trampas | IMPLEMENTADA en la práctica V2 (7 y 6 opciones). El módulo de 3 opciones solo existe para partidas guardadas antes de la V2 | `questionsV2.ts`, `appliedCases.ts` |
+| Pistas en tres niveles e intentos 100/80/60 % | IMPLEMENTADA (existente) | `questionsV2.ts` |
+| Cadena de valor construida por el jugador | IMPLEMENTADA | `chainBank`, `ChainBuilder` |
+| Presupuesto sin valores precargados, guía y diagnóstico | IMPLEMENTADA | `budgetReview.ts`, `BudgetReviewPanel` |
+| Escasez y contingencia | IMPLEMENTADA | `difficultyRules`, `budgetRules` |
+| Información imperfecta y centro de información | IMPLEMENTADA | `InformationCenter.tsx` |
+| Actores, matriz, negociación y aceptación social | IMPLEMENTADA (existente) | Diagnóstico, `negotiations.ts` |
+| Dilemas sin opción perfecta | IMPLEMENTADA | `data/dilemmas.ts` |
+| Eventos condicionales configurables | PARCIAL: el modelo completo (condiciones, probabilidad dependiente, opciones, efectos diferidos) se aplica a los dilemas previos a la inversión; los eventos de ejecución conservan su lista anterior, modulada ahora por el riesgo sistémico | `dilemmas.ts`, `engine.ts` |
+| Consecuencias inmediatas, diferidas y sistémicas | IMPLEMENTADA | `v2.consequences`, `v2.delayed`, `v2.eventRisk` |
+| Bitácora del proyecto | IMPLEMENTADA | `ConsequenceLog`, `Journal` |
+| Evaluación ex ante explicada con datos de la partida | IMPLEMENTADA | `ExAnteBrief.tsx` |
+| Escenarios y sensibilidad | IMPLEMENTADA (existente) | `Evaluation.tsx` |
+| Laboratorio regulatorio, «No intervenir», puzzle, fallo regulatorio | IMPLEMENTADA | `regulationLab.ts`, `RegulatoryPuzzle.tsx` |
+| Catálogo amplio de instrumentos (impuestos, subsidios, provisión pública…) | PARCIAL: tres instrumentos por misión (no intervenir, focalizado, estricto); los subsidios aparecen como dilema | `scenarios.ts` |
+| ODS sin preselección, justificados y valorados | IMPLEMENTADA | `SDGBuilder`, `sdgReview` |
+| Introducción de etapas y «Aprender más» | IMPLEMENTADA | `CommandCenter.tsx` |
+| Tutor contextual | PARCIAL: asesores de la misión y «Aprender más»; no hay un tutor por concepto a demanda | `Characters.tsx` |
+| Dificultad centralizada y explicada | IMPLEMENTADA; no modifica el plazo | `difficultyRules`, `DifficultyGuide` |
+| Puntuación V2, coherencia transversal, bonificaciones y penalizaciones | IMPLEMENTADA | `scoringV2.ts`, `coherence.ts` |
+| Resultado detallado, aciertos y errores, perfil radar, historia por reglas | IMPLEMENTADA | `ScoreV2.tsx`, `ledger.ts` |
+| Logros educativos | IMPLEMENTADA | `recognition.ts` |
+| Rejugabilidad | IMPLEMENTADA por semilla (demanda, costos, severidad, eventos, dilemas, orden de tarjetas); el presupuesto base no varía por semilla | — |
+| Motor configurable de misiones | PARCIAL: `Spec`, plantillas de dilemas y balance en datos; las preguntas se generan en código | `data/` |
+| Validación de misiones | IMPLEMENTADA | `missions.ts` |
+| Microinteracciones | IMPLEMENTADA, discretas y con `prefers-reduced-motion` | `v3.css` |
+| Reinicio controlado | IMPLEMENTADA para etapa y misión (existente); no por decisión individual | `ResetStage.tsx` |
+| Analítica local | PARCIAL: intentos, pistas, cambios y decisiones; no mide el tiempo por etapa | — |
+| Modo docente | PREPARADA / NO IMPLEMENTADA | ver `MANUAL_CREACION.md` |
+| Modo reto | IMPLEMENTADA (existente) | `challenges.ts` |
+| Lint | No configurado (no existía; no se añadió) | — |
+
+### Criterios de aceptación
+
+Todos se responden SÍ: el jugador construye presupuesto, cadena de valor y selección de ODS; puede cambiar de alternativa conservando el progreso, con etapas marcadas para revisión, y volver a etapas anteriores. Hay restricciones reales (fondo 100/92/85 %), consecuencias inmediatas, diferidas y sistémicas, incertidumbre controlada por semilla, y los actores importan (apoyo, negociación, dilemas, exposición social). La evaluación ex ante usa las decisiones previas; regular exige analizar la severidad, y no intervenir puede ser correcto; existen fallas regulatorias. La puntuación es explicable, los modos de dificultad difieren en ocho parámetros, la partida continúa tras recargar, hay rejugabilidad, una misión nueva se define con datos y la aplicación compila.
+
+### Pendientes reales
+
+- Migrar los eventos de ejecución al modelo condicional de los dilemas.
+- Ampliar el catálogo de instrumentos regulatorios por misión.
+- Medir el tiempo por etapa en la analítica local.
+- Piloto con estudiantes para calibrar balance, duración y dificultad percibida.
+- Configurar lint (ESLint) y pruebas E2E permanentes.

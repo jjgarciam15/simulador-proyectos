@@ -43,9 +43,9 @@ export default function ExAnteBrief({ g }: { g: GameState }) {
             <tbody>
               <tr><td>Alternativa</td><td>{a.name}</td></tr>
               <tr><td>Población objetivo</td><td>{g.target.toLocaleString("es-CO")} · cobertura prevista {(m.coverage * 100).toFixed(0)} %</td></tr>
-              <tr><td>Costo a comprometer</td><td>$ {money(cost)} M de $ {money(available(g))} M libres</td></tr>
-              <tr><td>Costo anual</td><td>$ {money(m.opex)} M</td></tr>
-              <tr><td>Beneficio social anual</td><td>$ {money(m.benefit)} M</td></tr>
+              <tr><td>Costo a comprometer</td><td>$ {money(cost)} de $ {money(available(g))} libres</td></tr>
+              <tr><td>Costo anual</td><td>$ {money(m.opex)}</td></tr>
+              <tr><td>Beneficio social anual</td><td>$ {money(m.benefit)}</td></tr>
               <tr><td>Tiempo</td><td>{duration} meses de ejecución; quedan {Math.max(0, s.deadline - g.month)} del plazo</td></tr>
               <tr><td>Riesgo</td><td>{riskLevel(g).toFixed(0)}/100 · información {g.quality}/100</td></tr>
               <tr><td>Presupuesto</td><td>Diagnóstico {review.score.toFixed(0)}/100</td></tr>

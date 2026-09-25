@@ -170,15 +170,15 @@ export function CommandCenter({
           <>
             <dl className="alt-detail">
               <dt>Inversión técnica</dt>
-              <dd>$ {money((a.capex * g.target) / s.affected)} M</dd>
+              <dd>$ {money((a.capex * g.target) / s.affected)}</dd>
               <dt>Operación anual</dt>
-              <dd>$ {money((a.opex * g.target) / s.affected)} M</dd>
+              <dd>$ {money((a.opex * g.target) / s.affected)}</dd>
               <dt>Duración de obra</dt>
               <dd>{a.months} meses de {Math.max(0, s.deadline - g.month)} disponibles</dd>
               <dt>Población objetivo</dt>
               <dd>{g.target.toLocaleString("es-CO")} de {s.affected.toLocaleString("es-CO")} afectadas</dd>
               <dt>Beneficio social anual</dt>
-              <dd>$ {money((a.social * g.target) / s.affected)} M · cobertura potencial {(a.coverage * 100).toFixed(0)} %</dd>
+              <dd>$ {money((a.social * g.target) / s.affected)} · cobertura potencial {(a.coverage * 100).toFixed(0)} %</dd>
               <dt>Riesgos</dt>
               <dd>Riesgo técnico {a.risk}/100 · complejidad {a.complexity}/100 · ambiental {a.environment > 0 ? "+" : ""}{a.environment}</dd>
               <dt>Restricciones</dt>

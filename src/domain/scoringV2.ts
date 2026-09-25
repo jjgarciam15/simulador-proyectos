@@ -183,7 +183,7 @@ export function projectStory(
   else parts.push("El presupuesto fue suficiente y equilibrado.");
   const cons = g.v2?.consequences ?? [];
   const regulatory = cons.find((c) => c.kind === "sistémica" && c.title !== "Regulación proporcional");
-  if (regulatory) parts.push(`En regulación, ${regulatory.title.charAt(0).toLowerCase() + regulatory.title.slice(1)} afectó la implementación.`);
+  if (regulatory) parts.push(`En regulación: ${regulatory.title.charAt(0).toLowerCase() + regulatory.title.slice(1)}, con efectos sobre la implementación.`);
   else if (cons.some((c) => c.title === "Regulación proporcional")) parts.push("La estrategia regulatoria fue proporcional a la evidencia.");
   const delayed = cons.filter((c) => c.kind === "diferida");
   if (delayed.length)

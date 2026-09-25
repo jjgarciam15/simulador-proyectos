@@ -56,7 +56,11 @@ export function outcomeLedger(g: GameState): LedgerItem[] {
   for (const d of (g.v2?.dilemmas ?? []).filter((d) => d.choice)) {
     const t = dilemmaById(d.id),
       c = t?.choices.find((c) => c.id === d.choice);
-    if (t && c) add("Decisiones", "Coherencia transversal", !c.delayed || (c.delayed.effects.performance ?? 0) >= 0, `${fillText(g, t.title)}: elegiste «${c.label}». ${c.lesson}`);
+    if (!t || !c) continue;
+    // A choice counts as an error when it hid a cost that materialised later (any negative delayed effect).
+    const e = c.delayed?.effects ?? {},
+      hiddenCost = Object.entries(e).some(([k, v]) => (k === "eventRisk" ? v > 0 : v < 0));
+    add("Decisiones", "Coherencia transversal", !hiddenCost, `${fillText(g, t.title)}: elegiste «${c.label}»${hiddenCost ? ", que trasladó costos al futuro" : ""}. ${c.lesson}`);
   }
   const practice = Object.values(g.v2?.assessments ?? {});
   if (practice.length)
