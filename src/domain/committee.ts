@@ -75,8 +75,15 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
       concept: "Sensibilidad",
       question: `Tu proyecto depende de la demanda. Si cae 20 %, ¿qué ocurre con el VPN económico (hoy ${fmt(base.npvE)})?`,
       options: shuffle(g, "demanda", [
-        { id: "positivo", text: "Baja, pero sigue siendo positivo.", credit: positive && low.npvE < base.npvE ? 1 : 0, feedback: `Con la demanda en 80 %, el VPN económico sería ${fmt(low.npvE)}.` },
-        { id: "negativo", text: "Se vuelve negativo: la decisión cambiaría.", credit: !positive ? 1 : 0, feedback: `Con la demanda en 80 %, el VPN económico sería ${fmt(low.npvE)}.` },
+        ...(base.npvE < 0
+          ? [
+              { id: "peor", text: "Ya es negativo y se aleja más de cero.", credit: low.npvE < base.npvE ? 1 : 0, feedback: `Con la demanda en 80 %, el VPN económico sería ${fmt(low.npvE)}.` },
+              { id: "mejora", text: "Pasa a ser positivo porque baja la operación.", credit: 0, feedback: `Menos demanda reduce los beneficios valorados: el VPN económico sería ${fmt(low.npvE)}.` },
+            ]
+          : [
+              { id: "positivo", text: "Baja, pero sigue siendo positivo.", credit: positive && low.npvE < base.npvE ? 1 : 0, feedback: `Con la demanda en 80 %, el VPN económico sería ${fmt(low.npvE)}.` },
+              { id: "negativo", text: "Se vuelve negativo: la decisión cambiaría.", credit: !positive ? 1 : 0, feedback: `Con la demanda en 80 %, el VPN económico sería ${fmt(low.npvE)}.` },
+            ]),
         { id: "igual", text: "No cambia, porque la demanda no afecta los beneficios.", credit: 0, feedback: "Los beneficios valorados dependen del uso del servicio: menos demanda, menos beneficio." },
         { id: "financiero", text: "Solo cambia el flujo financiero; el económico no.", credit: 0, feedback: "La demanda afecta los beneficios valorados del flujo económico y las tarifas del financiero." },
       ]),

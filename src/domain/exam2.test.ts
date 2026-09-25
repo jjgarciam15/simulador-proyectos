@@ -61,4 +61,9 @@ describe("Examen 2 (números verificables a mano)", () => {
     expect(flow.feedback).toMatch(/hundido/);
     expect(bad.rows.find((r) => r.step === "Flujo económico")!.points).toBeLessThan(8);
   });
+  it("no da puntos a una plantilla de flujo sin rubros incluidos", () => {
+    const A = examCase("A");
+    const empty = examResults({ flow: referenceRows(A).map((r) => ({ ...r, kind: "excluir" as const })) });
+    expect(empty.rows.find((r) => r.step === "Flujo financiero")!.points).toBe(0);
+  });
 });

@@ -85,8 +85,9 @@ export function examResults(a: ExamAnswers) {
   push("Alternativas", 5, tr?.correct ? 1 : 0, tr?.feedback ?? "Sin respuesta.");
   const sk = exam2.sunkQuestion.options.find((o) => o.id === a.sunk);
   push("Datos", 5, sk?.correct ? 1 : 0, sk?.feedback ?? "Sin respuesta.");
-  const flowErrors = a.flow ? detectFlowErrors(A, a.flow) : [];
-  push("Flujo financiero", 15, a.flow ? errorScore(flowErrors) / 100 : 0, a.flow ? (flowErrors.length ? flowErrors.map((e) => e.message).join(" ") : "Flujo consistente con el caso.") : "Sin flujo.");
+  const hasFlow = !!a.flow?.some((r) => r.kind !== "excluir"),
+    flowErrors = hasFlow ? detectFlowErrors(A, a.flow!) : [];
+  push("Flujo financiero", 15, hasFlow ? errorScore(flowErrors) / 100 : 0, hasFlow ? (flowErrors.length ? flowErrors.map((e) => e.message).join(" ") : "Flujo consistente con el caso.") : "Sin flujo.");
   const own = a.flow ? npv(netFlow(A, a.flow), A.financialRate) : NaN,
     npvOk = a.npv !== undefined && Math.abs(a.npv - rA.npvF) <= Math.max(1, Math.abs(rA.npvF) * 0.01),
     npvConsistent = a.npv !== undefined && Number.isFinite(own) && Math.abs(a.npv - own) <= Math.max(1, Math.abs(own) * 0.01);
