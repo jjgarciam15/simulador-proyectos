@@ -31,6 +31,8 @@ export interface V2State {
   inflows?: number;
   /** Project log of immediate, delayed and systemic consequences. */
   consequences?: import('./regulationLab').Consequence[];
+  /** V2.2 academic modules (objectives, effects, valuation, flows, committee). Absent in older games. */
+  v22?: V22State;
   version: 2;
   completed: number[];
   reviews: Record<number, string[]>;
@@ -61,6 +63,22 @@ export interface V2State {
   planner: number;
   changes: { phase: number; action: string; month: number }[];
 }
+export interface V22State {
+  version: 1;
+  mode: "aprendizaje" | "evaluacion";
+  objectives?: { general: string; specific: string[] };
+  impacts?: { placements: import("./valuation").ImpactPlacement[]; builtFor: string };
+  valuation?: {
+    choices: import("./valuation").ValuationChoice[];
+    paid: Record<string, import("./valuation").Study>;
+    builtFor: string;
+  };
+  flow?: { rows: import("./flows").RowInput[]; builtFor: string };
+  economic?: { rows: import("./flows").EconomicRowInput[]; benefits: string[]; builtFor: string };
+  committee?: { answers: Record<string, string> };
+  /** Anti-farming: confirmations per module (score uses the confirmed state, not repetitions). */
+  attempts?: Record<string, number>;
+}
 export function newV2State(g: GameState): V2State {
   return {
     negotiationRules:2,
@@ -86,13 +104,30 @@ export function invalidateV2(g: GameState, action: string) {
       g.v2.reviews[phase] = [
         ...new Set([
           ...(g.v2.reviews[phase] ?? []),
-          `Cambió ${actionLabels[action] ?? action} en el mes ${g.month}. Comprueba que esta etapa sigue siendo coherente.`,
+          specificReason[action]?.[phase] ??
+            `Cambió ${actionLabels[action] ?? action} en el mes ${g.month}. Comprueba que esta etapa sigue siendo coherente.`,
         ]),
       ];
     }
   g.v2.changes.push({ phase: g.phase, action, month: g.month });
 }
+/** Reasons shown when a change affects a stage in a specific way. */
+const specificReason: Record<string, Record<number, string>> = {
+  alternative: {
+    2: "La cadena de valor, el presupuesto y los efectos e impactos se construyeron con otra alternativa. Se conservan: revisa si siguen siendo coherentes.",
+    3: "La valoración y los flujos financiero y económico usan datos de otra alternativa. Se conservan tus entradas: recalcula y corrige los rubros.",
+  },
+  impacts: { 3: "Cambió la clasificación de efectos e impactos: revisa qué impactos valoras y qué beneficios entran al flujo económico." },
+  valuation: { 5: "Cambió la valoración de impactos: los beneficios del flujo económico y la comparación de alternativas cambiaron." },
+  objectives: { 2: "Cambiaron los objetivos: revisa que la cadena de valor y los productos respondan a ellos." },
+};
 const actionLabels: Record<string, string> = {
+  objectives: "los objetivos",
+  impacts: "la clasificación de efectos e impactos",
+  valuation: "la valoración económica",
+  flow: "el flujo financiero",
+  economic: "el flujo económico",
+  committee: "la defensa ante el comité",
   alternative: "la alternativa",
   target: "la población objetivo",
   nodes: "el Árbol del problema",

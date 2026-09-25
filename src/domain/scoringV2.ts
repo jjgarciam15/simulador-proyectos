@@ -123,7 +123,7 @@ export function scoreV2(
     "Valor observado",
     "Coherencia transversal",
   ];
-  const dimensions = values.map((value, i) => ({
+  let dimensions = values.map((value, i) => ({
     name: names[i],
     value: clamp(value),
     weight: weights[i],
@@ -141,6 +141,11 @@ export function scoreV2(
     `Práctica: cada pista descuenta según dificultad; cada intento adicional 0,2 puntos. Tope total: 8 puntos. La nota de cada ejercicio se informa aparte.`,
     `Ajustes: bonificaciones +${adjust.bonus} (tope 6) y penalizaciones −${adjust.penalty} (tope 8), cada una con su razón.`,
   ];
+  const v3 = plan.v2?.v22 ? scoreV3Parts(g, plan, values, transversal) : null;
+  if (v3) {
+    dimensions = v3.dimensions;
+    notes.splice(0, 9, ...v3.notes);
+  }
   const story = projectStory(g, plan, review, transversal);
   return {
     dimensions,
@@ -203,4 +208,84 @@ export function projectStory(
         : "Las decisiones de distintas etapas se contradijeron con frecuencia.",
   );
   return parts.join(" ");
+}
+
+import { scoringWeightsV3 } from "../data/balance";
+import { profileOf, moduleEnabled } from "../data/missionProfiles";
+import { objectivesScore, impactReview, valuationSummary } from "./valuation";
+import { missionFlowCase } from "./missionFlow";
+import { detectEconomicErrors, detectFlowErrors, errorScore } from "./flows";
+import { committeeScore } from "./committee";
+import { traceability } from "./traceability";
+
+/** V2.2 flows score of the approved plan: the player's rows compared with the case (error detector). */
+export function flowScores(plan: GameState) {
+  const v = plan.v2?.v22,
+    c = missionFlowCase(plan);
+  if (!v || !c) return { financial: 0, economic: 0 };
+  return {
+    financial: v.flow ? errorScore(detectFlowErrors(c, v.flow.rows)) * (v.flow.builtFor === plan.alternative ? 1 : 0.5) : 0,
+    economic: v.economic && v.flow ? errorScore(detectEconomicErrors(c, v.flow.rows, v.economic.rows, v.economic.benefits)) * (v.economic.builtFor === plan.alternative ? 1 : 0.5) : 0,
+  };
+}
+function scoreV3Parts(g: GameState, plan: GameState, v2Values: number[], transversal: number) {
+  const s = scenarioById(g.scenarioId),
+    on = (m: Parameters<typeof moduleEnabled>[1]) => moduleEnabled(g.scenarioId, m),
+    impacts = impactReview(plan).score * (plan.v2?.v22?.impacts?.builtFor === plan.alternative ? 1 : 0.5),
+    valuation = valuationSummary(plan).score,
+    flows = flowScores(plan),
+    trace = traceability(plan),
+    committee = committeeScore(plan),
+    objectives = objectivesScore(plan);
+  const values = [
+    v2Values[0],
+    0.6 * v2Values[1] + 0.4 * objectives,
+    v2Values[2],
+    on("valuation") ? 0.4 * impacts + 0.6 * valuation : impacts,
+    on("economicFlow") ? 0.5 * flows.financial + 0.5 * flows.economic : flows.financial,
+    v2Values[3],
+    v2Values[4],
+    v2Values[5],
+    v2Values[6],
+    v2Values[7],
+    0.6 * transversal + 0.4 * trace.score,
+    committee,
+  ];
+  const names = [
+    "Diagnóstico y Árbol del problema",
+    "Alternativa y objetivos",
+    "Cadena de valor y presupuesto",
+    "Efectos, impactos y valoración",
+    "Flujos, VPN y RPC",
+    "Evaluación ex ante",
+    "Regulación y ODS",
+    "Compromisos y riesgo",
+    "Ejecución y servicio",
+    "Valor observado",
+    "Coherencia y trazabilidad",
+    "Comité evaluador",
+  ];
+  const profile = profileOf(g.scenarioId),
+    raw = scoringWeightsV3[s.role].map((w, i) => w * (profile.weights?.[names[i]] ?? 1) * (i === 11 && !on("committee") ? 0 : 1)),
+    total = raw.reduce((n, w) => n + w, 0);
+  const dimensions = values.map((value, i) => ({ name: names[i], value: clamp(value), weight: raw[i] / total }));
+  const notes = [
+    "Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida.",
+    `Alternativa y objetivos: 60 % correspondencia de objetivo y causas; 40 % objetivos general y específicos (${objectives.toFixed(0)}/100).`,
+    "Preparación: 50 % cadena de valor, 30 % presupuesto (suficiencia, mantenimiento y diagnóstico) y 20 % indicadores.",
+    on("valuation")
+      ? `Efectos e impactos: 40 % clasificación (${impacts.toFixed(0)}); 60 % valoración (${valuation}): idoneidad del método, medición correcta, impactos negativos incluidos y ausencia de doble conteo.`
+      : `Efectos e impactos: clasificación (${impacts.toFixed(0)}). La valoración no aplica en esta misión.`,
+    on("economicFlow")
+      ? `Flujos: 50 % flujo financiero (${flows.financial.toFixed(0)}) y 50 % flujo económico con RPC (${flows.economic.toFixed(0)}); cada error grave resta 12 puntos y cada alerta 5.`
+      : `Flujos: flujo financiero (${flows.financial.toFixed(0)}); cada error grave resta 12 puntos y cada alerta 5.`,
+    "Evaluación: 50 % revisión confirmada, 25 % valor esperado normalizado y 25 % información disponible al invertir.",
+    "Regulación: 60 % cadena causal y proporcionalidad; 40 % pertinencia y evidencia ODS.",
+    "Compromisos: disciplina financiera e información/riesgo, con igual peso.",
+    "Ejecución: 40 % cobertura/equidad, 30 % plazo y 30 % legitimidad.",
+    "Valor observado: beneficio social para rol público; creación de valor para privado.",
+    `Coherencia y trazabilidad: 60 % coherencia transversal (${transversal.toFixed(0)}) y 40 % trazabilidad (${trace.score}, ${trace.gaps.length} vacío(s)).`,
+    on("committee") ? `Comité evaluador: ${committee}/100 en preguntas derivadas de tu partida.` : "Comité evaluador: no aplica en esta misión.",
+  ];
+  return { dimensions, notes };
 }

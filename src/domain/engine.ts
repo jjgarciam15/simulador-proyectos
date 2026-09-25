@@ -50,7 +50,7 @@ export function model(g:GameState,a=selected(g),realized=false,overrides:Partial
  return {financial,social,rows,coverage,capex,opex,revenue,benefit,equity:npv(equityFlows,rate),breakEven:revenue>0?opex/revenue:null,minimumPrice:revenue>0?opex/revenue*x.price:null,maxOpex:revenue,maintenanceRatio};
 }
 export function welfare(g:GameState,policyId=g.policy){const s=scenarioById(g.scenarioId),p=s.instruments.find(p=>p.id===policyId)!;const price=80*(1+p.price),quantity=Math.max(0,Math.min((s.demandIntercept-price)/.6,(price-s.supplyIntercept)/.6));const consumer=Math.max(0,(s.demandIntercept-price)*quantity-.3*quantity**2),producer=Math.max(0,(price-s.supplyIntercept)*quantity-.3*quantity**2),external=quantity*s.externalCost*(1-p.externality),admin=p.admin/20,compliance=quantity*p.compliance*20,total=consumer+producer-external-admin-compliance;const shares=p.entry>0?s.market.map(v=>v*.85).concat(15):p.entry<0?[s.market[0]+s.market.at(-1)!,...s.market.slice(1,-1)]:s.market;const optimalQ=(s.demandIntercept-s.supplyIntercept-s.externalCost)/1.2;const optimum=(s.demandIntercept-s.supplyIntercept-s.externalCost)*optimalQ-.6*optimalQ*optimalQ;return {price,quantity,consumer,producer,external,admin,compliance,total,dwl:Math.max(0,optimum-total),shares,hhi:hhi(shares)}}
-export type Action=ActionV2 | QuestionAction | NegotiationAction
+export type Action=ActionV2 | ActionV22 | QuestionAction | NegotiationAction
  |{type:'learn';id:string;choice:string;confidence:'seguro'|'duda'}
  |{type:'reflection';text:string}
  |{type:'mga';section:'links'|'chain'|'prediction';value:MgaDossier}
@@ -164,8 +164,9 @@ import {newV2State,invalidateV2,chainV2Score} from './projectV2';
 import {applyV2,type ActionV2} from './actionsV2';
 import {difficultyRules} from '../data/balance';
 
-export function createGameV2(id:string,d:Difficulty='guiado',seed='PROY-4831'){const g=createGame(id,d,seed);g.v2=newV2State(g);g.cash=g.v2.initialCash;return g;}
+export function createGameV2(id:string,d:Difficulty='guiado',seed='PROY-4831',mode:'aprendizaje'|'evaluacion'='aprendizaje'){const g=createGame(id,d,seed);g.v2=newV2State(g);g.v2.v22={version:1,mode};g.cash=g.v2.initialCash;return g;}
 const v2Actions=['visit','chain','actorMap','sdgReasons','regulatory','planner','resetStage'];
+const v22Actions=['objectives','impacts','valuation','flow','economic','committee'];
 const dependencyFields:Record<string,keyof GameState>={nodes:'nodes',target:'target',objective:'objective',alternative:'alternative',budget:'budget',activities:'activities',indicators:'indicators',assumptions:'assumptions',policy:'policy',alignment:'sdgs',study:'studies',actor:'actorActions',mitigate:'mitigations',mga:'mga'};
 export function act(original:GameState,action:Action,withComparison=true):GameState{
  if(original.v2?.challenge?.noCredit&&action.type==='finance'&&action.source==='credito')throw new Error('Este reto no permite contratar crédito. Revisa el alcance, el presupuesto o los requisitos de cofinanciación.');
@@ -181,8 +182,10 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
  }
  if(original.v2&&action.type==='commit'){
   if([0,1,2,3,4].some(p=>!original.v2!.completed.includes(p))||Object.values(original.v2.reviews).some(r=>r.length))throw new Error('Revisa y confirma las etapas pendientes antes de comprometer la inversión.');
+  const missing22=v22Missing(original,5);if(missing22)throw new Error(missing22);
  }
  if(original.v2&&action.type==='next'){
+  const missing22=v22Missing(original,original.phase);if(missing22)throw new Error(missing22);
   if(original.phase===2&&(original.v2.chain.length<5||original.v2.connections.length<4))throw new Error('Construye cinco niveles y al menos cuatro conexiones en la cadena de valor.');
   if(original.phase===4&&(!original.v2.regulatory.reason||!original.sdgs.length||original.sdgs.some(id=>!original.v2!.sdgReasons[id])))throw new Error('Confirma el argumento regulatorio y sustenta los ODS seleccionados.');
  }
@@ -194,7 +197,7 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
    record(input,c.funded?'Compromiso respaldado':'Compromiso sin respaldo',`${c.actor.name}: ${c.allocated} de ${c.minimum} M en ${c.name}. ${c.funded?'Apoyo +8; legitimidad +3.':'Apoyo −10; legitimidad −12; mayor exposición social.'}`);
   }
  }
- let next=v2Actions.includes(action.type)?applyV2(input,action as ActionV2):coreAct(input,action,withComparison);
+ let next=v22Actions.includes(action.type)?applyV22(input,action as ActionV22):v2Actions.includes(action.type)?applyV2(input,action as ActionV2):coreAct(input,action,withComparison);
  if(!next.v2)return next;
  if(action.type==='budget')next.v2.budgetLines=structuredClone(action.lines??original.v2?.budgetLines??[]);
  if(['budget','assumptions','alternative','policy'].includes(action.type)){const field=dependencyFields[action.type];if(JSON.stringify(original[field])===JSON.stringify(next[field]))next.acknowledged=[...original.acknowledged];}
@@ -203,12 +206,12 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
  if(action.type==='commit'&&next.snapshot)applyCommitConsequences(next);
  if(next.outcome)next.v2.completed=[...new Set([...next.v2.completed,6,7])];
  const key=dependencyFields[action.type];
- const changed=key?(JSON.stringify(original[key])!==JSON.stringify(next[key])||(action.type==='budget'&&JSON.stringify(original.v2?.budgetLines??[])!==JSON.stringify(next.v2.budgetLines??[]))):['chain','actorMap','sdgReasons','regulatory','resetStage'].includes(action.type)&&JSON.stringify(original.v2)!==JSON.stringify(next.v2);
+ const changed=key?(JSON.stringify(original[key])!==JSON.stringify(next[key])||(action.type==='budget'&&JSON.stringify(original.v2?.budgetLines??[])!==JSON.stringify(next.v2.budgetLines??[]))):['chain','actorMap','sdgReasons','regulatory','resetStage',...v22Actions].includes(action.type)&&JSON.stringify(original.v2)!==JSON.stringify(next.v2);
  if(changed){
   const label=action.type==='resetStage'?['nodes','alternative','chain','regulatory','policy'][original.phase]:action.type==='mga'?(action.section==='links'?'nodes':action.section==='chain'?'chain':'regulatory'):action.type==='sdgReasons'?'alignment':action.type;
   invalidateV2(next,label);
   if(v2Actions.includes(action.type))record(next,'Expediente V2 confirmado',label+' registrado; consulta las dependencias pendientes.');
-  if(original.v2?.completed.includes(original.phase)&&['nodes','target','objective','alternative','budget','activities','indicators','assumptions','policy','alignment','chain','regulatory','sdgReasons','resetStage'].includes(action.type)){
+  if(original.v2?.completed.includes(original.phase)&&['nodes','target','objective','alternative','budget','activities','indicators','assumptions','policy','alignment','chain','regulatory','sdgReasons','resetStage',...v22Actions].includes(action.type)){
    const fee=scenarioById(next.scenarioId).budget*.002;spend(next,fee);advanceTime(next,1);record(next,'Revisión confirmada','Se conservó el trabajo. Revisa etapas afectadas: 0,2 % del presupuesto base y un mes.',fee,1);
   }
  }
@@ -269,4 +272,111 @@ function applyCommitConsequences(g: GameState) {
     v.consequences = [...(v.consequences ?? []), c];
     record(g, c.title, c.detail);
   }
+}
+
+import { generalObjectiveOptions, specificObjectiveOptions, impactCards, valuableCards, valuationCharge, type ImpactPlacement, type ValuationChoice } from "./valuation";
+import { missionFlowCase } from "./missionFlow";
+import { valuationMethods } from "../data/valuationMethods";
+import { rpcTable } from "../data/rpc";
+import { moduleEnabled } from "../data/missionProfiles";
+import type { EconomicRowInput, RowInput } from "./flows";
+import { committeeQuestions } from "./committee";
+
+export type ActionV22 =
+  | { type: "objectives"; general: string; specific: string[] }
+  | { type: "impacts"; placements: ImpactPlacement[] }
+  | { type: "valuation"; choices: ValuationChoice[] }
+  | { type: "flow"; rows: RowInput[] }
+  | { type: "economic"; rows: EconomicRowInput[]; benefits: string[] }
+  | { type: "committee"; answers: Record<string, string> };
+const v22Stage: Record<ActionV22["type"], number> = { objectives: 1, impacts: 2, valuation: 3, flow: 3, economic: 3, committee: 5 };
+const kinds = ["inversion", "operacion", "mantenimiento", "reinversion", "ingreso", "residual", "excluir"];
+const impactKinds = ["producto", "efecto", "impactoPositivo", "impactoNegativo", "problema", "irrelevante"];
+/** Requirements of the V2.2 academic modules before leaving a stage (or committing, stage 5). */
+export function v22Missing(g: GameState, phase: number): string | null {
+  const v = g.v2?.v22;
+  if (!v) return null;
+  const on = (m: Parameters<typeof moduleEnabled>[1]) => moduleEnabled(g.scenarioId, m);
+  if (phase === 1 && !v.objectives) return "Construye y confirma el objetivo general y los objetivos específicos.";
+  if (phase === 2 && !v.impacts) return "Clasifica y confirma los efectos e impactos del proyecto.";
+  if (phase === 3) {
+    if (on("valuation") && !v.valuation?.choices.length) return "Valora al menos un impacto en el módulo de valoración económica.";
+    if (!v.flow) return "Construye y confirma el flujo financiero.";
+    if (on("economicFlow") && !v.economic) return "Construye y confirma el flujo económico con RPC.";
+  }
+  if (phase === 5 && on("committee") && Object.keys(v.committee?.answers ?? {}).length < committeeQuestions(g).length)
+    return "Responde las preguntas del comité evaluador antes de comprometer la inversión.";
+  return null;
+}
+/** V2.2 academic actions. They validate content, record the confirmation and, for valuation studies, spend money and time. */
+function applyV22(original: GameState, a: ActionV22): GameState {
+  if (!original.v2?.v22) throw new Error("Este módulo corresponde a partidas V2.2. Inicia una misión nueva.");
+  if (original.snapshot || original.outcome) throw new Error("La inversión ya fue comprometida.");
+  if (original.phase !== v22Stage[a.type]) throw new Error("Visita la etapa correspondiente para confirmar.");
+  const g = structuredClone(original),
+    v = g.v2!.v22!;
+  v.attempts = { ...v.attempts, [a.type]: (v.attempts?.[a.type] ?? 0) + 1 };
+  switch (a.type) {
+    case "objectives": {
+      const general = generalObjectiveOptions(g).map((o) => o.id),
+        specific = specificObjectiveOptions(g).map((o) => o.id);
+      if (!general.includes(a.general) || !a.specific.length || a.specific.some((id) => !specific.includes(id)) || new Set(a.specific).size !== a.specific.length)
+        throw new Error("Elige un objetivo general y al menos un objetivo específico de las opciones.");
+      v.objectives = { general: a.general, specific: [...a.specific] };
+      g.objective = a.general;
+      record(g, "Objetivos confirmados", `Objetivo general y ${a.specific.length} objetivo(s) específico(s).`);
+      break;
+    }
+    case "impacts": {
+      const ids = impactCards(g).map((c) => c.id);
+      if (a.placements.some((p) => !ids.includes(p.id) || !impactKinds.includes(p.kind)) || new Set(a.placements.map((p) => p.id)).size !== a.placements.length)
+        throw new Error("Clasifica tarjetas existentes, una vez cada una.");
+      if (a.placements.length < ids.length) throw new Error("Clasifica todas las tarjetas: también las irrelevantes.");
+      v.impacts = { placements: structuredClone(a.placements), builtFor: g.alternative };
+      record(g, "Efectos e impactos clasificados", `${a.placements.filter((p) => p.kind.startsWith("impacto")).length} impactos identificados.`);
+      break;
+    }
+    case "valuation": {
+      const cards = valuableCards(g).map((c) => c.id),
+        methods = valuationMethods.map((m) => m.id);
+      if (a.choices.some((c) => !cards.includes(c.impactId) || !methods.includes(c.method) || !["basico", "completo"].includes(c.study) || !Number.isFinite(c.quantity) || c.quantity < 0) || new Set(a.choices.map((c) => c.impactId)).size !== a.choices.length)
+        throw new Error("Cada impacto valorado necesita un método, un tipo de estudio y una medición no negativa.");
+      const charge = valuationCharge(g, a.choices);
+      if (charge.cost > 0) spend(g, charge.cost);
+      if (charge.months) advanceTime(g, charge.months);
+      const paid = { ...(v.valuation?.paid ?? {}) };
+      for (const c of a.choices) if (paid[c.impactId] !== "completo") paid[c.impactId] = c.study;
+      v.valuation = { choices: structuredClone(a.choices), paid, builtFor: g.alternative };
+      record(g, "Valoración económica confirmada", `${a.choices.length} impacto(s) valorados.${charge.cost ? " Estudios de valoración." : ""}`, charge.cost, charge.months);
+      break;
+    }
+    case "flow": {
+      const c = missionFlowCase(g);
+      if (!c) throw new Error("Selecciona una alternativa.");
+      if (a.rows.some((r) => !c.rubros.some((x) => x.id === r.rubroId) || !kinds.includes(r.kind) || !Number.isFinite(r.amount) || r.amount < 0 || Object.values(r.overrides ?? {}).some((x) => !Number.isFinite(x))))
+        throw new Error("Revisa los rubros: tipo válido y montos no negativos.");
+      v.flow = { rows: structuredClone(a.rows), builtFor: g.alternative };
+      record(g, "Flujo financiero confirmado", `${a.rows.filter((r) => r.kind !== "excluir").length} rubros en el flujo.`);
+      break;
+    }
+    case "economic": {
+      const c = missionFlowCase(g);
+      if (!c) throw new Error("Selecciona una alternativa.");
+      const rpcs = rpcTable.map((r) => r.id);
+      if (a.rows.some((r) => !c.rubros.some((x) => x.id === r.rubroId) || !rpcs.includes(r.rpc)) || a.benefits.some((id) => !c.benefits.some((b) => b.id === id)))
+        throw new Error("Usa rubros del flujo, RPC de la tabla y beneficios valorados.");
+      v.economic = { rows: structuredClone(a.rows), benefits: [...a.benefits], builtFor: g.alternative };
+      record(g, "Flujo económico confirmado", `RPC aplicadas a ${a.rows.length} rubros; ${a.benefits.length} beneficio(s) valorados incluidos.`);
+      break;
+    }
+    case "committee": {
+      const qs = committeeQuestions(g);
+      if (qs.some((q) => !q.options.some((o) => o.id === a.answers[q.id])))
+        throw new Error("Responde todas las preguntas del comité.");
+      v.committee = { answers: { ...a.answers } };
+      record(g, "Defensa ante el comité evaluador", "Respuestas registradas; la retroalimentación completa aparece en el resultado.");
+      break;
+    }
+  }
+  return g;
 }

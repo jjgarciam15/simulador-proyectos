@@ -56,6 +56,7 @@ describe("Motor de dilemas", () => {
     g = settleDilemma(act(g, { type: "next" }));
     g = act(g, { type: "objective", id: "n0" });
     g = act(g, { type: "alternative", id: "a1" });
+    g = act(g, { type: "objectives", general: "n0", specific: ["n1", "n2"] });
     g = act(g, { type: "next" });
     expect(pendingDilemma(g)?.id).toBe("form-priority");
     expect(() => act(g, { type: "next" })).toThrow(/dilema/);
@@ -221,10 +222,10 @@ describe("Presupuesto, coherencia y resultado", () => {
     expect(review.excess).toBeGreaterThan(10);
     expect(adjustments(g).penalties.some((p) => p.label === "ODS indiscriminados")).toBe(true);
   });
-  it("el resultado final explica nueve dimensiones, ajustes, historia y aciertos/errores", () => {
+  it("el resultado final explica doce dimensiones (V2.2), ajustes, historia y aciertos/errores", () => {
     const g = finish(prepareV2("agua"));
     const a = g.outcome!.assessment!;
-    expect(a.dimensions).toHaveLength(9);
+    expect(a.dimensions).toHaveLength(12);
     expect(a.dimensions.reduce((n, d) => n + d.weight, 0)).toBeCloseTo(1);
     expect(a.coherence!.length).toBe(7);
     expect(a.story).toMatch(/cobertura/);

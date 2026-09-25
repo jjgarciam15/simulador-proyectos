@@ -154,8 +154,9 @@ describe("Construcción y evaluación V2", () => {
       { ...g, quality: 1, extraCost: 10000 },
       dimensions.map((d) => ({ ...d, value: 0 })),
     );
-    expect(base.dimensions[3].value).toBe(adverse.dimensions[3].value);
-    expect(base.dimensions[6].value).not.toBe(adverse.dimensions[6].value);
+    const dim = (a: typeof base, name: string) => a.dimensions.find((d) => d.name === name)!.value;
+    expect(dim(base, "Evaluación ex ante")).toBe(dim(adverse, "Evaluación ex ante"));
+    expect(dim(base, "Ejecución y servicio")).not.toBe(dim(adverse, "Ejecución y servicio"));
   });
   it("detecta cadenas incorrectas y ciclos sin cambiar el original", () => {
     let g = prepareV2();

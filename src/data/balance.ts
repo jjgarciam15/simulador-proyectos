@@ -68,6 +68,11 @@ export const dependencyRules: Record<string, number[]> = {
   mitigate: [3, 5],
   chain: [3, 4, 5],
   regulatory: [5],
+  objectives: [2, 3, 5],
+  impacts: [3, 5],
+  valuation: [3, 5],
+  flow: [5],
+  economic: [5],
 };
 /**
  * Educational regulatory lab. Harm of the market failure under no intervention = harmScale × severity
@@ -116,4 +121,14 @@ export const adjustmentRules = {
   sdgExcessPenalty: 2,
   regulatoryPenalty: 2,
   overrunPenalty: { share: 0.1, points: 2 },
+};
+/**
+ * Scoring V3 (V2.2 games). Order: diagnóstico, alternativa y objetivos, cadena y presupuesto,
+ * efectos/impactos/valoración, flujos/VPN/RPC, evaluación ex ante, regulación y ODS, compromisos y riesgo,
+ * ejecución, valor observado, coherencia y trazabilidad, comité evaluador. Mission profiles may scale weights;
+ * the result is always renormalized to sum 1.
+ */
+export const scoringWeightsV3 = {
+  publico: [0.1, 0.08, 0.12, 0.12, 0.12, 0.08, 0.1, 0.06, 0.06, 0.04, 0.08, 0.04],
+  privado: [0.08, 0.08, 0.12, 0.1, 0.14, 0.1, 0.1, 0.06, 0.06, 0.04, 0.08, 0.04],
 };

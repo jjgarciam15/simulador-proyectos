@@ -154,3 +154,33 @@ Todos se responden SÍ: el jugador construye presupuesto, cadena de valor y sele
 - Medir el tiempo por etapa en la analítica local.
 - Piloto con estudiantes para calibrar balance, duración y dificultad percibida.
 - Configurar lint (ESLint) y pruebas E2E permanentes.
+
+---
+
+# V2.2 · Evolución académica, económica y de simulación (25 de septiembre de 2026)
+
+Ampliación obligatoria del prompt maestro V2 (registrada completa en `MANUAL_CREACION.md → Historial de prompts`). Estados: IMPLEMENTADA, PARCIAL, PREPARADA, PENDIENTE.
+
+## Línea base
+
+`pnpm test`: 156 pruebas aprobadas (14 archivos). `pnpm typecheck` y `pnpm build`: sin errores. No hay script de lint. No existía un «Examen 2» en el repositorio: se diseña desde cero.
+
+## Investigación académica (fuentes verificadas)
+
+| Tema | Fuente | Dato adoptado |
+|---|---|---|
+| Tasa social de descuento | DNP, Resolución 1092 de 2022 | 9 % efectivo anual para proyectos de inversión pública |
+| RPC de insumos y de la divisa | DNP, *Archivos de Economía* 497 (2019), Hernández, Matamoros y Sánchez | RPC divisa 1,032; obras civiles 0,903; edificaciones 0,905; energía distribuida 0,901; agua 0,826; gasolinas y combustibles 0,822; cemento 0,875; hierro y acero 0,873; transporte de pasajeros 0,874 |
+| RPC de mano de obra | DNP, *Archivos de Economía* 498 (2019), Matamoros, Lamprea y Hernández | 2018: calificada urbana 1,018; no calificada urbana 0,607; rural 0,722 |
+| Metodologías de valoración | MinAmbiente, *Guía de aplicación de la valoración económica ambiental* (Resolución 1084 de 2018) | Preferencias reveladas (costo de viaje, precios hedónicos, costos evitados o inducidos: productividad, costos de producción, costo de la enfermedad; gastos de prevención, restauración, reemplazo, gastos defensivos); preferencias declaradas (valoración contingente, experimentos de elección y conjoint); la transferencia de beneficios «no es un método de valoración como tal» |
+| Marco general | OECD (2018), *Cost-Benefit Analysis and the Environment* | Distinción preferencias reveladas/declaradas; valores de uso y de no uso |
+
+Diferencia documentada: la guía de MinAmbiente ubica los métodos basados en costos dentro de la familia de preferencias reveladas (información de mercados relacionados), mientras que parte de la literatura internacional los presenta como una familia aparte. El simulador los muestra como «Basados en costos y gastos», con una nota sobre esa clasificación, y recuerda que no son una medida técnicamente exacta del bienestar.
+
+## Diseño
+
+- **Estructura de partida.** Se conservan ocho etapas y se agrupan los nuevos módulos para no alargar la experiencia: Formulación incorpora objetivos generales y específicos; Preparación incorpora efectos e impactos; Evaluación incorpora valoración económica, flujo financiero, flujo económico con RPC, VPN paso a paso, sensibilidad, estrés, valor de quiebre y evaluación distributiva; Decisión incorpora comparador, matriz de decisión y comité evaluador.
+- **Motor de cálculo genérico** (`src/domain/flows.ts`): funciones puras sobre un `FlowCase` (rubros, periodos, tasas, RPC, beneficios). Las misiones construyen su caso desde la alternativa, la población y el presupuesto de la partida; el Examen 2 usa un caso propio con números verificables a mano.
+- **Valoración** (`src/domain/valuation.ts`): medición → método → valor unitario → unidades → beneficio anual; ajuste por idoneidad del método (óptima, válida, parcial, inadecuada), confianza (alta, media, baja) según método y calidad del estudio, y detección de doble conteo.
+- **Trazabilidad** (`src/domain/traceability.ts`): vínculos problema → objetivo → alternativa → actividad → producto → efecto → impacto → método → valor → flujo → indicador → decisión, con detección de vacíos.
+- **Puntuación V3**: dimensiones nuevas para objetivos, efectos, valoración, flujos, RPC y comité; pesos por perfil de misión, normalizados. Las partidas V2 anteriores conservan su fórmula.

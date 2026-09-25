@@ -45,6 +45,7 @@ export function prepareV2(
   g = next(g);
   g = act(g, { type: "objective", id: "n0" });
   g = act(g, { type: "alternative", id: "a" + alternativeIndex });
+  if (g.v2?.v22) g = act(g, { type: "objectives", general: "n0", specific: ["n1", "n2"] });
   g = next(g);
   g = act(g, {
     type: "budget",
@@ -76,9 +77,11 @@ export function prepareV2(
     cards: bank.map(({ id, level }) => ({ id, level })),
     connections: bank.slice(1).map((c, i) => ({ from: bank[i].id, to: c.id })),
   });
+  if (g.v2?.v22) g = act(g, { type: "impacts", placements: referenceImpacts(g) });
   if (projectCost(g) > available(g))
     g = act(g, { type: "finance", source: "credito" });
   g = next(g);
+  if (g.v2?.v22) g = completeEvaluationV22(g);
   g = act(g, { type: "ack", id: "evaluation" });
   g = next(g);
   g = act(g, {
@@ -110,5 +113,29 @@ export function prepareV2(
     },
   });
   g = next(g);
+  if (g.v2?.v22 && g.phase === 5) g = act(g, { type: "committee", answers: referenceCommittee(g) });
   return g;
 }
+
+/** Reference classification of effects and impacts (all correct). */
+export function referenceImpacts(g: GameState) {
+  return impactCards(g).map((c) => ({ id: c.id, kind: c.kind, ...(c.group ? { group: c.group } : {}) }));
+}
+/** V2.2 evaluation modules completed with reference answers (valuation, financial and economic flows). */
+export function completeEvaluationV22(g: GameState) {
+  if (g.phase !== 3 || !g.v2?.v22 || g.v2.v22.flow) return g;
+  g = act(g, { type: "valuation", choices: referenceValuation(g) });
+  const c = missionFlowCase(g)!;
+  g = act(g, { type: "flow", rows: referenceRows(c) });
+  const c2 = missionFlowCase(g)!;
+  return act(g, { type: "economic", rows: referenceEconomic(c2), benefits: referenceBenefits(c2) });
+}
+/** Answer the committee with the strongest option and commit. */
+export function commitV22(g: GameState, withComparison = false) {
+  if (g.v2?.v22 && !g.v2.v22.committee) g = act(g, { type: "committee", answers: referenceCommittee(g) });
+  return act(g, { type: "commit" }, withComparison);
+}
+import { impactCards, referenceValuation } from "../domain/valuation";
+import { missionFlowCase } from "../domain/missionFlow";
+import { referenceRows, referenceEconomic, referenceBenefits } from "../domain/flows";
+import { referenceCommittee } from "../domain/committee";
