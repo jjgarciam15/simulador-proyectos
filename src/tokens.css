@@ -1,0 +1,34 @@
+/*
+ * Design tokens. Contrast targets (WCAG AA): textPrimary/textSecondary on background and surface ≥ 4.5:1.
+ * New components use only these variables; states always combine color + icon + text.
+ */
+:root {
+  --background: #f3f5ef;
+  --surface: #ffffff;
+  --surface-elevated: #fbfcf8;
+  --surface-muted: #eef2ea;
+  --primary: #2c6655;
+  --primary-strong: #1f4d40;
+  --primary-soft: #e3efe9;
+  --secondary: #6d5a2a;
+  --accent: #a3701d;
+  --success: #25694f;
+  --success-soft: #e2f1ea;
+  --warning: #8a5a10;
+  --warning-soft: #fff3d6;
+  --danger: #a33a22;
+  --danger-soft: #fdebe5;
+  --info: #2c5a86;
+  --info-soft: #e5eef8;
+  --text-primary: #17241f;
+  --text-secondary: #46564f;
+  --text-on-primary: #ffffff;
+  --border: #c4cfc0;
+  --border-strong: #8fa393;
+  --focus: #1f6fd1;
+  /* Worksheet cell kinds (dato entregado, a calcular, a ingresar, calculado). */
+  --cell-given: #eef1ec;
+  --cell-compute: #fff5dc;
+  --cell-input: #e8f0fb;
+  --cell-auto: #e6f3ec;
+}
