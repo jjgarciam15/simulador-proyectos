@@ -171,6 +171,7 @@ No se requieren variables de entorno ni claves API.
 | `pnpm preview` | Sirve `dist/` localmente para revisarlo |
 | `pnpm check` | Tipos, pruebas y compilación (lo que ejecuta la CI) |
 | `pnpm repo:check` | Revisa que no se versionen dependencias, compilaciones ni credenciales |
+| `pnpm portable` | Compila y genera el paquete portátil para Windows en `release/` (no requiere Node para usarlo) |
 
 No hay comando de lint configurado.
 
@@ -252,11 +253,30 @@ scripts/       Lanzador de Windows y revisión del repositorio
 
 La memoria técnica completa está en [`MANUAL_CREACION.md`](MANUAL_CREACION.md) y la ejecución de esta versión en [`IMPLEMENTATION_PLAN_V2.md`](IMPLEMENTATION_PLAN_V2.md).
 
+## Versión portátil (copiar y usar sin instalar nada)
+
+Para llevar el simulador a otro computador Windows **sin instalar Node.js, npm ni pnpm**:
+
+1. Descarga `PROYECTA-<versión>-portable.zip`: desde la pestaña **Actions → Paquete portátil** (artefacto de cada actualización de `main`) o desde **Releases** cuando se publica una etiqueta `v*`. También se genera localmente con `pnpm portable` (queda en `release/`).
+2. Descomprímelo (clic derecho → Extraer todo) y haz doble clic en `ABRIR_PROYECTA.cmd`.
+3. Deja abierta la ventana negra mientras usas el simulador; para terminar, ciérrala.
+
+El paquete contiene la aplicación compilada (`app/`) y `servidor-portatil.ps1`, un servidor mínimo en PowerShell (incluido en Windows) que solo escucha en `127.0.0.1`, no sirve archivos fuera de `app/` y usa el puerto 5173 (o el siguiente libre). Se copia con USB, OneDrive o correo; las partidas quedan en el navegador de cada equipo (para llevar un proyecto propio, exporta el `.proyecta.json`).
+
+## Actualizar a una versión nueva
+
+```bash
+git pull origin main
+pnpm install
+```
+
+Si el simulador estaba abierto, ciérralo antes (o reinicia el servidor): una instancia iniciada con las dependencias anteriores sigue fallando aunque ya estén instaladas.
+
 ## Solución de problemas
 
 | Problema | Solución |
 |---|---|
-| `Cannot find module` o dependencias ausentes | `pnpm install --frozen-lockfile` |
+| `Cannot find module`, dependencias ausentes o «Failed to resolve import "fflate"» después de actualizar | Cierra el simulador y ejecuta `pnpm install`. `ABRIR_PROYECTA.cmd` ahora detecta dependencias faltantes y las instala solo |
 | Aviso «Unsupported engine» | Usa Node 24 (`nvm use`); con Node 22 funciona igual |
 | Puerto 5173 ocupado | Cierra la otra instancia o revisa `.local/servidor-error.log` (lanzador Windows) |
 | La partida no se guarda | Revisa permisos o cuota del almacenamiento del navegador; mantén la pestaña abierta |

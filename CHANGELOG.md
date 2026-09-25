@@ -1,5 +1,11 @@
 # Cambios
 
+## 2.4.1 · paquete portátil (25 de septiembre de 2026)
+
+- `pnpm portable` genera `PROYECTA-<versión>-portable.zip`: aplicación compilada + servidor PowerShell; se abre con doble clic en Windows sin instalar Node.js.
+- Flujo de GitHub Actions «Paquete portátil»: artefacto en cada push a `main` y Release al publicar una etiqueta `v*`.
+- `ABRIR_PROYECTA.cmd` (versión de desarrollo) instala dependencias faltantes tras actualizar y reinicia el servidor anterior.
+
 ## 2.4.1 · verificación integral (25 de septiembre de 2026)
 
 - Todas las preguntas del juego, comité, Centro de aprendizaje, Examen 2, tutorial y actividades generadas tienen 5–7 opciones con trampas; las opciones se mezclan para que la correcta no quede siempre primera.
