@@ -3,32 +3,67 @@
  * New components use only these variables; states always combine color + icon + text.
  */
 :root {
-  --background: #f3f5ef;
+  /* V2.4 palette: strategy (teal/indigo), economy (amber), education (clear surfaces). AA contrast on surface. */
+  --background: #f4f6f3;
   --surface: #ffffff;
-  --surface-elevated: #fbfcf8;
-  --surface-muted: #eef2ea;
-  --primary: #2c6655;
-  --primary-strong: #1f4d40;
-  --primary-soft: #e3efe9;
-  --secondary: #6d5a2a;
-  --accent: #a3701d;
-  --success: #25694f;
-  --success-soft: #e2f1ea;
-  --warning: #8a5a10;
-  --warning-soft: #fff3d6;
-  --danger: #a33a22;
-  --danger-soft: #fdebe5;
-  --info: #2c5a86;
-  --info-soft: #e5eef8;
-  --text-primary: #17241f;
-  --text-secondary: #46564f;
+  --surface-elevated: #fbfcfa;
+  --surface-muted: #edf2ef;
+  --primary: #0b6e69;
+  --primary-strong: #07524e;
+  --primary-soft: #ddf2ef;
+  --secondary: #2d4a8a;
+  --secondary-soft: #e6ecf8;
+  --accent: #d9892b;
+  --accent-strong: #9a5a0c;
+  --accent-soft: #fdf0dc;
+  --success: #1f7a4d;
+  --success-soft: #e0f3e8;
+  --warning: #8f5b00;
+  --warning-soft: #fff2d3;
+  --danger: #b3261e;
+  --danger-soft: #fce8e6;
+  --info: #1e5fa8;
+  --info-soft: #e4eefa;
+  --text-primary: #13201c;
+  --text-secondary: #3f4f49;
   --text-on-primary: #ffffff;
-  --border: #c4cfc0;
-  --border-strong: #8fa393;
+  --border: #c5d0ca;
+  --border-strong: #8a9d94;
   --focus: #1f6fd1;
-  /* Worksheet cell kinds (dato entregado, a calcular, a ingresar, calculado). */
+  /* Worksheet cell kinds (dato entregado, a calcular, a ingresar, calculado, advertencia, error). */
   --cell-given: #eef1ec;
   --cell-compute: #fff5dc;
   --cell-input: #e8f0fb;
-  --cell-auto: #e6f3ec;
+  --cell-auto: #e2f3ec;
+  --cell-warning: #fff0c7;
+  --cell-error: #fbe2df;
+  /* Typography, spacing, radius, shadows and motion. */
+  --font-sans: Inter, "Segoe UI", system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-md: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-1: 0 1px 2px rgba(15, 35, 30, 0.08);
+  --shadow-2: 0 6px 18px rgba(15, 35, 30, 0.12);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 160ms;
+  --dur: 280ms;
+  --dur-slow: 600ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+    --dur-slow: 0ms;
+  }
 }
