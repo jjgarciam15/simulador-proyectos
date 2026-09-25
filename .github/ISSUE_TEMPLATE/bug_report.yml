@@ -1,0 +1,21 @@
+name: Error del simulador
+description: Reportar un problema reproducible sin datos personales.
+title: "[Error] "
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir
+      description: Incluye misión, dificultad, semilla y etapa. No adjuntes datos personales de estudiantes.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Resultado esperado y observado
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Navegador, sistema operativo y versión del proyecto

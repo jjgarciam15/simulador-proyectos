@@ -1,0 +1,324 @@
+.resource-deck {
+  gap: 5px;
+  padding: 7px 15px;
+  background: linear-gradient(105deg, #17373c, #102b35);
+  border-bottom: 1px solid #627759;
+}
+.resource-tile {
+  min-width: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  text-align: left;
+  padding: 7px 9px;
+  background: #29483d33;
+  border: 1px solid #709b7838;
+  border-radius: 8px;
+  color: #c3d6b1;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    border-color 0.2s;
+}
+.resource-tile:hover,
+.resource-tile:focus-visible {
+  background: #3f5849;
+  border-color: #cab77e;
+  outline: 2px solid transparent;
+  transform: translateY(-1px);
+}
+.resource-tile-copy {
+  min-width: 0;
+  flex: 1;
+}
+.resource-deck .resource-tile-copy > span:first-child {
+  font-size: 10px;
+  color: #b9c5b2;
+  display: block;
+  white-space: nowrap;
+}
+.resource-deck .resource-tile strong {
+  font-size: 13px;
+  color: #f0dbaa;
+  line-height: 1.2;
+  margin: 4px 0;
+  white-space: normal;
+}
+.resource-meter {
+  height: 3px;
+  display: block;
+  background: #0b252dd9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.resource-meter i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #648c85, #b3c784);
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.resource-delta {
+  position: absolute;
+  top: -5px;
+  right: 3px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #d2b66f;
+  color: #112d36 !important;
+  font-size: 10px !important;
+  box-shadow: 0 2px 7px #0003;
+  animation: resource-delta-in 0.4s ease-out;
+}
+.resource-rise {
+  border-color: #a8d69a;
+  animation: resource-up 0.7s ease-out;
+}
+.resource-fall {
+  border-color: #d7a072;
+  animation: resource-down 0.7s ease-out;
+}
+.resource-rise .resource-delta {
+  background: #c2e5a8;
+}
+.resource-fall .resource-delta {
+  background: #f0b57a;
+}
+.resource-move {
+  border-color: #d1bb78;
+}
+.resource-dialog {
+  max-width: 690px;
+  width: calc(100% - 36px);
+  border: 1px solid #93a386;
+  background: #faf9ed;
+}
+.resource-detail-title {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding-right: 22px;
+}
+.resource-detail-title > svg {
+  width: 30px;
+  height: 30px;
+  color: #648574;
+  flex-shrink: 0;
+}
+.resource-detail-title h2 {
+  font-size: 25px;
+  margin: 4px 0 12px;
+}
+.resource-detail-title span {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #6b7a60;
+}
+.resource-detail-title > strong {
+  margin-left: auto;
+  color: #54704e;
+  font-size: 22px;
+  white-space: nowrap;
+}
+.resource-scene {
+  margin: 16px 0;
+}
+.resource-scene svg {
+  width: 100%;
+  display: block;
+  border-radius: 12px;
+  max-height: 245px;
+}
+.resource-scene small {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  color: #75816b;
+  margin: 7px;
+}
+.resource-dialog p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+.resource-advice {
+  display: flex;
+  gap: 12px;
+  background: #e9eedf;
+  border-radius: 8px;
+  padding: 15px;
+}
+.resource-advice svg {
+  flex-shrink: 0;
+  color: #668662;
+  margin-top: 3px;
+}
+.resource-advice p {
+  margin: 0;
+}
+.resource-last-change {
+  border-left: 3px solid #bd9859;
+  padding: 12px;
+  background: #f2e9d2;
+}
+.ledger-breakdown {
+  display: grid;
+  gap: 0;
+  margin: 15px 0;
+}
+.ledger-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 11px 0;
+  border-bottom: 1px solid #d9decc;
+  font-size: 13px;
+}
+.ledger-breakdown dd {
+  font-weight: 650;
+  white-space: nowrap;
+  margin: 0;
+  color: #355a46;
+}
+.resource-hint {
+  font-size: 11px !important;
+  color: #74816b;
+}
+.resource-window {
+  transition: fill 0.8s;
+}
+.resource-flow {
+  animation: supply-flow 2s linear infinite;
+}
+.resource-building {
+  animation: building-reveal 0.45s ease-out;
+  transform-origin: center bottom;
+}
+@keyframes supply-flow {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+@keyframes building-reveal {
+  from {
+    opacity: 0.3;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes resource-delta-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes resource-up {
+  50% {
+    box-shadow: inset 0 0 25px #addd7733;
+  }
+}
+@keyframes resource-down {
+  50% {
+    box-shadow: inset 0 0 25px #e9a46633;
+  }
+}
+@media (max-width: 1250px) {
+  .resource-tile {
+    padding: 5px;
+    gap: 5px;
+  }
+  .resource-deck .resource-tile strong {
+    font-size: 12px;
+  }
+  .resource-deck .resource-tile-copy > span:first-child {
+    font-size: 9px;
+  }
+}
+@media (max-width: 950px) {
+  .resource-deck {
+    padding: 6px 10px;
+    gap: 5px;
+  }
+  .resource-tile {
+    justify-content: flex-start;
+    padding: 4px 8px;
+  }
+  .resource-deck .resource-tile-copy > span:first-child {
+    font-size: 10px;
+  }
+  .resource-deck .resource-tile strong {
+    font-size: 12px;
+    margin: 2px 0;
+  }
+  .resource-meter {
+    height: 2px;
+  }
+}
+@media (max-width: 700px) {
+  .resource-deck {
+    padding: 5px;
+    gap: 4px;
+  }
+  .resource-tile {
+    gap: 4px;
+    padding: 4px;
+  }
+  .resource-deck .resource-tile-copy > span:first-child {
+    font-size: 9px;
+  }
+  .resource-deck .resource-tile strong {
+    font-size: 11px;
+  }
+  .resource-detail-title {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .resource-detail-title > strong {
+    margin-left: 0;
+    font-size: 23px;
+  }
+  .resource-detail-title h2 {
+    font-size: 22px;
+  }
+  .ledger-breakdown > div {
+    font-size: 12px;
+  }
+  .resource-delta {
+    font-size: 9px !important;
+    top: -4px;
+  }
+  .resource-dialog {
+    padding: 25px 18px;
+  }
+  .resource-tile svg {
+    width: 12px;
+  }
+}
+html[data-aurora-motion="reduced"] .resource-flow,
+html[data-aurora-motion="reduced"] .resource-building {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .resource-flow,
+  .resource-building,
+  .resource-rise,
+  .resource-fall,
+  .resource-delta {
+    animation: none;
+  }
+  .resource-tile,
+  .resource-meter i,
+  .resource-window {
+    transition: none;
+  }
+}

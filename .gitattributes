@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+# Markdown uses trailing spaces for explicit line breaks, including the original design prompt.
+*.md whitespace=-blank-at-eol
+*.png binary
+*.jpg binary
+*.woff2 binary

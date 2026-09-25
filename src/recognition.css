@@ -1,0 +1,242 @@
+.award-intro {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin: 10px 0 25px;
+}
+.award-emblem {
+  width: 94px;
+  height: 108px;
+  display: grid;
+  place-items: center;
+  color: #ddbd7b;
+  background: linear-gradient(145deg, #31514a, #142f38);
+  clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
+  flex-shrink: 0;
+  animation: medal-arrive 0.6s ease-out;
+}
+.award-intro h3 {
+  font-size: 22px !important;
+  margin: 0 0 8px !important;
+}
+.award-intro p {
+  margin: 0;
+  font-size: 14px;
+  color: #596e5b;
+}
+.medal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+.medal-grid article {
+  border: 1px solid #cfd8c1;
+  background: #f3f4e9;
+  border-radius: 12px;
+  padding: 20px;
+}
+.medal-grid .medal-earned {
+  border-color: #baa266;
+  background: linear-gradient(135deg, #faf5dc, #eee4c4);
+}
+.medal-grid article > span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  margin-top: 12px;
+  color: #6d704f;
+}
+.medal-grid article h4 {
+  margin: 8px 0;
+  font-size: 16px;
+}
+.medal-grid article p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #5c6e59;
+}
+.medal-earned > svg {
+  color: #97772d;
+}
+.medal-locked > svg {
+  color: #8d9b82;
+}
+.recognition-note {
+  font-size: 12px !important;
+  line-height: 1.7;
+  color: #6b7760;
+}
+.report-heading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.report-heading > svg {
+  color: #688761;
+}
+.report-heading h3 {
+  margin: 0 !important;
+  font-size: 18px !important;
+}
+.report-heading p {
+  margin: 5px 0;
+}
+.report-heading > .btn {
+  margin-left: auto;
+}
+.report-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 22px 0;
+}
+.report-summary > div {
+  background: #edf1e4;
+  border-radius: 9px;
+  padding: 17px;
+}
+.report-summary span {
+  display: block;
+  font-size: 11px;
+  color: #68765e;
+}
+.report-summary strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 24px;
+  font-weight: 550;
+  color: #3e604b;
+}
+.report-scale {
+  padding: 15px;
+  background: #f6f1df;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-size: 13px;
+}
+.report-scale summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.campaign-recognition {
+  max-width: 1320px;
+  margin: 30px auto;
+  padding: 28px;
+  border: 1px solid #586e58;
+  border-radius: 14px;
+  background: linear-gradient(115deg, #15343a, #24453f);
+  color: #c6d7be;
+}
+.campaign-heading {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.campaign-heading > svg {
+  color: #d7b16a;
+  flex-shrink: 0;
+}
+.campaign-heading h2 {
+  font-size: 25px;
+  color: #e6ce9a;
+  margin: 8px 0;
+}
+.campaign-heading p {
+  font-size: 14px;
+  margin: 8px 0;
+  line-height: 1.7;
+}
+.campaign-recognition progress {
+  width: 100%;
+  height: 7px;
+  margin: 18px 0;
+  accent-color: #c4b476;
+}
+.campaign-recognition details {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.campaign-recognition summary {
+  cursor: pointer;
+  color: #e0d3ac;
+}
+.campaign-projects {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 18px 0;
+}
+.campaign-projects > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #0c29304d;
+  padding: 12px;
+  border-radius: 6px;
+}
+.campaign-projects strong {
+  margin-left: auto;
+  color: #d9c892;
+  font-size: 11px;
+}
+.campaign-projects svg {
+  flex-shrink: 0;
+}
+.campaign-complete {
+  border-color: #d4b26d;
+  box-shadow: 0 0 30px #b9a06315;
+}
+.campaign-award {
+  padding: 18px;
+  background: #d9ba7133;
+  border: 1px solid #9e8b53;
+  border-radius: 10px;
+  font-size: 14px;
+}
+@keyframes medal-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (max-width: 760px) {
+  .campaign-recognition {
+    margin: 20px 16px;
+    padding: 22px;
+  }
+  .campaign-projects {
+    grid-template-columns: 1fr;
+  }
+  .campaign-heading {
+    align-items: flex-start;
+  }
+  .campaign-heading h2 {
+    font-size: 21px;
+  }
+  .report-heading > .btn {
+    margin-left: 0;
+  }
+  .award-intro {
+    gap: 15px;
+  }
+  .award-emblem {
+    width: 70px;
+    height: 90px;
+  }
+  .report-summary strong {
+    font-size: 20px;
+  }
+  .medal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .award-emblem {
+    animation: none;
+  }
+}
