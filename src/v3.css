@@ -1,0 +1,231 @@
+/* Iteración 2 de la V2: dilemas, laboratorio regulatorio, diagnósticos y resultados. */
+.dilemma {
+  padding: 20px;
+  margin-bottom: 22px;
+  border: 1px solid #c9a55a;
+  border-left: 5px solid #bd8426;
+  border-radius: 14px;
+  background: #fff8e6;
+  animation: v3-enter 0.35s ease-out;
+}
+.dilemma .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dilemma h3 {
+  margin: 6px 0;
+}
+.dilemma-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.dilemma-choices button {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 12px;
+  border: 1px solid #d5c39b;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.dilemma-choices button:hover,
+.dilemma-choices button:focus-visible {
+  border-color: #367566;
+}
+.dilemma-choices button.chosen {
+  border-color: #367566;
+  box-shadow: 0 0 0 2px #36756633;
+  background: #f1f7f3;
+}
+.warning {
+  color: #9a4b16;
+}
+.ok-text {
+  color: #2f6b55;
+}
+.findings {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+  display: grid;
+  gap: 6px;
+}
+.finding {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-left: 4px solid #9fb3a6;
+  background: #f4f7f2;
+  animation: v3-enter 0.25s ease-out;
+}
+.finding.ok {
+  border-left-color: #367566;
+}
+.finding.alerta {
+  border-left-color: #bd8426;
+  background: #fff6e1;
+}
+.finding.grave {
+  border-left-color: #b2482a;
+  background: #fdeee8;
+}
+.budget-review,
+.chain-feedback,
+.lab-evidence {
+  margin: 14px 0;
+  padding: 14px;
+  border: 1px solid #c7d3c2;
+  border-radius: 12px;
+  background: #f7faf5;
+}
+.chain-bank article {
+  cursor: grab;
+}
+.chain-bank article.placed {
+  opacity: 0.65;
+}
+.chain-route > div {
+  min-height: 70px;
+  transition: background 0.15s, outline-color 0.15s;
+  outline: 2px dashed transparent;
+}
+.chain-route > div.drop-over {
+  outline-color: #367566;
+  background: #e5f0ea;
+}
+.puzzle-chain {
+  display: grid;
+  gap: 4px;
+  padding-left: 22px;
+}
+.puzzle-chain li::marker {
+  font-weight: 700;
+  color: #367566;
+}
+.chosen-row td {
+  background: #eaf3ee;
+  font-weight: 600;
+}
+.stage-intro {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) 1fr;
+  gap: 4px 14px;
+  margin: 10px 0;
+}
+.stage-intro dt {
+  font-weight: 700;
+  font-size: 13px;
+}
+.stage-intro dd {
+  margin: 0;
+}
+.alt-detail {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 3px 10px;
+  font-size: 13px;
+}
+.alt-detail dt {
+  color: #56655d;
+}
+.alt-detail dd {
+  margin: 0;
+}
+.live-vars {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 10px 0;
+}
+.live-vars div {
+  padding: 8px;
+  border-radius: 8px;
+  background: #f1f5ef;
+}
+.live-vars small {
+  display: block;
+  font-size: 11px;
+  color: #56655d;
+}
+.review-inline {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff2d0;
+  animation: v3-pulse 1.6s ease-in-out 2;
+}
+.info-item {
+  padding: 8px 0;
+  border-top: 1px solid #dfe6db;
+}
+.consequence-log {
+  margin-bottom: 18px;
+}
+.consequence {
+  padding: 10px 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border-left: 4px solid #367566;
+  background: #f4f7f2;
+}
+.consequence.diferida {
+  border-left-color: #bd8426;
+}
+.consequence.sistemica {
+  border-left-color: #6d5ba8;
+}
+.consequence .badge {
+  margin-right: 8px;
+}
+.ledger details {
+  margin: 6px 0;
+}
+.adjustments ul {
+  padding-left: 18px;
+}
+.story {
+  font-size: 1.05em;
+  line-height: 1.55;
+}
+.difficulty-guide details {
+  margin: 10px 0;
+}
+.difficulty-guide td,
+.difficulty-guide th {
+  font-size: 13px;
+}
+@keyframes v3-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes v3-pulse {
+  50% {
+    box-shadow: 0 0 0 4px #bd842633;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dilemma,
+  .finding,
+  .review-inline {
+    animation: none;
+  }
+}
+@media (max-width: 640px) {
+  .stage-intro,
+  .alt-detail {
+    grid-template-columns: 1fr;
+  }
+  .live-vars {
+    grid-template-columns: 1fr;
+  }
+}

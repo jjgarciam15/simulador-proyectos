@@ -15,41 +15,42 @@ export const difficultyRules: Record<
 > = {
   guiado: {
     label: "Fácil · guiado",
-    cash: 1.08,
+    cash: 1,
     hintPenalty: 1,
     event: 0.8,
     dilemmaCost: 0.8,
     feedback: "full",
     description:
-      "Orientación contextual y pistas graduales; fondo inicial +8 %. Puedes analizar antes de confirmar.",
+      "Orientación contextual y pistas graduales; fondo inicial completo. Puedes analizar antes de confirmar.",
   },
   profesional: {
     label: "Intermedio · profesional",
-    cash: 1,
+    cash: 0.92,
     hintPenalty: 2,
     event: 1,
     dilemmaCost: 1,
     feedback: "cards",
     description:
-      "Sin recomendaciones de solución; pistas con mayor costo pedagógico y recursos base.",
+      "Sin recomendaciones de solución; fondo inicial −8 % y pistas con mayor costo pedagógico.",
   },
   experto: {
     label: "Difícil · experto",
-    cash: 0.92,
+    cash: 0.85,
     hintPenalty: 3,
     event: 1.25,
     dilemmaCost: 1.2,
     feedback: "score",
     description:
-      "Fondo inicial −8 %, información menos precisa y mayor exposición a eventos. Ayudas a demanda.",
+      "Fondo inicial −15 %, información menos precisa y mayor exposición a eventos. Ayudas a demanda.",
   },
 };
 export const retryFactors = [1, 0.8, 0.6];
 // Diagnóstico, alternativa, preparación, evaluación, regulación/ODS,
-// compromisos, ejecución y valor observado. Cada perfil suma 1.
+// compromisos, ejecución, valor observado y coherencia transversal.
+// Iteration 2 adds a ninth dimension, transversal coherence (15 %). Each profile sums 1.
 export const scoringWeightsV2 = {
-  publico: [0.15, 0.1, 0.2, 0.15, 0.15, 0.1, 0.1, 0.05],
-  privado: [0.1, 0.1, 0.2, 0.2, 0.15, 0.1, 0.1, 0.05],
+  publico: [0.13, 0.08, 0.17, 0.13, 0.13, 0.08, 0.08, 0.05, 0.15],
+  privado: [0.08, 0.08, 0.17, 0.17, 0.13, 0.08, 0.08, 0.06, 0.15],
 };
 export const dependencyRules: Record<string, number[]> = {
   nodes: [1, 2, 3, 4, 5],
@@ -92,4 +93,27 @@ export const regulationBalance = {
     persistentFailure: { performance: -0.04, eventRisk: 0.15 },
     wrongDiagnosis: { performance: -0.03, reputation: -2 },
   },
+};
+/** Budget review thresholds (ratios against references of the selected alternative). */
+export const budgetRules = {
+  underestimate: { grave: 0.7, alert: 0.85 },
+  operation: { min: 0.8, max: 1.3 },
+  maintenance: { min: 0.8, max: 1.6 },
+  /** Contingency as a share of the technical investment. */
+  contingency: { min: 0.03, max: 0.2 },
+  penalty: { grave: 20, alert: 8 },
+};
+/** Explicit bonuses and penalties of the final assessment (points on the 0–100 scale). */
+export const adjustmentRules = {
+  maxBonus: 6,
+  maxPenalty: 8,
+  coherenceBonus: { threshold: 80, points: 3 },
+  reserveBonus: 2,
+  riskBonus: 2,
+  consistencyBonus: 1,
+  wastePenalty: 2,
+  incoherencePenalty: { threshold: 50, points: 3 },
+  sdgExcessPenalty: 2,
+  regulatoryPenalty: 2,
+  overrunPenalty: { share: 0.1, points: 2 },
 };

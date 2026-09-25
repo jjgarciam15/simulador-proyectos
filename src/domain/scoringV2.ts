@@ -6,12 +6,31 @@ import { clamp } from "./finance";
 import { learningPenalty } from "./questionsV2";
 import { scoringWeightsV2 } from "../data/balance";
 import { regulatoryLabScore } from "./regulationLab";
+import { adjustments, coherenceMatrix, transversalCoherence } from "./coherence";
+import { budgetReview } from "./budgetReview";
+/** The plan as approved: budget-dependent reviews use it, while execution facts come from the final state. */
+function approvedPlan(g: GameState): GameState {
+  const d = g.snapshot?.decisionState;
+  if (!d || !g.v2) return g;
+  return {
+    ...d,
+    snapshot: g.snapshot,
+    extraCost: g.extraCost,
+    mitigations: g.mitigations,
+    v2: { ...d.v2!, eventRisk: g.v2.eventRisk, changes: g.v2.changes },
+  };
+}
 export interface AssessmentV2 {
   base: number;
   penalty: number;
   notes: string[];
   dimensions: Outcome["dimensions"];
   story: string;
+  /** Explicit bonuses, capped (points added to the base). */
+  bonus?: number;
+  adjustments?: ReturnType<typeof adjustments>;
+  coherence?: ReturnType<typeof coherenceMatrix>;
+  budgetFindings?: ReturnType<typeof budgetReview>["findings"];
 }
 export function regulatoryScore(g: GameState) {
   const r = g.v2!.regulatory;
@@ -47,7 +66,16 @@ export function scoreV2(
   );
   const excessReserve =
     Math.max(0, g.budget.contingency / (s.budget || 1) - 0.15) * 100;
-  const budget = clamp(50 * sufficiency + 50 * maintenance - excessReserve);
+  const plan = approvedPlan(g),
+    review = budgetReview(plan);
+  // Half the classic sufficiency/maintenance check, half the explainable review (waste, contingency, commitments…).
+  const budget = clamp(
+    0.5 * (50 * sufficiency + 50 * maintenance - excessReserve) +
+      0.5 * review.score,
+  );
+  const matrix = coherenceMatrix(plan),
+    transversal = transversalCoherence(plan),
+    adjust = adjustments(plan);
   const indicators = g.indicators.length
     ? clamp(100 - indicatorReview(g).length * 20)
     : 0;
@@ -81,6 +109,7 @@ export function scoreV2(
     0.5 * observed[5].value + 0.5 * observed[3].value,
     0.4 * observed[2].value + 0.3 * observed[6].value + 0.3 * observed[7].value,
     observed[1].value,
+    transversal,
   ];
   const weights = scoringWeightsV2[s.role];
   const names = [
@@ -92,6 +121,7 @@ export function scoreV2(
     "Compromisos y riesgo",
     "Ejecución y servicio",
     "Valor observado",
+    "Coherencia transversal",
   ];
   const dimensions = values.map((value, i) => ({
     name: names[i],
@@ -107,14 +137,70 @@ export function scoreV2(
     `Compromisos: disciplina financiera e información/riesgo, con igual peso.`,
     `Ejecución: 40 % cobertura/equidad, 30 % plazo y 30 % legitimidad.`,
     `Valor observado: beneficio social para rol público; creación de valor para privado, normalizado con la referencia de misión.`,
+    `Coherencia transversal: promedio de ${matrix.length} relaciones entre etapas (problema, alternativa, cadena, presupuesto, evaluación, regulación, ODS y actores).`,
     `Práctica: cada pista descuenta según dificultad; cada intento adicional 0,2 puntos. Tope total: 8 puntos. La nota de cada ejercicio se informa aparte.`,
+    `Ajustes: bonificaciones +${adjust.bonus} (tope 6) y penalizaciones −${adjust.penalty} (tope 8), cada una con su razón.`,
   ];
-  const story = `La cobertura observada fue ${((g.outcome?.coverage ?? 0) * 100).toFixed(0)} %. La cadena de valor alcanzó ${chainV2Score(g)}/100; el presupuesto, ${budget.toFixed(0)}/100. ${g.extraCost > 0 ? "Los eventos exigieron recursos adicionales." : "No se registraron sobrecostos de eventos."} ${g.month > s.deadline ? "El cierre superó el plazo." : "El cierre ocurrió dentro del plazo disponible."}`;
+  const story = projectStory(g, plan, review, transversal);
   return {
     dimensions,
     base: dimensions.reduce((n, d) => n + d.value * d.weight, 0),
-    penalty: learningPenalty(g),
+    penalty: learningPenalty(g) + adjust.penalty,
+    bonus: adjust.bonus,
+    adjustments: adjust,
+    coherence: matrix,
+    budgetFindings: review.findings,
     notes,
     story,
   };
+}
+
+/** Rule-based synthesis of the game. Every sentence comes from an observed fact, never from random text. */
+export function projectStory(
+  g: GameState,
+  plan: GameState,
+  review: ReturnType<typeof budgetReview>,
+  transversal: number,
+) {
+  const s = scenarioById(g.scenarioId),
+    coverage = (g.outcome?.coverage ?? 0) * 100,
+    parts: string[] = [];
+  if (g.outcome && ["abandonado", "insolvencia"].includes(g.outcome.status))
+    parts.push("El proyecto se cerró sin completar la ejecución, por lo que no entregó el servicio previsto.");
+  else
+    parts.push(
+      coverage >= 70
+        ? `El proyecto consiguió una cobertura alta (${coverage.toFixed(0)} %).`
+        : coverage >= 45
+          ? `El proyecto alcanzó una cobertura intermedia (${coverage.toFixed(0)} %).`
+          : `La cobertura fue baja (${coverage.toFixed(0)} %).`,
+    );
+  const tags = new Set(review.findings.map((f) => f.tag));
+  if (tags.has("subestimacion"))
+    parts.push("El presupuesto quedó ajustado: algunas partidas estaban subestimadas.");
+  else if (tags.has("desperdicio"))
+    parts.push("Parte del presupuesto quedó inmovilizado en reservas o partidas sobredimensionadas.");
+  else parts.push("El presupuesto fue suficiente y equilibrado.");
+  const cons = g.v2?.consequences ?? [];
+  const regulatory = cons.find((c) => c.kind === "sistémica" && c.title !== "Regulación proporcional");
+  if (regulatory) parts.push(`En regulación, ${regulatory.title.charAt(0).toLowerCase() + regulatory.title.slice(1)} afectó la implementación.`);
+  else if (cons.some((c) => c.title === "Regulación proporcional")) parts.push("La estrategia regulatoria fue proporcional a la evidencia.");
+  const delayed = cons.filter((c) => c.kind === "diferida");
+  if (delayed.length)
+    parts.push(`${delayed.length} decisión(es) previas tuvieron consecuencias diferidas al invertir.`);
+  if (g.extraCost > 0)
+    parts.push(
+      plan.budget.contingency > 0
+        ? "Los eventos de ejecución exigieron recursos; la contingencia amortiguó parte del impacto."
+        : "Los eventos de ejecución exigieron recursos y no había contingencia para absorberlos.",
+    );
+  parts.push(g.month > s.deadline ? `El cierre superó el plazo de ${s.deadline} meses.` : "El cierre ocurrió dentro del plazo.");
+  parts.push(
+    transversal >= 75
+      ? "Las etapas se sostuvieron entre sí: la coherencia transversal fue alta."
+      : transversal >= 50
+        ? "La coherencia entre etapas fue parcial."
+        : "Las decisiones de distintas etapas se contradijeron con frecuencia.",
+  );
+  return parts.join(" ");
 }

@@ -254,3 +254,30 @@ export function sdgReasonScore(g: GameState) {
       Math.max(s.sdgs.length, g.sdgs.length),
   );
 }
+/** Per-ODS review after the player justifies them: relevance, kind of relation, evidence, omissions and excess. */
+export function sdgReview(g: GameState) {
+  const s = scenarioById(g.scenarioId),
+    direct = directSDGs[g.scenarioId] ?? [];
+  const rows = g.sdgs.map((id) => {
+    const r = g.v2?.sdgReasons[id],
+      relevant = s.sdgs.includes(id),
+      isDirect = direct.includes(id),
+      kindOk = r?.kind === (isDirect ? "directa" : "indirecta"),
+      evidenceOk = isDirect ? ["producto", "resultado"].includes(r?.evidence ?? "") : r?.evidence === "impacto";
+    return {
+      id,
+      status: !relevant ? "sin relación" : kindOk && evidenceOk ? "bien sustentado" : "pertinente, mal sustentado",
+      why: !relevant
+        ? "El proyecto no produce cambios verificables en este objetivo: seleccionarlo resta puntos."
+        : !kindOk
+          ? `La relación es ${isDirect ? "directa: el servicio actúa sobre este objetivo" : "indirecta: llega a través de efectos del servicio"}.`
+          : !evidenceOk
+            ? isDirect
+              ? "Una relación directa se demuestra con productos o resultados en la población."
+              : "Una relación indirecta se demuestra con impactos o externalidades esperadas."
+            : "Relación y evidencia coherentes.",
+    };
+  });
+  const omitted = s.sdgs.filter((id) => !g.sdgs.includes(id));
+  return { rows, omitted, excess: g.sdgs.filter((id) => !s.sdgs.includes(id)).length };
+}

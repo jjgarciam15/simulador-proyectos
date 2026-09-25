@@ -7,6 +7,7 @@ import {
 import type { GameState } from "../domain/types";
 import { Panel, Button } from "../components/ui";
 import { scenarioById } from "../data/scenarios";
+import { difficultyRules } from "../data/balance";
 
 export function ChallengeCatalog({
   onStart,
@@ -32,7 +33,7 @@ export function ChallengeCatalog({
               {scenarioById(c.scenarioId).title}.{" "}
               {c.noCredit
                 ? "Crédito deshabilitado; cofinanciación sujeta a los requisitos del escenario."
-                : "Fondo inicial reducido un 8 % y eventos más severos; financiación habitual disponible."}
+                : `Fondo inicial reducido un ${Math.round((1 - difficultyRules[c.difficulty].cash) * 100)} % y eventos más severos; financiación habitual disponible.`}
             </p>
             <ul>
               <li>Completa el proyecto sin incumplimiento.</li>
