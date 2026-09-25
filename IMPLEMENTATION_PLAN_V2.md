@@ -222,11 +222,11 @@ Validación final: `pnpm typecheck` sin errores; `pnpm test` 192 pruebas aprobad
 | Puntuación V3 con pesos configurables | IMPLEMENTADA | 12 dimensiones, renormalización |
 | Anti-farming | IMPLEMENTADA | Se puntúa el estado confirmado |
 | Recomendaciones y rejugabilidad | IMPLEMENTADA | Recomendaciones por dimensión débil; semilla |
-| Tokens de diseño y contraste | PARCIAL | Tokens aplicados a los módulos V2.2; las pantallas antiguas conservan sus estilos |
+| Tokens de diseño y contraste | IMPLEMENTADO | Auditoría automática WCAG AA de todas las pantallas: 0 textos bajo el umbral (`src/contrast.css`) |
 | Arrastrar y soltar accesible | PARCIAL | Alternativa por selección; DnD verificado con eventos sintéticos |
 | Tutor contextual | PARCIAL | Introducciones y pistas por módulo; sin tutor conversacional |
 | Modo docente | PREPARADA | Datos y reglas reutilizables; sin interfaz |
-| Analítica de tiempo por etapa | PENDIENTE | Solo intentos, pistas y cambios |
+| Analítica de tiempo por etapa | IMPLEMENTADO | Acción `stageTime` (no puntúa); panel «Tiempo por etapa» en resultados |
 | Validación de contenido | IMPLEMENTADA | Pruebas de catálogo: tarjetas de impacto con método idóneo y flujos de las nueve misiones |
 
 ### Deuda técnica
@@ -274,12 +274,35 @@ Línea base: 192 pruebas (17 archivos), tipos y compilación sin errores. Decisi
 | Personajes con 7 estados y 5 roles | IMPLEMENTADO | Estado derivado de la partida, en texto y animación |
 | Microinteracciones, eventos, logros, mapa, movimiento reducido | IMPLEMENTADO | `v5.css` |
 | Centro de aprendizaje desde el Builder (modal) | IMPLEMENTADO | Enlaces «¿Qué es esto?» |
-| Ejemplos del Centro que ayudan a llenar el proyecto con confirmación | PENDIENTE | |
+| Ejemplos del Centro que ayudan a llenar el proyecto con confirmación | IMPLEMENTADO | Árbol del problema e impactos; solo se copian tras confirmar |
 | TeacherProject / Assignment / StudentAttempt / Result | PREPARADO | Tipos documentados |
-| Comparación de intentos | PENDIENTE | |
+| Comparación de intentos | IMPLEMENTADO | Tabla por misión en resultados |
 
 ### Deuda técnica V2.4
 
 - `App.tsx` crece con cada vista; conviene un enrutador de vistas y un contexto para el almacén de proyectos.
 - El registro de misiones generadas escribe en tablas por misión existentes (`missionImpacts`, `missionProfiles`, `directSDGs`, `missions`); una interfaz de consulta única sería más limpia.
 - Heurísticas de asistencia basadas en palabras clave: útiles para advertir, no para calificar.
+
+## Verificación integral (25 de septiembre de 2026)
+
+Revisión de todo lo solicitado (lista original, V2, V2.2 y V2.4) y búsqueda de fallos:
+
+- `pnpm check`: tipos sin errores, 224 pruebas en 21 archivos, compilación correcta; `pnpm repo:check` sin hallazgos.
+- Recorrido automático en navegador de las 9 misiones oficiales × 2 dificultades × 3 momentos (en curso, en ejecución, terminada), todas las etapas y todas sus herramientas: 1.060 vistas sin errores de página, de consola, textos inválidos (NaN, undefined) ni desbordamiento horizontal; también a 390 px.
+- Mismo recorrido para misiones generadas desde un proyecto creado, un PDF y un Excel: 158 vistas sin problemas.
+- Pruebas de extremo a extremo A–E y Examen 2 completo: sin errores.
+- Auditoría de contraste WCAG AA en inicio, ayuda, Mis proyectos, importación, los 10 pasos del Builder, Examen 2, todas las etapas del juego y resultados: 0 textos bajo el umbral.
+- Móvil (390 px) en inicio, Builder, Mis proyectos e importación: sin desbordamiento.
+
+Fallos encontrados y corregidos en esta revisión:
+
+1. Comité, Centro de aprendizaje, Examen 2, tutorial y actividades generadas tenían 3–4 opciones: ahora todas las preguntas tienen 5–7 opciones con trampas (prueba `questionRules.test.ts`).
+2. En el Centro de aprendizaje y el Examen 2 la respuesta correcta aparecía siempre primero: las opciones se mezclan de forma reproducible.
+3. Tarjetas de «Encargos especiales» del inicio y herramientas del panel derecho del juego con texto casi invisible; otros 70 textos con contraste bajo.
+4. Barra de pasos y tablas del Builder desbordaban la pantalla en móvil.
+5. El control flotante de sonido tapaba el texto del pie de página.
+6. Solicitud de `favicon.ico` inexistente (error 404 en consola).
+7. Restos de la palabra «árbol» sin «del problema».
+
+Siguen como PARCIAL / PENDIENTE / PREPARADO (decisión documentada, no fallos): OCR de PDF escaneados (requeriría descargar modelos de idioma de un servicio externo), partida rápida con menos etapas, datos ocultos del creador, publicación compartible más allá del archivo `.proyecta.json`, modo profesor con servidor, rediseño estructural de pantallas antiguas y los límites V2 ya listados (catálogo de instrumentos, tiempo en meses, tutor conversacional).

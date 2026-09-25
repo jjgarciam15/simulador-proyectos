@@ -17,3 +17,15 @@ describe("Personajes con estados", () => {
     expect(moodFor({ ...g, outcome: { ...(g.outcome ?? {}), score: 80 } } as typeof g)).toBe("celebrating");
   });
 });
+import { act } from "./engine";
+describe("Analítica de tiempo por etapa", () => {
+  it("acumula segundos por etapa sin afectar recursos ni bitácora", () => {
+    const g = createGameV2("agua", "guiado", "T-1");
+    let x = act(g, { type: "stageTime", phase: 0, seconds: 90 });
+    x = act(x, { type: "stageTime", phase: 0, seconds: 30 });
+    expect(x.v2!.stageSeconds).toEqual({ 0: 120 });
+    expect(x.cash).toBe(g.cash);
+    expect(x.journal.length).toBe(g.journal.length);
+    expect(act(g, { type: "stageTime", phase: 0, seconds: -5 })).toBe(g);
+  });
+});

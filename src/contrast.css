@@ -1,0 +1,197 @@
+/*
+ * Contrast pass (WCAG AA). Found with an automated audit of every screen: text ≥ 4.5:1, large text ≥ 3:1.
+ * Loaded last on purpose: it only darkens (light surfaces) or lightens (dark surfaces) inherited greys.
+ */
+:root {
+  --muted: #4a5f5b;
+}
+/* Light panels that live inside the dark home keep dark text (challenge cards were unreadable). */
+.aurora-home .panel {
+  color: var(--text-primary);
+}
+.aurora-home .panel h3,
+.aurora-home .panel h4 {
+  color: var(--text-primary);
+}
+.aurora-home .panel .muted,
+.aurora-home .panel small {
+  color: var(--text-secondary);
+}
+/* Eyebrows and headings on light surfaces */
+.panel .eyebrow,
+.panel > .eyebrow,
+.journal .eyebrow,
+.brief-panel .eyebrow {
+  color: #66531f;
+}
+.page-heading .eyebrow {
+  color: #4b5634;
+}
+.page-heading p,
+.page-heading p span {
+  color: #455a56;
+}
+.information-box > span,
+.information-box small,
+.report-summary span,
+.stage-checks span,
+.stage-checks small,
+.constraint-row > span,
+.next-row > span,
+.tip summary span,
+.tree-label,
+.quadrant,
+.axis-caption,
+.phase-strip + * small {
+  color: var(--text-secondary) !important;
+}
+.concept-tags span {
+  color: #34502e;
+}
+.mga-review summary span,
+.sidebar nav .done > span {
+  color: #2f6b3d;
+}
+.impact-tag {
+  color: #2d5a29;
+}
+.impact-tag.negative {
+  color: #8a4a1c;
+}
+.ods-results strong {
+  color: #2f6b3d;
+}
+.risk-heatmap small {
+  color: #3a4429;
+}
+.avatar {
+  color: #3e5b3e;
+}
+.chain-bank article.placed {
+  opacity: 0.9 !important;
+}
+.v22-howto small {
+  color: var(--accent-strong);
+}
+.pb-chain-link {
+  color: #5e7169;
+}
+.game-footer {
+  color: #4f6357;
+}
+/* Chart legends keep the series swatch but use readable text. */
+.recharts-legend-item-text {
+  color: var(--text-primary) !important;
+}
+/* Secondary buttons on dark surfaces */
+.context-panel .btn.secondary {
+  color: #e3efe8;
+  border-color: #7c9a8e;
+}
+
+/* Light greys on dark surfaces (home, sidebar, context panel, toasts) */
+.mission-card .mission-resources span,
+.mission-card .mission-number,
+.mission-card .mission-district,
+.scenario-filter button,
+.board-heading span,
+.crew-intro p,
+.crew-intro .eyebrow,
+.world-coordinate,
+.fiction-note,
+.aurora-home .eyebrow,
+.aurora-home > footer span,
+.landing footer span,
+.history-list .eyebrow,
+.context-panel > .eyebrow,
+.context-panel .eyebrow,
+.sidebar-bottom > small,
+.save-indicator,
+.impact-toast > span,
+.live-vars small,
+.scripted-note,
+.sidebar > .eyebrow {
+  color: #b9cec4 !important;
+}
+.sidebar nav button > span {
+  color: #b9cbbf;
+}
+.sidebar nav button {
+  color: #cfdcd4;
+}
+/* Right context panel (dark): tools were dark-on-dark. */
+.context-panel .command-tool,
+.context-panel .command-tool summary,
+.context-panel .command-tool dt,
+.context-panel .command-tool dd,
+.context-panel .command-tool li,
+.context-panel .command-tool b,
+.context-panel .command-tool p,
+.context-panel .command-tool .field > span {
+  color: #e3efe8;
+}
+.context-panel .command-tool small,
+.context-panel .panel small,
+.context-panel .v22-level small {
+  color: #b9cec4 !important;
+}
+.context-panel .command-tool input,
+.context-panel .command-tool select {
+  color: var(--text-primary);
+}
+/* Eyebrows: light surfaces dark gold, dark surfaces light gold. */
+.panel .eyebrow,
+.aurora-home .panel .eyebrow,
+.brief-panel .eyebrow,
+.journal .eyebrow {
+  color: #66531f !important;
+}
+.result-hero .eyebrow,
+.result-hero > .eyebrow {
+  color: #e6d3a6 !important;
+}
+.page-heading .eyebrow {
+  color: #4b5634 !important;
+}
+.history-list strong small {
+  color: #b9cec4;
+}
+.sidebar nav .done > span {
+  color: #8fdcae;
+}
+.section-nav button > span,
+.tool-navigation > span,
+.journal small,
+.stage-checks span > small {
+  color: var(--text-secondary) !important;
+}
+.sdg span {
+  color: #4b6246;
+}
+.gantt-row > div > div {
+  background: #3f6b48;
+}
+.guide-title > span {
+  color: #6b531c;
+}
+.aurora-home .btn.secondary {
+  background: #4a6563;
+  border-color: #4a6563;
+  color: #eef5f1;
+}
+.aurora-home .btn.secondary:hover:not(:disabled) {
+  background: #3d5654;
+}
+.context-panel .panel .eyebrow {
+  color: #e6d3a6 !important;
+}
+.stage-checks span > small {
+  color: #2f3f39 !important;
+  opacity: 1 !important;
+}
+/* Keep footers clear of the floating sound control. */
+.landing > footer,
+.aurora-home > footer,
+.game-footer {
+  padding-bottom: 84px !important;
+}

@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { BookOpen, FileSearch, Plus, Trash2 } from "lucide-react";
+import { BookOpen, FileSearch, Lightbulb, Plus, Trash2 } from "lucide-react";
+import { conceptById } from "../../data/concepts";
 import type { Evidence, NormalizedProject } from "../../domain/project/types";
 import type { Issue } from "../../domain/project/validation";
 
@@ -121,5 +122,31 @@ export function ConfidenceNote({ p }: { p: NormalizedProject }) {
       <FileSearch size={15} aria-hidden /> Proyecto importado de <strong>{p.source.fileName}</strong>: {values.length} dato(s) extraído(s), {reviewed} revisado(s). Los campos vacíos muestran «No identificada»: el archivo no los contenía y el
       simulador no los inventa. Al editar un dato queda marcado como revisado.
     </p>
+  );
+}
+
+/**
+ * Example from the Learning Center that can help fill the project. It is never applied automatically:
+ * the person reads it and confirms before anything is copied.
+ */
+export function ExampleBox({ concept, preview, onUse, label }: { concept: string; preview: ReactNode; onUse: () => void; label: string }) {
+  const c = conceptById(concept);
+  return (
+    <details className="pb-example">
+      <summary>
+        <Lightbulb size={14} aria-hidden /> Ver un ejemplo del Centro de aprendizaje{c ? ` · ${c.name}` : ""}
+      </summary>
+      {c && <p className="muted">{c.example}</p>}
+      <div className="pb-example-preview">{preview}</div>
+      <button
+        type="button"
+        className="btn secondary"
+        onClick={() => {
+          if (window.confirm(`${label}\n\nEl ejemplo se agregará a tu proyecto y podrás editarlo o borrarlo. ¿Continuar?`)) onUse();
+        }}
+      >
+        Usar este ejemplo como punto de partida
+      </button>
+    </details>
   );
 }

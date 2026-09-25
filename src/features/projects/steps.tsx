@@ -6,7 +6,7 @@ import { emptyAlternative, uid } from "../../domain/project/project";
 import type { BenefitKind, CostCategory, FailureType, ImpactTypeId, NormalizedProject, RiskLevel, TreeItem } from "../../domain/project/types";
 import { looksLikeCause, looksLikeEffect, looksLikeSolution } from "../../domain/project/validation";
 import { fmtMoney } from "../../domain/format";
-import { EvidenceBadge, IssuesFor, LearnLink, NumField, TextField, TextList, type BuilderCtx } from "./fields";
+import { EvidenceBadge, ExampleBox, IssuesFor, LearnLink, NumField, TextField, TextList, type BuilderCtx } from "./fields";
 
 const beneficiaries = ["Usuarios", "Consumidores", "Productores", "Gobierno", "Comunidad", "Trabajadores", "Población objetivo", "Terceros"];
 const impactTypes: { id: ImpactTypeId; label: string }[] = [
@@ -22,6 +22,12 @@ const impactTypes: { id: ImpactTypeId; label: string }[] = [
 ];
 const failures: FailureType[] = ["Externalidades", "Monopolio natural", "Poder de mercado", "Información asimétrica", "Bienes públicos", "Ninguna falla suficiente"];
 const levels: RiskLevel[] = ["baja", "media", "alta"];
+/** Example taken from the Learning Center (Árbol del problema, misión «Agua para todos»). */
+const treeExample = {
+  problem: "Baja continuidad del servicio de agua",
+  causes: ["Pérdidas en la red", "Mantenimiento preventivo insuficiente"],
+  effects: ["Enfermedades asociadas al agua", "Pérdida de productividad y bienestar"],
+};
 
 /* ---------------- 1. Información general ---------------- */
 export function GeneralStep({ ctx }: { ctx: BuilderCtx }) {
@@ -125,6 +131,30 @@ export function ProblemStep({ ctx }: { ctx: BuilderCtx }) {
         {zone("causes", "Causas (por qué ocurre)")}
       </div>
       <p className="muted">Arrastra una tarjeta entre causas y efectos, o usa «Mover a…» con el teclado.</p>
+      <ExampleBox
+        concept="arbol"
+        label="Se agregarán el problema, dos causas y dos efectos del ejemplo (solo en los campos vacíos)."
+        preview={
+          <ul>
+            <li>
+              <strong>Problema:</strong> {treeExample.problem}
+            </li>
+            <li>
+              <strong>Causas:</strong> {treeExample.causes.join(" · ")}
+            </li>
+            <li>
+              <strong>Efectos:</strong> {treeExample.effects.join(" · ")}
+            </li>
+          </ul>
+        }
+        onUse={() =>
+          ctx.edit(["problem", "causes", "problemEffects"], (d) => {
+            if (!d.problem.trim()) d.problem = treeExample.problem;
+            treeExample.causes.forEach((text, i) => d.causes.push({ id: uid("c"), text, level: i ? "indirecta" : "directa" }));
+            treeExample.effects.forEach((text, i) => d.problemEffects.push({ id: uid("e"), text, level: i ? "indirecta" : "directa" }));
+          })
+        }
+      />
     </>
   );
 }
@@ -514,6 +544,22 @@ export function ImpactsStep({ ctx }: { ctx: BuilderCtx }) {
         </button>
       </div>
       <IssuesFor issues={ctx.issues} path="impacts" exact />
+      <ExampleBox
+        concept="efectos-impactos"
+        label="Se agregarán un efecto y un impacto valorable de ejemplo."
+        preview={
+          <ul>
+            <li>Efecto: «Más horas de suministro continuo por hogar» (se mide en horas).</li>
+            <li>Impacto positivo: «Menos horas dedicadas a acarrear agua» · grupo Población objetivo · tipo Tiempo · método Valor del tiempo.</li>
+          </ul>
+        }
+        onUse={() =>
+          ctx.edit(["impacts"], (d) => {
+            d.impacts.push({ id: uid("i"), text: "Más horas de suministro continuo por hogar", kind: "efecto", direction: "positivo", group: "Usuarios", magnitude: "", duration: "Vida útil" });
+            d.impacts.push({ id: uid("i"), text: "Menos horas dedicadas a acarrear agua", kind: "impacto", direction: "positivo", group: "Población objetivo", magnitude: "", duration: "Vida útil", type: "tiempo", method: "tiempo", unit: "horas", perPerson: null, annualValue: null });
+          })
+        }
+      />
     </>
   );
 }

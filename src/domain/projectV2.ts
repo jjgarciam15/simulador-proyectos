@@ -61,6 +61,8 @@ export interface V2State {
     { choices: string[][]; hints: number; score: number; solved: boolean }
   >;
   planner: number;
+  /** Local analytics: seconds spent in each stage (not scored). */
+  stageSeconds?: Record<number, number>;
   changes: { phase: number; action: string; month: number }[];
 }
 export interface V22State {

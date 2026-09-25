@@ -1,5 +1,12 @@
 # Cambios
 
+## 2.4.1 · verificación integral (25 de septiembre de 2026)
+
+- Todas las preguntas del juego, comité, Centro de aprendizaje, Examen 2, tutorial y actividades generadas tienen 5–7 opciones con trampas; las opciones se mezclan para que la correcta no quede siempre primera.
+- Auditoría de contraste WCAG AA de todas las pantallas y corrección de 70 textos, incluidas las tarjetas de retos del inicio y las herramientas del panel derecho.
+- Tiempo por etapa, comparación de intentos y ejemplos del Centro de aprendizaje con confirmación en el Project Builder.
+- Builder sin desbordamiento en móvil; pie de página libre del control de sonido; ícono de la aplicación.
+
 ## 2.4.0 · plataforma de proyectos (25 de septiembre de 2026)
 
 - Tres experiencias en el inicio: Jugar historia, Importar proyecto y Crear proyecto, más Continuar, Aprender y Cómo jugar.

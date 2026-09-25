@@ -301,10 +301,12 @@ export function Results({
   g,
   onRetry,
   onFork,
+  history = [],
 }: {
   g: GameState;
   onRetry: () => void;
   onFork: () => void;
+  history?: GameState[];
 }) {
   const o = g.outcome!,
     s = scenarioById(g.scenarioId),
@@ -354,7 +356,7 @@ export function Results({
           </Button>
         </div>
       </Panel>
-      <ScoreV2 g={g}/><FinalRecognition g={g}/><Panel title="Lo esperado y lo que ocurrió">
+      <ScoreV2 g={g}/><AttemptComparison g={g} history={history}/><StageTimes g={g}/><FinalRecognition g={g}/><Panel title="Lo esperado y lo que ocurrió">
         <div className="metric-grid">
           <Metric
             label="VPN financiero observado"
@@ -541,6 +543,7 @@ export function Results({
 }
 
 import ScoreV2 from './ScoreV2';
+import { AttemptComparison, StageTimes } from './Analytics';
 
 import Comparator from "./v22/Comparator";
 import Committee from "./v22/Committee";

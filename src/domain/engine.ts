@@ -50,7 +50,7 @@ export function model(g:GameState,a=selected(g),realized=false,overrides:Partial
  return {financial,social,rows,coverage,capex,opex,revenue,benefit,equity:npv(equityFlows,rate),breakEven:revenue>0?opex/revenue:null,minimumPrice:revenue>0?opex/revenue*x.price:null,maxOpex:revenue,maintenanceRatio};
 }
 export function welfare(g:GameState,policyId=g.policy){const s=scenarioById(g.scenarioId),p=s.instruments.find(p=>p.id===policyId)!;const price=80*(1+p.price),quantity=Math.max(0,Math.min((s.demandIntercept-price)/.6,(price-s.supplyIntercept)/.6));const consumer=Math.max(0,(s.demandIntercept-price)*quantity-.3*quantity**2),producer=Math.max(0,(price-s.supplyIntercept)*quantity-.3*quantity**2),external=quantity*s.externalCost*(1-p.externality),admin=p.admin/20,compliance=quantity*p.compliance*20,total=consumer+producer-external-admin-compliance;const shares=p.entry>0?s.market.map(v=>v*.85).concat(15):p.entry<0?[s.market[0]+s.market.at(-1)!,...s.market.slice(1,-1)]:s.market;const optimalQ=(s.demandIntercept-s.supplyIntercept-s.externalCost)/1.2;const optimum=(s.demandIntercept-s.supplyIntercept-s.externalCost)*optimalQ-.6*optimalQ*optimalQ;return {price,quantity,consumer,producer,external,admin,compliance,total,dwl:Math.max(0,optimum-total),shares,hhi:hhi(shares)}}
-export type Action=ActionV2 | ActionV22 | QuestionAction | NegotiationAction
+export type Action=ActionV2 | ActionV22 | QuestionAction | NegotiationAction | { type: 'stageTime'; phase: number; seconds: number }
  |{type:'learn';id:string;choice:string;confidence:'seguro'|'duda'}
  |{type:'reflection';text:string}
  |{type:'mga';section:'links'|'chain'|'prediction';value:MgaDossier}
@@ -169,6 +169,7 @@ const v2Actions=['visit','chain','actorMap','sdgReasons','regulatory','planner',
 const v22Actions=['objectives','impacts','valuation','flow','economic','committee'];
 const dependencyFields:Record<string,keyof GameState>={nodes:'nodes',target:'target',objective:'objective',alternative:'alternative',budget:'budget',activities:'activities',indicators:'indicators',assumptions:'assumptions',policy:'policy',alignment:'sdgs',study:'studies',actor:'actorActions',mitigate:'mitigations',mga:'mga'};
 export function act(original:GameState,action:Action,withComparison=true):GameState{
+ if(action.type==='stageTime'){/* Local analytics only: time spent per stage, never used for scoring. */if(!original.v2||!Number.isFinite(action.seconds)||action.seconds<=0||action.phase<0||action.phase>7)return original;const next=structuredClone(original);const t=next.v2!.stageSeconds??{};t[action.phase]=Math.round((t[action.phase]??0)+Math.min(action.seconds,3600));next.v2!.stageSeconds=t;return next;}
  if(original.v2?.challenge?.noCredit&&action.type==='finance'&&action.source==='credito')throw new Error('Este reto no permite contratar crédito. Revisa el alcance, el presupuesto o los requisitos de cofinanciación.');
  if(original.v2&&action.type==='budget'&&!validBudgetLines(action.lines??original.v2.budgetLines??[],action.value))throw new Error('Revisa cantidades, unidades y costos: el detalle no puede superar la asignación de su categoría.');
  if(action.type==='answerV2'||action.type==='hintV2')return assessQuestion(original,action);
