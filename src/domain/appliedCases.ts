@@ -4,6 +4,34 @@ import { scenarioById } from "../data/scenarios";
 import { random } from "./finance";
 import { difficultyRules } from "../data/balance";
 type Option = [string, string, string];
+/** One extra trap per case: it sounds rigorous but repeats a frequent conceptual error. */
+const traps: Record<string, Option> = {
+  gap: [
+    "ratio",
+    "La brecha relevante es la razón oferta/demanda; con ella se define la meta en personas.",
+    "Una razón describe la magnitud relativa, pero no convierte unidades de servicio en personas ni identifica a quién falta atender.",
+  ],
+  npv: [
+    "average",
+    "Unos 41 M, porque el promedio de los flujos descontados supera la inversión anual.",
+    "El valor coincide por casualidad, pero el método es incorrecto: el VPN suma flujos descontados y resta la inversión, no promedia.",
+  ],
+  transfers: [
+    "cost",
+    "Registrar el subsidio como ahorro de costos del proyecto y reducir su inversión social.",
+    "Quien financia no cambia el costo de los recursos usados: la obra sigue consumiendo lo mismo para la sociedad.",
+  ],
+  regulation: [
+    "entry",
+    "Aprobarla si reduce accidentes, aunque desaparezcan todos los entrantes pequeños.",
+    "El beneficio de seguridad es real, pero ignorar la pérdida de competencia omite un costo social de la regla.",
+  ],
+  causality: [
+    "compare",
+    "Atribuir al proyecto la diferencia entre la meta y la línea base, porque así se planificó.",
+    "La meta es un objetivo, no un contrafactual: no indica qué habría ocurrido sin el proyecto.",
+  ],
+};
 export function appliedCases(g: GameState): QuestionV2[] {
   const s = scenarioById(g.scenarioId);
   function make(
@@ -22,7 +50,7 @@ export function appliedCases(g: GameState): QuestionV2[] {
       context: s.title,
       difficulty: g.difficulty,
       question,
-      options: options
+      options: [...options, ...(traps[id] ? [traps[id]] : [])]
         .map(([id, text, feedback]) => ({ id, text, feedback }))
         .sort((a, b) => random(g.seed, id + a.id) - random(g.seed, id + b.id)),
       answers: ["reason"],

@@ -6,6 +6,7 @@ import {
   type V2State,
 } from "./projectV2";
 import { scenarioById } from "../data/scenarios";
+import { puzzleDeck, puzzleSlots } from "./regulationLab";
 export type ActionV2 =
   | { type: "resetStage" }
   | { type: "visit"; phase: number }
@@ -17,7 +18,8 @@ export type ActionV2 =
   | { type: "actorMap"; value: V2State["actorMap"] }
   | { type: "sdgReasons"; value: V2State["sdgReasons"] }
   | { type: "regulatory"; value: V2State["regulatory"] }
-  | { type: "planner"; value: number };
+  | { type: "planner"; value: number }
+  | { type: "dilemma"; choice: string };
 export function applyV2(original: GameState, a: ActionV2) {
   if (!original.v2)
     throw new Error("Esta herramienta corresponde a una partida V2.");
@@ -100,6 +102,8 @@ export function applyV2(original: GameState, a: ActionV2) {
     delete v.reviews[g.phase];
     return g;
   }
+  if (a.type === "dilemma")
+    throw new Error("Los dilemas se resuelven desde el motor principal.");
   const required = { chain: 2, actorMap: 0, sdgReasons: 4, regulatory: 4 }[
     a.type
   ];
@@ -182,6 +186,18 @@ export function applyV2(original: GameState, a: ActionV2) {
       throw new Error(
         "Completa evidencia, incentivo, efecto adverso y argumento breve.",
       );
+    const chain = a.value.chain;
+    if (chain) {
+      const deck = new Set(puzzleDeck(g).map((c) => c.id));
+      if (
+        puzzleSlots.some((slot) => !chain[slot] || !deck.has(chain[slot])) ||
+        Object.keys(chain).some((k) => !(puzzleSlots as readonly string[]).includes(k)) ||
+        new Set(Object.values(chain)).size !== Object.values(chain).length
+      )
+        throw new Error(
+          "Completa los ocho eslabones de la cadena regulatoria con tarjetas distintas.",
+        );
+    }
     v.regulatory = a.value;
   }
   return g;

@@ -50,7 +50,7 @@ export function model(g:GameState,a=selected(g),realized=false,overrides:Partial
  return {financial,social,rows,coverage,capex,opex,revenue,benefit,equity:npv(equityFlows,rate),breakEven:revenue>0?opex/revenue:null,minimumPrice:revenue>0?opex/revenue*x.price:null,maxOpex:revenue,maintenanceRatio};
 }
 export function welfare(g:GameState,policyId=g.policy){const s=scenarioById(g.scenarioId),p=s.instruments.find(p=>p.id===policyId)!;const price=80*(1+p.price),quantity=Math.max(0,Math.min((s.demandIntercept-price)/.6,(price-s.supplyIntercept)/.6));const consumer=Math.max(0,(s.demandIntercept-price)*quantity-.3*quantity**2),producer=Math.max(0,(price-s.supplyIntercept)*quantity-.3*quantity**2),external=quantity*s.externalCost*(1-p.externality),admin=p.admin/20,compliance=quantity*p.compliance*20,total=consumer+producer-external-admin-compliance;const shares=p.entry>0?s.market.map(v=>v*.85).concat(15):p.entry<0?[s.market[0]+s.market.at(-1)!,...s.market.slice(1,-1)]:s.market;const optimalQ=(s.demandIntercept-s.supplyIntercept-s.externalCost)/1.2;const optimum=(s.demandIntercept-s.supplyIntercept-s.externalCost)*optimalQ-.6*optimalQ*optimalQ;return {price,quantity,consumer,producer,external,admin,compliance,total,dwl:Math.max(0,optimum-total),shares,hhi:hhi(shares)}}
-export type Action=ActionV2 | QuestionAction | NegotiationAction
+export type Action=ActionV2 | ActionV22 | QuestionAction | NegotiationAction | { type: 'stageTime'; phase: number; seconds: number }
  |{type:'learn';id:string;choice:string;confidence:'seguro'|'duda'}
  |{type:'reflection';text:string}
  |{type:'mga';section:'links'|'chain'|'prediction';value:MgaDossier}
@@ -61,7 +61,7 @@ function advanceTime(g:GameState,months:number){g.month+=months;if(g.grantPendin
 export function validatePhase(g:GameState):string|null{
  if(g.contentVersion>=3&&g.phase===0&&(g.mga?.links.length??0)<4)return 'En el laboratorio MGA, conecta cuatro relaciones causales y confirma el mapa.';
  if(!g.v2&&g.contentVersion>=3&&g.phase===2&&(!g.mga?.chain.cause||!g.mga.chain.objective||!g.mga.chain.product||g.mga.chain.activities.length<2))return 'Completa y confirma la cadena de valor en el laboratorio MGA.';
- if(g.phase===0&&(g.nodes.length<4||!g.nodes.some(id=>scenarioById(g.scenarioId).nodes.find(n=>n.id===id)?.level==='direct')))return 'Construye el árbol con una causa directa, causas indirectas y efectos (al menos cuatro nodos).';
+ if(g.phase===0&&(g.nodes.length<4||!g.nodes.some(id=>scenarioById(g.scenarioId).nodes.find(n=>n.id===id)?.level==='direct')))return 'Construye el Árbol del problema con una causa directa, causas indirectas y efectos (al menos cuatro nodos).';
  if(g.phase===1&&(!g.alternative||!g.objective))return 'Selecciona un objetivo central y una alternativa.';
  if(g.phase===2){if(!g.indicators.length)return 'Define al menos un indicador con línea base y meta.';if(g.activities.length<2)return 'Prepara al menos dos actividades y sus dependencias.';if(projectCost(g)>available(g))return 'El presupuesto propuesto supera el saldo disponible. Ajusta o financia antes de avanzar.';}
  if(g.phase===3&&!g.acknowledged.includes('evaluation'))return 'Revisa los flujos y confirma que analizaste los supuestos.';
@@ -79,7 +79,7 @@ function coreAct(original:GameState,action:Action,withComparison=true):GameState
  if(stages[action.type]&&!stages[action.type]!.includes(g.phase))throw new Error('Esta decisión corresponde a otra etapa. Reabre esa etapa para modificarla.');
  switch(action.type){
  case 'mga':{const required={links:0,chain:2,prediction:3}[action.section];if(g.phase!==required)throw new Error('Reabre la etapa correspondiente para modificar el expediente.');const value=action.value;const dossier=g.mga??emptyDossier();if(action.section==='links'){if(value.links.length>8||new Set(value.links.map(l=>l.from+'>'+l.to)).size!==value.links.length||value.links.some(l=>l.from===l.to||!g.nodes.includes(l.from)||!g.nodes.includes(l.to)))throw new Error('Conecta nodos seleccionados, sin duplicados ni enlaces a sí mismos.');dossier.links=value.links;}if(action.section==='chain'){const c=value.chain;if(!s.nodes.some(n=>n.id===c.cause)||!s.nodes.some(n=>n.id===c.objective)||!['service','activity','population'].includes(c.product)||new Set(c.activities).size!==c.activities.length||c.activities.some(id=>!g.activities.some(a=>a.id===id)))throw new Error('Selecciona elementos existentes de la cadena de valor.');dossier.chain=c;}if(action.section==='prediction'){dossier.prediction=value.prediction.slice(0,1200);dossier.assumption=value.assumption.slice(0,1200);}g.mga=dossier;g.acknowledged=[];record(g,'Expediente MGA actualizado',action.section==='links'?'Relaciones causales registradas.':action.section==='chain'?'Vínculos de la cadena de valor registrados.':'Hipótesis y supuesto externo registrados, sin calificación del texto.');break;}
- case 'study':{if(g.phase!==0)throw new Error('Los estudios se contratan en diagnóstico.');const study=s.studies.find(v=>v.id===action.id);if(!study||g.studies.includes(study.id))throw new Error('Estudio no disponible o ya realizado.');spend(g,study.cost);advanceTime(g,study.months);g.studies.push(study.id);g.quality=clamp(g.quality+study.quality);record(g,study.name,study.finding,study.cost,study.months);break;}
+ case 'study':{if(g.phase!==0&&!(g.v2&&g.phase<=5))throw new Error('Los estudios se contratan en diagnóstico.');const study=s.studies.find(v=>v.id===action.id);if(!study||g.studies.includes(study.id))throw new Error('Estudio no disponible o ya realizado.');spend(g,study.cost);advanceTime(g,study.months);g.studies.push(study.id);g.quality=clamp(g.quality+study.quality);record(g,study.name,study.finding,study.cost,study.months);break;}
  case 'actor':{if(g.actorActions[action.id])throw new Error('Este actor ya recibió una intervención.');if(!s.actors.some(a=>a.id===action.id))throw new Error('Actor desconocido.');const choices:Record<string,[number,number,number,number]>={consultar:[.003,1,7,4],negociar:[.008,2,12,5],informar:[.001,0,3,1],involucrar:[.012,3,16,8],monitorear:[.0005,0,1,1],ignorar:[0,0,-8,-5]};const configured=choices[action.choice],actor=s.actors.find(a=>a.id===action.id)!;const c=configured?[...configured]:undefined;if(c&&g.v2){const multiplier=.5+actor.power/100;c[2]=Math.round(c[2]*multiplier);c[3]=Math.round(c[3]*(.5+actor.interest/100));}if(!c)throw new Error('Acción inválida.');spend(g,s.budget*c[0]);advanceTime(g,c[1]);g.support=clamp(g.support+c[2]);g.reputation=clamp(g.reputation+c[3]);g.actorActions[action.id]=action.choice;record(g,action.choice+' · '+s.actors.find(a=>a.id===action.id)!.name,'Apoyo '+(c[2]>=0?'+':'')+c[2]+'; legitimidad '+c[3],s.budget*c[0],c[1]);break;}
  case 'nodes':g.nodes=[...new Set(['n0',...action.ids.filter(id=>s.nodes.some(n=>n.id===id))])];record(g,'Árbol del problema actualizado','La coherencia se evaluará a partir de las relaciones causales.');break;
  case 'objective':if(!s.nodes.some(n=>n.id===action.id))throw new Error('Objetivo inválido.');g.objective=action.id;record(g,'Objetivo central definido',s.nodes.find(n=>n.id===action.id)!.objective);break;
@@ -102,7 +102,7 @@ function coreAct(original:GameState,action:Action,withComparison=true):GameState
  case 'commit':{if(g.phase!==5||!selected(g))throw new Error('Completa las etapas antes de comprometer inversión.');if(g.target<s.affected*.7&&(g.grantPending||g.grantReceived))throw new Error('El alcance incumple la condición de cofinanciación.');const cost=projectCost(g);if(cost>available(g))throw new Error('La inversión supera los recursos disponibles.');if(!g.indicators.length||g.activities.length<2)throw new Error('Completa indicadores y cronograma.');const allocation=g.activities.reduce((n,a)=>n+a.cost,0);if(allocation>technicalBudget(g)+.01)throw new Error('Las actividades asignan más dinero que la inversión técnica. Revisa su presupuesto.');if(action.text!==undefined)g.justification=action.text.slice(0,1200);const m=model(g);const decisionState=structuredClone(g);g.snapshot={alternative:g.alternative,assumptions:structuredClone(g.assumptions),budget:structuredClone(g.budget),policy:g.policy,causes:[...g.nodes],objective:g.objective,target:g.target,available:available(g),month:g.month,quality:g.quality,support:g.support,coherence:coherence(g),expectedFinancial:m.financial.npv,expectedSocial:m.social.npv,loans:structuredClone(g.loans),mitigations:[...g.mitigations],sdgs:[...g.sdgs],policyAligned:g.policyAligned,activities:structuredClone(g.activities),indicators:structuredClone(g.indicators),decisionState};g.committed=cost;record(g,'Inversión comprometida',selected(g)!.name+' · Se congeló la evaluación ex ante.');g.journal.at(-1)!.justification=g.justification;g.phase=6;g.maxPhase=6;break;}
  case 'advance':{if(g.phase!==6)throw new Error('La ejecución aún no inicia.');const a=selected(g)!;if(!g.eventIds.includes('technical-reveal')){g.eventIds.push('technical-reveal');const delta=g.truth.technical-estimate(g,'technical');if(delta>.005){g.pendingEvent={id:'technical-reveal',name:'El diseño definitivo precisa los costos',description:'La revisión de ingeniería revela costos que no estaban completamente identificados al decidir.',category:'technical',probability:1,cost:delta,delay:0,benefit:0,study:'tecnico'};record(g,'Revelación de información técnica',g.pendingEvent.description);break;}}
  const planned=Math.max(a.months,schedule(g.activities).duration)+g.assumptions.delay;const step=Math.min(3,Math.max(1,planned+g.delay-g.elapsed));const remaining=Math.max(1,planned+g.delay-g.elapsed);const protectedReserve=g.budget.operation+g.budget.maintenance+g.budget.contingency;const release=Math.max(0,g.committed-protectedReserve)*Math.min(1,step/remaining);g.committed-=release;g.cash-=release;g.spent+=release;g.elapsed+=step;advanceTime(g,step);record(g,'Ejecución · mes '+g.elapsed,'Desembolso de actividades programadas; las reservas siguen protegidas.',release,step);
- const period=Math.floor(g.elapsed/3),event=s.events.find(e=>(e.minVersion??1)<=g.contentVersion&&!g.eventIds.includes(e.id)&&random(g.seed,'event:'+period+':'+e.id)<e.probability*(g.v2?difficultyRules[g.difficulty].event:g.difficulty==='experto'?1.25:.8)*(1.3-g.quality*.006)*(g.studies.includes(e.study)?.5:1)*(e.category==='social'?1.4-g.support/100:1)*(e.category==='environment'?g.truth.environment:1)*(g.mitigations.some(id=>s.risks.find(r=>r.id===id)?.study===e.study)?.5:1));
+ const period=Math.floor(g.elapsed/3),event=s.events.find(e=>(e.minVersion??1)<=g.contentVersion&&!g.eventIds.includes(e.id)&&random(g.seed,'event:'+period+':'+e.id)<e.probability*(g.v2?difficultyRules[g.difficulty].event*(1+(g.v2.eventRisk??0)):g.difficulty==='experto'?1.25:.8)*(1.3-g.quality*.006)*(g.studies.includes(e.study)?.5:1)*(e.category==='social'?1.4-g.support/100:1)*(e.category==='environment'?g.truth.environment:1)*(g.mitigations.some(id=>s.risks.find(r=>r.id===id)?.study===e.study)?.5:1));
  if(event){g.pendingEvent={...event};g.eventIds.push(event.id);record(g,'Evento: '+event.name,event.description);}else if(g.elapsed>=planned+g.delay)finish(g,g.month>s.deadline?'incumplimiento':'completado',withComparison);break;}
  case 'respond':{const e=g.pendingEvent;if(!e)throw new Error('No hay evento pendiente.');if(action.choice==='abandonar'){finish(g,'abandonado',withComparison);break;}const a=selected(g)!;const base=a.capex*(g.target/s.affected)*g.assumptions.capex;const severity=e.id==='technical-reveal'?1:g.difficulty==='experto'?1.25:1;let cost=base*e.cost*severity,delay=e.delay,benefit=e.benefit;
  if(action.choice==='mitigar'){cost*=.7;delay=Math.ceil(delay*.4);benefit*=.3;}
@@ -142,7 +142,7 @@ function finish(g:GameState,status:Outcome['status'],withComparison=true){
  const lessons:string[]=[];if(g.quality<60)lessons.push('La información limitada dejó mayor exposición a desviaciones; compara el costo de un estudio con la pérdida que podría evitar.');if(m.maintenanceRatio<.8)lessons.push('El mantenimiento insuficiente redujo confiabilidad y cobertura durante la operación.');if(coherence(g)<65)lessons.push('La cadena causal presentó vacíos: revisa si los productos actúan sobre las causas elegidas.');if(g.support<50)lessons.push('La baja participación debilitó legitimidad y aumentó exposición social.');if(m.financial.npv<0&&m.social.npv>0)lessons.push('El beneficio social positivo no financia por sí mismo el déficit de caja: se necesita una fuente sostenible.');if(g.extraCost>0)lessons.push('Los eventos consumieron recursos: las contingencias y la mitigación deben evaluarse antes de comprometer la inversión.');if(!lessons.length)lessons.push('La estrategia mantuvo consistencia y recursos. Prueba otra focalización para explorar el costo de oportunidad.');
  if(!snapshot)lessons.push('El proyecto se cerró antes de comprometer inversión. No existe una comparación contrafactual de ejecución.');
  g.outcome={status,score:Math.round(clamp(dimensions.reduce((n,d)=>n+d.value*d.weight,0)*(status==='abandonado'||status==='insolvencia'?.35:1))),dimensions,financial:m.financial.npv,social:m.social.npv,coverage:m.coverage,expectedFinancial:snapshot?.expectedFinancial??model(g).financial.npv,expectedSocial:snapshot?.expectedSocial??model(g).social.npv,opportunity:best?Math.max(0,best.realized-chosen.realized):0,expectedOpportunity:expectedBest?Math.max(0,expectedBest.expected-chosen.expected):0,best:best?.name??'No hay alternativa factible bajo estas restricciones',alternatives:results,wasted:status==='abandonado'||status==='insolvencia'?g.spent:g.extraCost,lessons};
- if(g.v2){const assessment=scoreV2(g,g.outcome.dimensions);g.outcome.assessment=assessment;g.outcome.dimensions=assessment.dimensions;g.outcome.score=Math.round(clamp(assessment.base-assessment.penalty)*(status==='abandonado'||status==='insolvencia'?.35:1));g.outcome.lessons.push(assessment.story);}
+ if(g.v2){const assessment=scoreV2(g,g.outcome.dimensions);g.outcome.assessment=assessment;g.outcome.dimensions=assessment.dimensions;g.outcome.score=Math.round(clamp(assessment.base-assessment.penalty+(assessment.bonus??0))*(status==='abandonado'||status==='insolvencia'?.35:1));g.outcome.lessons.push(assessment.story);}
  record(g,'Evaluación ex post',`Cierre: ${status}. Compromisos liberados: ${Math.round(unused)} M.`);
 }
 /** Replay each candidate with the same seed and response policy, never with a new random draw. */
@@ -164,13 +164,17 @@ import {newV2State,invalidateV2,chainV2Score} from './projectV2';
 import {applyV2,type ActionV2} from './actionsV2';
 import {difficultyRules} from '../data/balance';
 
-export function createGameV2(id:string,d:Difficulty='guiado',seed='PROY-4831'){const g=createGame(id,d,seed);g.v2=newV2State(g);g.cash=g.v2.initialCash;return g;}
+export function createGameV2(id:string,d:Difficulty='guiado',seed='PROY-4831',mode:'aprendizaje'|'evaluacion'='aprendizaje'){const g=createGame(id,d,seed);g.v2=newV2State(g);g.v2.v22={version:1,mode};g.cash=g.v2.initialCash;return g;}
 const v2Actions=['visit','chain','actorMap','sdgReasons','regulatory','planner','resetStage'];
+const v22Actions=['objectives','impacts','valuation','flow','economic','committee'];
 const dependencyFields:Record<string,keyof GameState>={nodes:'nodes',target:'target',objective:'objective',alternative:'alternative',budget:'budget',activities:'activities',indicators:'indicators',assumptions:'assumptions',policy:'policy',alignment:'sdgs',study:'studies',actor:'actorActions',mitigate:'mitigations',mga:'mga'};
 export function act(original:GameState,action:Action,withComparison=true):GameState{
+ if(action.type==='stageTime'){/* Local analytics only: time spent per stage, never used for scoring. */if(!original.v2||!Number.isFinite(action.seconds)||action.seconds<=0||action.phase<0||action.phase>7)return original;const next=structuredClone(original);const t=next.v2!.stageSeconds??{};t[action.phase]=Math.round((t[action.phase]??0)+Math.min(action.seconds,3600));next.v2!.stageSeconds=t;return next;}
  if(original.v2?.challenge?.noCredit&&action.type==='finance'&&action.source==='credito')throw new Error('Este reto no permite contratar crédito. Revisa el alcance, el presupuesto o los requisitos de cofinanciación.');
  if(original.v2&&action.type==='budget'&&!validBudgetLines(action.lines??original.v2.budgetLines??[],action.value))throw new Error('Revisa cantidades, unidades y costos: el detalle no puede superar la asignación de su categoría.');
  if(action.type==='answerV2'||action.type==='hintV2')return assessQuestion(original,action);
+ if(action.type==='dilemma')return resolveDilemma(original,action.choice);
+ if(original.v2?.pendingDilemma&&(action.type==='next'||action.type==='commit'))throw new Error('Resuelve el dilema pendiente antes de continuar: '+dilemmaById(original.v2.pendingDilemma)?.title+'.');
  if(action.type==='negotiate'){
   const quote=negotiationQuote(original,action.actorId,action.choice),g=structuredClone(original);
   spend(g,quote.cost);advanceTime(g,quote.months);g.support=clamp(g.support+quote.support);g.reputation=clamp(g.reputation+quote.reputation);
@@ -179,8 +183,10 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
  }
  if(original.v2&&action.type==='commit'){
   if([0,1,2,3,4].some(p=>!original.v2!.completed.includes(p))||Object.values(original.v2.reviews).some(r=>r.length))throw new Error('Revisa y confirma las etapas pendientes antes de comprometer la inversión.');
+  const missing22=v22Missing(original,5);if(missing22)throw new Error(missing22);
  }
  if(original.v2&&action.type==='next'){
+  const missing22=v22Missing(original,original.phase);if(missing22)throw new Error(missing22);
   if(original.phase===2&&(original.v2.chain.length<5||original.v2.connections.length<4))throw new Error('Construye cinco niveles y al menos cuatro conexiones en la cadena de valor.');
   if(original.phase===4&&(!original.v2.regulatory.reason||!original.sdgs.length||original.sdgs.some(id=>!original.v2!.sdgReasons[id])))throw new Error('Confirma el argumento regulatorio y sustenta los ODS seleccionados.');
  }
@@ -192,21 +198,22 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
    record(input,c.funded?'Compromiso respaldado':'Compromiso sin respaldo',`${c.actor.name}: ${c.allocated} de ${c.minimum} M en ${c.name}. ${c.funded?'Apoyo +8; legitimidad +3.':'Apoyo −10; legitimidad −12; mayor exposición social.'}`);
   }
  }
- let next=v2Actions.includes(action.type)?applyV2(input,action as ActionV2):coreAct(input,action,withComparison);
+ let next=v22Actions.includes(action.type)?applyV22(input,action as ActionV22):v2Actions.includes(action.type)?applyV2(input,action as ActionV2):coreAct(input,action,withComparison);
  if(!next.v2)return next;
  if(action.type==='budget')next.v2.budgetLines=structuredClone(action.lines??original.v2?.budgetLines??[]);
  if(['budget','assumptions','alternative','policy'].includes(action.type)){const field=dependencyFields[action.type];if(JSON.stringify(original[field])===JSON.stringify(next[field]))next.acknowledged=[...original.acknowledged];}
- if(action.type==='next'){next.v2.completed=[...new Set([...next.v2.completed,original.phase])];delete next.v2.reviews[original.phase];}
+ if(action.type==='next'){next.v2.completed=[...new Set([...next.v2.completed,original.phase])];delete next.v2.reviews[original.phase];if(!original.v2?.completed.includes(original.phase))triggerDilemma(next,original.phase);}
  if(action.type==='commit'){next.v2.completed=[...new Set([...next.v2.completed,5])];delete next.v2.reviews[5];if(next.snapshot){next.snapshot.decisionState={...structuredClone(original),justification:next.justification};}}
+ if(action.type==='commit'&&next.snapshot)applyCommitConsequences(next);
  if(next.outcome)next.v2.completed=[...new Set([...next.v2.completed,6,7])];
  const key=dependencyFields[action.type];
- const changed=key?(JSON.stringify(original[key])!==JSON.stringify(next[key])||(action.type==='budget'&&JSON.stringify(original.v2?.budgetLines??[])!==JSON.stringify(next.v2.budgetLines??[]))):['chain','actorMap','sdgReasons','regulatory','resetStage'].includes(action.type)&&JSON.stringify(original.v2)!==JSON.stringify(next.v2);
+ const changed=key?(JSON.stringify(original[key])!==JSON.stringify(next[key])||(action.type==='budget'&&JSON.stringify(original.v2?.budgetLines??[])!==JSON.stringify(next.v2.budgetLines??[]))):['chain','actorMap','sdgReasons','regulatory','resetStage',...v22Actions].includes(action.type)&&JSON.stringify(original.v2)!==JSON.stringify(next.v2);
  if(changed){
   const label=action.type==='resetStage'?['nodes','alternative','chain','regulatory','policy'][original.phase]:action.type==='mga'?(action.section==='links'?'nodes':action.section==='chain'?'chain':'regulatory'):action.type==='sdgReasons'?'alignment':action.type;
   invalidateV2(next,label);
   if(v2Actions.includes(action.type))record(next,'Expediente V2 confirmado',label+' registrado; consulta las dependencias pendientes.');
-  if(original.v2?.completed.includes(original.phase)&&['nodes','target','objective','alternative','budget','activities','indicators','assumptions','policy','alignment','chain','regulatory','sdgReasons','resetStage'].includes(action.type)){
-   const fee=scenarioById(next.scenarioId).budget*.002;spend(next,fee);advanceTime(next,1);record(next,'Revisión confirmada','Se conservó el trabajo. Revisa etapas afectadas: 0,2 % del presupuesto base y un mes.',fee,1);
+  if(original.v2?.completed.includes(original.phase)&&['nodes','target','objective','alternative','budget','activities','indicators','assumptions','policy','alignment','chain','regulatory','sdgReasons','resetStage',...v22Actions].includes(action.type)){
+   if(next.v2?.v22?.exploration)record(next,'Revisión confirmada','Modo exploración: el cambio no consume recursos. Revisa etapas afectadas.',0,0);else{const fee=scenarioById(next.scenarioId).budget*.002;spend(next,fee);advanceTime(next,1);record(next,'Revisión confirmada','Se conservó el trabajo. Revisa etapas afectadas: 0,2 % del presupuesto base y un mes.',fee,1);}
   }
  }
  return next;
@@ -215,3 +222,162 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
 import {assessQuestion,type QuestionAction} from './questionsV2';
 import {negotiationQuote,negotiationCommitments,type NegotiationAction} from './negotiations';
 import {scoreV2} from './scoringV2';
+
+import { drawDilemma, dilemmaById, pendingDilemma, effectCash, applyStateEffects, describeEffects, fillText } from "./dilemmas";
+import { applyRegulatoryConsequences } from "./regulationLab";
+
+function triggerDilemma(g: GameState, completedPhase: number) {
+  const t = drawDilemma(g, completedPhase);
+  if (!t || !g.v2) return;
+  g.v2.pendingDilemma = t.id;
+  g.v2.dilemmas = [...(g.v2.dilemmas ?? []), { id: t.id, phase: completedPhase, month: g.month }];
+  record(g, "Dilema: " + fillText(g, t.title), fillText(g, t.context));
+}
+function resolveDilemma(original: GameState, choiceId: string): GameState {
+  const t = pendingDilemma(original);
+  if (!t || !original.v2) throw new Error("No hay un dilema pendiente.");
+  if (original.snapshot || original.outcome) throw new Error("La inversión ya fue comprometida.");
+  const c = t.choices.find((c) => c.id === choiceId);
+  if (!c) throw new Error("Opción de dilema inválida.");
+  const g = structuredClone(original),
+    v = g.v2!,
+    cash = effectCash(g, c.effects);
+  if (cash < 0) spend(g, -cash);
+  if (cash > 0) {
+    g.cash += cash;
+    v.inflows = (v.inflows ?? 0) + cash;
+  }
+  if (c.effects.months) advanceTime(g, c.effects.months);
+  applyStateEffects(g, c.effects);
+  if (c.delayed) v.delayed = [...(v.delayed ?? []), { source: fillText(g, t.title), note: c.delayed.note, effects: c.delayed.effects }];
+  v.pendingDilemma = undefined;
+  v.dilemmas = (v.dilemmas ?? []).map((d) => (d.id === t.id ? { ...d, choice: c.id } : d));
+  v.consequences = [
+    ...(v.consequences ?? []),
+    { kind: "inmediata", title: fillText(g, t.title) + " · " + c.label, detail: describeEffects(g, c.effects) + ". " + c.lesson, month: g.month, phase: g.phase },
+  ];
+  record(g, "Decisión: " + c.label, describeEffects(g, c.effects) + ". " + c.lesson + (c.delayed ? " Puede tener consecuencias posteriores." : ""), Math.max(0, -cash), c.effects.months ?? 0);
+  g.acknowledged = [];
+  return g;
+}
+/** Delayed consequences of earlier dilemmas and regulatory design materialise when the plan meets reality. */
+function applyCommitConsequences(g: GameState) {
+  const v = g.v2!;
+  for (const d of v.delayed ?? []) {
+    applyStateEffects(g, d.effects);
+    v.consequences = [...(v.consequences ?? []), { kind: "diferida", title: d.source, detail: d.note + " (" + describeEffects(g, d.effects) + ")", month: g.month, phase: g.phase }];
+    record(g, "Consecuencia diferida: " + d.source, d.note + " " + describeEffects(g, d.effects) + ".");
+  }
+  v.delayed = [];
+  for (const c of applyRegulatoryConsequences(g)) {
+    v.consequences = [...(v.consequences ?? []), c];
+    record(g, c.title, c.detail);
+  }
+}
+
+import { generalObjectiveOptions, specificObjectiveOptions, impactCards, valuableCards, valuationCharge, type ImpactPlacement, type ValuationChoice } from "./valuation";
+import { missionFlowCase } from "./missionFlow";
+import { valuationMethods } from "../data/valuationMethods";
+import { rpcTable } from "../data/rpc";
+import { moduleEnabled } from "../data/missionProfiles";
+import type { EconomicRowInput, RowInput } from "./flows";
+import { committeeQuestions } from "./committee";
+
+export type ActionV22 =
+  | { type: "objectives"; general: string; specific: string[] }
+  | { type: "impacts"; placements: ImpactPlacement[] }
+  | { type: "valuation"; choices: ValuationChoice[] }
+  | { type: "flow"; rows: RowInput[] }
+  | { type: "economic"; rows: EconomicRowInput[]; benefits: string[] }
+  | { type: "committee"; answers: Record<string, string> };
+const v22Stage: Record<ActionV22["type"], number> = { objectives: 1, impacts: 2, valuation: 3, flow: 3, economic: 3, committee: 5 };
+const kinds = ["inversion", "operacion", "mantenimiento", "reinversion", "ingreso", "residual", "excluir"];
+const impactKinds = ["producto", "efecto", "impactoPositivo", "impactoNegativo", "problema", "irrelevante"];
+/** Requirements of the V2.2 academic modules before leaving a stage (or committing, stage 5). */
+export function v22Missing(g: GameState, phase: number): string | null {
+  const v = g.v2?.v22;
+  if (!v) return null;
+  const on = (m: Parameters<typeof moduleEnabled>[1]) => moduleEnabled(g.scenarioId, m);
+  if (phase === 1 && !v.objectives) return "Construye y confirma el objetivo general y los objetivos específicos.";
+  if (phase === 2 && !v.impacts) return "Clasifica y confirma los efectos e impactos del proyecto.";
+  if (phase === 3) {
+    if (on("valuation") && !v.valuation?.choices.length) return "Valora al menos un impacto en el módulo de valoración económica.";
+    if (!v.flow) return "Construye y confirma el flujo financiero.";
+    if (on("economicFlow") && !v.economic) return "Construye y confirma el flujo económico con RPC.";
+  }
+  if (phase === 5 && on("committee") && Object.keys(v.committee?.answers ?? {}).length < committeeQuestions(g).length)
+    return "Responde las preguntas del comité evaluador antes de comprometer la inversión.";
+  return null;
+}
+/** V2.2 academic actions. They validate content, record the confirmation and, for valuation studies, spend money and time. */
+function applyV22(original: GameState, a: ActionV22): GameState {
+  if (!original.v2?.v22) throw new Error("Este módulo corresponde a partidas V2.2. Inicia una misión nueva.");
+  if (original.snapshot || original.outcome) throw new Error("La inversión ya fue comprometida.");
+  if (original.phase !== v22Stage[a.type]) throw new Error("Visita la etapa correspondiente para confirmar.");
+  const g = structuredClone(original),
+    v = g.v2!.v22!;
+  v.attempts = { ...v.attempts, [a.type]: (v.attempts?.[a.type] ?? 0) + 1 };
+  switch (a.type) {
+    case "objectives": {
+      const general = generalObjectiveOptions(g).map((o) => o.id),
+        specific = specificObjectiveOptions(g).map((o) => o.id);
+      if (!general.includes(a.general) || !a.specific.length || a.specific.some((id) => !specific.includes(id)) || new Set(a.specific).size !== a.specific.length)
+        throw new Error("Elige un objetivo general y al menos un objetivo específico de las opciones.");
+      v.objectives = { general: a.general, specific: [...a.specific] };
+      g.objective = a.general;
+      record(g, "Objetivos confirmados", `Objetivo general y ${a.specific.length} objetivo(s) específico(s).`);
+      break;
+    }
+    case "impacts": {
+      const ids = impactCards(g).map((c) => c.id);
+      if (a.placements.some((p) => !ids.includes(p.id) || !impactKinds.includes(p.kind)) || new Set(a.placements.map((p) => p.id)).size !== a.placements.length)
+        throw new Error("Clasifica tarjetas existentes, una vez cada una.");
+      if (a.placements.length < ids.length) throw new Error("Clasifica todas las tarjetas: también las irrelevantes.");
+      v.impacts = { placements: structuredClone(a.placements), builtFor: g.alternative };
+      record(g, "Efectos e impactos clasificados", `${a.placements.filter((p) => p.kind.startsWith("impacto")).length} impactos identificados.`);
+      break;
+    }
+    case "valuation": {
+      const cards = valuableCards(g).map((c) => c.id),
+        methods = valuationMethods.map((m) => m.id);
+      if (a.choices.some((c) => !cards.includes(c.impactId) || !methods.includes(c.method) || !["basico", "completo"].includes(c.study) || !Number.isFinite(c.quantity) || c.quantity < 0) || new Set(a.choices.map((c) => c.impactId)).size !== a.choices.length)
+        throw new Error("Cada impacto valorado necesita un método, un tipo de estudio y una medición no negativa.");
+      const charge = valuationCharge(g, a.choices);
+      if (charge.cost > 0) spend(g, charge.cost);
+      if (charge.months) advanceTime(g, charge.months);
+      const paid = { ...(v.valuation?.paid ?? {}) };
+      for (const c of a.choices) if (paid[c.impactId] !== "completo") paid[c.impactId] = c.study;
+      v.valuation = { choices: structuredClone(a.choices), paid, builtFor: g.alternative };
+      record(g, "Valoración económica confirmada", `${a.choices.length} impacto(s) valorados.${charge.cost ? " Estudios de valoración." : ""}`, charge.cost, charge.months);
+      break;
+    }
+    case "flow": {
+      const c = missionFlowCase(g);
+      if (!c) throw new Error("Selecciona una alternativa.");
+      if (a.rows.some((r) => !c.rubros.some((x) => x.id === r.rubroId) || !kinds.includes(r.kind) || !Number.isFinite(r.amount) || r.amount < 0 || Object.values(r.overrides ?? {}).some((x) => !Number.isFinite(x))))
+        throw new Error("Revisa los rubros: tipo válido y montos no negativos.");
+      v.flow = { rows: structuredClone(a.rows), builtFor: g.alternative };
+      record(g, "Flujo financiero confirmado", `${a.rows.filter((r) => r.kind !== "excluir").length} rubros en el flujo.`);
+      break;
+    }
+    case "economic": {
+      const c = missionFlowCase(g);
+      if (!c) throw new Error("Selecciona una alternativa.");
+      const rpcs = rpcTable.map((r) => r.id);
+      if (a.rows.some((r) => !c.rubros.some((x) => x.id === r.rubroId) || !rpcs.includes(r.rpc)) || a.benefits.some((id) => !c.benefits.some((b) => b.id === id)))
+        throw new Error("Usa rubros del flujo, RPC de la tabla y beneficios valorados.");
+      v.economic = { rows: structuredClone(a.rows), benefits: [...a.benefits], builtFor: g.alternative };
+      record(g, "Flujo económico confirmado", `RPC aplicadas a ${a.rows.length} rubros; ${a.benefits.length} beneficio(s) valorados incluidos.`);
+      break;
+    }
+    case "committee": {
+      const qs = committeeQuestions(g);
+      if (qs.some((q) => !q.options.some((o) => o.id === a.answers[q.id])))
+        throw new Error("Responde todas las preguntas del comité.");
+      v.committee = { answers: { ...a.answers } };
+      record(g, "Defensa ante el comité evaluador", "Respuestas registradas; la retroalimentación completa aparece en el resultado.");
+      break;
+    }
+  }
+  return g;
+}

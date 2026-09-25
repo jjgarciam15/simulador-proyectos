@@ -1,5 +1,43 @@
 # Cambios
 
+## 2.4.1 · verificación integral (25 de septiembre de 2026)
+
+- Todas las preguntas del juego, comité, Centro de aprendizaje, Examen 2, tutorial y actividades generadas tienen 5–7 opciones con trampas; las opciones se mezclan para que la correcta no quede siempre primera.
+- Auditoría de contraste WCAG AA de todas las pantallas y corrección de 70 textos, incluidas las tarjetas de retos del inicio y las herramientas del panel derecho.
+- Tiempo por etapa, comparación de intentos y ejemplos del Centro de aprendizaje con confirmación en el Project Builder.
+- Builder sin desbordamiento en móvil; pie de página libre del control de sonido; ícono de la aplicación.
+
+## 2.4.0 · plataforma de proyectos (25 de septiembre de 2026)
+
+- Tres experiencias en el inicio: Jugar historia, Importar proyecto y Crear proyecto, más Continuar, Aprender y Cómo jugar.
+- NormalizedProject versionado con migraciones y MissionGenerator por reglas sobre el mismo motor de las misiones oficiales.
+- Project Builder: asistente por pasos, árbol del problema visual, asistencia académica, autoguardado, completitud, «Revisar mi proyecto», vista previa, configuración y creación de la partida; modo creador con editor de actividades y vista previa como jugador.
+- Importación local de PDF (texto nativo) y Excel (sin macros) con seguridad, referencias de fuente, confianza y revisión obligatoria; plantilla Excel y formato portable `.proyecta.json`.
+- Mis proyectos con oficiales, importados, creados, borradores y partidas; duplicar proyectos y partidas.
+- Restablecer partidas y preparar el simulador para compartir con confirmación escrita y verificación tras recargar.
+- Nueva paleta y tokens de diseño; personajes con estados y roles; microinteracciones y movimiento reducido; celdas de advertencia y error en la hoja de flujo.
+
+## 2.2.0 · evolución académica, económica y de simulación (25 de septiembre de 2026)
+
+- Objetivos general y específicos desde el Árbol del problema; clasificación de efectos e impactos con doble conteo.
+- Módulo de valoración económica: 10 métodos, árbol de decisión, costo de estudio, idoneidad y confianza; experimento de elección didáctico.
+- Hoja de flujo financiero tipo Excel, VPN paso a paso, línea de tiempo, flujo económico con RPC (DNP) y tasa social de descuento del 9 %.
+- Escenarios, estrés, variable crítica, valor de quiebre, supuestos y evaluación distributiva.
+- Comparador de alternativas, matriz de decisión ponderada y comité evaluador.
+- Puntuación V3 de 12 dimensiones con pesos por rol y perfil de misión; trazabilidad del proyecto.
+- Modos Aprendizaje y Evaluación, Centro de aprendizaje, práctica rápida, Cómo jugar, tutorial y Examen 2.
+- Documentación: fases detalladas en README, capítulos académicos y referencias en la memoria.
+
+## 2.1.0 · iteración 2 de la V2 (25 de septiembre de 2026)
+
+- Dilemas condicionales previos a la inversión, con consecuencias inmediatas, diferidas y sistémicas, reproducibles por semilla.
+- Laboratorio regulatorio: severidad oculta de la falla, valor neto por instrumento, «No intervenir» defendible, puzzle causal de ocho eslabones y fallo regulatorio.
+- Cadena de valor por misión con 21 tarjetas (correctas, parciales y distractores), arrastrar y soltar y retroalimentación según dificultad.
+- Planificador presupuestal sin valores precargados, con guía de rangos y diagnóstico explicable; fondo inicial 100/92/85 % según dificultad.
+- Puntuación con coherencia transversal, bonificaciones y penalizaciones, historia por reglas y aciertos y errores por etapa; cinco logros nuevos.
+- Preguntas de práctica con 6–7 opciones y trampas; introducciones de etapa; evaluación ex ante explicada con datos de la partida; comparación de dificultades; detalle de la alternativa y variables vivas; centro de información con estudios contratables en cualquier etapa.
+- «Árbol del problema» en todos los textos. Despliegue en subruta. README reescrito; plan de implementación y memoria actualizados.
+
 ## 2.0.0 · preparación local para GitHub
 
 - Ocho etapas navegables, revisiones dependientes y reinicio controlado antes de inversión.

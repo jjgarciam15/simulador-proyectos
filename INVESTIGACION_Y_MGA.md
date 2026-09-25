@@ -31,7 +31,7 @@ Para contenido versión 3:
 
 `coherencia = 0,70 × coherencia anterior + 0,15 × conexiones causales + 0,15 × cadena de valor`
 
-La coherencia anterior utiliza árbol (45 %), objetivo general (25 %) y correspondencia con la alternativa (30 %). Las conexiones tienen cuatro relaciones esperadas; los enlaces incorrectos restan. La cadena comprueba cuatro elementos con el mismo peso: causa abordada, objetivo asociado, producto clasificado como servicio y dos actividades con recursos.
+La coherencia anterior utiliza el Árbol del problema (45 %), objetivo general (25 %) y correspondencia con la alternativa (30 %). Las conexiones tienen cuatro relaciones esperadas; los enlaces incorrectos restan. La cadena comprueba cuatro elementos con el mismo peso: causa abordada, objetivo asociado, producto clasificado como servicio y dos actividades con recursos.
 
 Estos pesos son parámetros pedagógicos propios, **no una fórmula oficial de la MGA**. La coherencia afecta el beneficio social modelado y su dimensión de puntuación. Las hipótesis, supuestos y reflexiones textuales no se puntúan. Una buena caja tampoco demuestra automáticamente buenos resultados sociales.
 
@@ -41,7 +41,7 @@ Las partidas de contenido 1 y 2 conservan su fórmula y sus requisitos anteriore
 
 Abre `ABRIR_PROYECTA.cmd` y comienza una misión nueva:
 
-- Diagnóstico: selecciona nodos en el árbol y abre la última herramienta, **Laboratorio MGA**. Conecta cuatro relaciones y confirma.
+- Diagnóstico: selecciona nodos en el Árbol del problema y abre la última herramienta, **Laboratorio MGA**. Conecta cuatro relaciones y confirma.
 - Formulación: elige objetivo y alternativa; comprueba qué causa atiende la propuesta.
 - Preparación: confirma cronograma e indicadores, construye la cadena y revisa las observaciones.
 - Evaluación: registra una predicción, cambia un supuesto en sensibilidad y contrasta el resultado.

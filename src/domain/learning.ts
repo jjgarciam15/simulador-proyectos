@@ -48,7 +48,7 @@ export function learningChallenges(g: GameState): LearningChallenge[] {
       "Convertir la compra en el problema central",
       "Usar el presupuesto disponible como medida de la necesidad",
       "La necesidad se sustenta con evidencia; la compra es una posible intervención.",
-      "Revisa si el árbol describe una situación o una solución ausente.",
+      "Revisa si el Árbol del problema describe una situación o una solución ausente.",
     ],
     [
       "Objetivos y alternativas",

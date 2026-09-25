@@ -1,66 +1,276 @@
 # PROYECTA · Reconstruir Aurora
 
-Simulador educativo local en español para formular, evaluar y gestionar proyectos de inversión. Aurora es un territorio ficticio. Los datos y parámetros son simulados; no acredita viabilidad oficial ni sustituye MGA Web.
+Simulador educativo en español de **formulación y evaluación de proyectos**. El jugador administra un proyecto en un territorio ficticio (Aurora): tiene presupuesto y tiempo limitados, compra información, elige una alternativa, construye la cadena de valor y el presupuesto, enfrenta dilemas y eventos, decide la regulación y los ODS, y al final ve las consecuencias de sus decisiones con una nota explicada.
 
-## Requisitos e instalación
+Integra MGA, economía, regulación económica, gestión de recursos, evaluación ex ante, riesgo y ODS. Los datos son simulados: no acredita viabilidad oficial ni sustituye MGA Web.
 
-Node.js 24 y pnpm 11.19.0. Instalar pnpm si no se dispone de él: `npm install -g pnpm@11.19.0`. Desde la carpeta del proyecto ejecutar `pnpm install --frozen-lockfile`. El archivo `pnpm-lock.yaml` conserva versiones. No hacen falta variables de entorno ni claves API.
+## Propósito
 
-| Comando | Función |
+Pasar de «respondo actividades para avanzar» a «administro un proyecto y mis decisiones tienen consecuencias». El simulador recompensa analizar, priorizar, administrar, justificar, anticipar y corregir.
+
+## Formas de jugar
+
+| Experiencia | Qué es | Cómo se entra |
+|---|---|---|
+| **Jugar historia** | Nueve misiones oficiales en Aurora, con narrativa y datos diseñados. | Inicio → «Jugar historia» o «Comenzar reconstrucción». |
+| **Importar proyecto** | Convierte un PDF o un Excel en una estructura académica editable y luego en una simulación. | Inicio → «Importar proyecto» (o Mis proyectos). |
+| **Crear proyecto** | Formula tu propio proyecto paso a paso; el sistema revisa su coherencia y lo convierte en una simulación. | Inicio → «Crear proyecto» (o Mis proyectos). |
+
+Las tres fuentes llegan al **mismo motor**:
+
+```
+Oficial ──────────────┐
+PDF / Excel → parser ─┼─> NormalizedProject → validación → MissionGenerator → motor único (act) → puzzles, flujos, decisiones → puntuación → comité → resultado
+Manual → Builder ─────┘
+```
+
+**Mis proyectos** reúne oficiales, importados, creados, borradores y partidas. Cada tarjeta muestra origen, estado, completitud, dificultad y última edición, con acciones jugar, continuar, editar, duplicar, eliminar, generar partida y vista previa. Una misión oficial se puede duplicar como proyecto editable para crear variantes; la oficial no cambia.
+
+### Project Builder (crear o revisar un proyecto)
+
+Asistente por pasos agrupados, con autoguardado en el navegador, indicador de completitud calculado con los campos que la misión realmente necesita y la progresión Problema → Objetivo → Alternativas → Proyecto.
+
+| Paso | Qué pide | Asistencia académica |
+|---|---|---|
+| 1. Información general | Perfil (estudiante o creador/profesor), nombre, descripción, sector, ubicación, tipo (público/privado), horizonte | — |
+| 2. Problema, causas y efectos | Árbol visual efectos ↑ problema ↑ causas; arrastrar o «Mover a…» con teclado; nivel directo/indirecto | Advierte si el problema parece una solución («Comprar buses») o si una causa parece efecto; nunca cambia el texto |
+| 3. Actores y población | Población total, afectada, objetivo y atendida hoy; actores con interés, poder, posición e influencia | Objetivo ≤ afectada ≤ total |
+| 4. Objetivos | Objetivo general, específicos ligados a una causa y fines ligados a efectos | «El objetivo específico 2 parece no responder a ninguna causa identificada» |
+| 5. Alternativas | 2–4 alternativas: inversión, O&M, ingresos, beneficio social, duración, vida útil, residual, capacidad, cobertura, riesgo, balance ambiental, trade-off y causas que atiende | Tabla comparativa en vivo, sin elegir la mejor |
+| 6. Cadena de valor | Insumos → actividades → productos → resultados → impactos (las conexiones se iluminan) | — |
+| 7. Efectos, impactos y valoración | Efecto o impacto, dirección, grupo, magnitud, duración, tipo de cambio en bienestar, método, valor anual, medida por persona, doble conteo | — |
+| 8. Costos, beneficios y finanzas | Costos por clasificación, beneficios (ingreso, ahorro, beneficio económico, impacto valorado), presupuesto, plazo, tasas, ajustes económicos y supuestos | Distingue ingreso financiero de beneficio económico |
+| 9. Riesgos, regulación y ODS | Riesgos con probabilidad, impacto y mitigación; falla de mercado, externalidades, regulación, tarifas, subsidios, competencia, restricciones; ODS sugeridos por el creador o que identificará el jugador | — |
+| (Creador) Actividades | Revisa y edita las actividades generadas: pregunta, opciones, respuestas, explicación, puntos, dificultad; distractores del Árbol del problema; vista previa como jugador | — |
+| 10. Revisar y crear partida | «Revisar mi proyecto» (✓ / ! / ✕ por elemento), resumen, fases que tus datos permiten, dificultad (Fácil/Intermedio/Avanzado), modo (Aprendizaje/Evaluación/Exploración), duración (Rápida/Normal/Completa) y **CREAR PARTIDA INTERACTIVA** | Los errores bloquean; las advertencias no |
+
+Los datos ausentes nunca se inventan: si el generador necesita un valor (por ejemplo, presupuesto), usa un supuesto documentado que se muestra en la partida. Cada misión generada es una copia congelada del proyecto: editarlo después no altera partidas en curso.
+
+### Importar PDF o Excel
+
+- **Local y privado:** el archivo se procesa en el navegador; no se envía a ningún servicio.
+- **Seguridad:** extensión (.pdf, .xlsx), tipo MIME, tamaño (≤ 15 MB) y firma del archivo; los libros con macros (.xlsm, .xls…) se rechazan; las fórmulas se leen como texto y **no se ejecutan**.
+- **PDF:** extracción nativa del texto con pdf.js (sin evaluación de código). Reconoce «Etiqueta: valor», listas bajo «Causas», «Efectos», «Objetivos específicos» y bloques «Alternativa 1: …». Los PDF escaneados no tienen texto: el OCR no está incluido y se pide completar manualmente.
+- **Excel:** lee hojas, encabezados, tablas y valores; reconoce pares etiqueta/valor y tablas de alternativas, actores, costos y riesgos. Hay una **plantilla descargable**.
+- **Trazabilidad:** cada dato guarda su página, hoja y celda, y una confianza (alta, media, baja). Lo que falta aparece como «No identificada».
+- **Revisión obligatoria:** el proyecto se abre en el mismo Project Builder; hay que confirmar la revisión antes de generar la partida.
+- **Formato portable:** un proyecto se exporta e importa como `.proyecta.json` (datos versionados, sin código), validado contra el esquema.
+
+### Restablecer partidas y preparar para compartir
+
+Mis proyectos → «Restablecer partidas…». Hay que escribir `RESTABLECER`.
+
+| Se borra (datos del jugador) | Se conserva (datos del sistema) |
 |---|---|
-| `pnpm dev` | Servidor local; abrir la dirección mostrada, normalmente http://127.0.0.1:5173 |
-| `pnpm check` | Tipos, pruebas y compilación |
-| `pnpm repo:check` | Revisar archivos preparados para Git y patrones de credenciales |
-| `pnpm test` | Pruebas Vitest del motor y cálculos |
-| `pnpm build` | Comprobación TypeScript y compilación en `dist/` |
-| `pnpm preview` | Revisar el build estático localmente |
-| `node node_modules/typescript/bin/tsc -b` | Comprobar tipos sin emitir JS |
+| Partidas activas, en pausa y terminadas; puntuaciones, respuestas, progreso y bitácoras (`proyecta-v1`, `proyecta-v1:unreadable`) | Las nueve misiones oficiales, su contenido e ilustraciones |
+| Proyectos importados y creados, borradores y misiones generadas (`proyecta-projects-v1`) | Metodologías y Centro de aprendizaje |
+| Intentos del Examen 2 (`proyecta-exam2-v1`) | Preferencias de sonido y animación, y el código |
 
-No hay comando lint configurado. En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia/reutiliza Vite en el puerto 5173 y abre una ventana de aplicación. Los registros están en `.local/`. En otras plataformas utilizar `pnpm dev`.
+Con «Preparar el simulador para compartir» la página se recarga y verifica el estado cero (0 partidas, 0 proyectos personales, 0 importados, 0 misiones generadas) y que las misiones oficiales siguen disponibles.
 
-## Arquitectura real
+## Qué aprenderás
 
-React 19 + TypeScript, Vite 6, TailwindCSS 4, Recharts y Lucide. SPA sin backend ni router: App coordina inicio, ayuda, historial y partida. El motor puro `act` confirma decisiones; formularios y controles mantienen propuestas locales hasta confirmar. Financiación y eventos se procesan en el motor, no en los gráficos.
+- Construir el **Árbol del problema** (causas, problema central, efectos) y transformarlo en objetivos.
+- Comparar **alternativas** con trade-offs reales: inversión, operación y mantenimiento, cobertura, plazo, riesgo y ambiente.
+- Armar la **cadena de valor** y un **presupuesto** sin valores precargados, con contingencia y mantenimiento.
+- Distinguir **productos, efectos e impactos** y elegir un **método de valoración** (precios de mercado, costo de viaje, valoración contingente, transferencia de beneficios, etc.).
+- Construir el **flujo financiero** tipo hoja de cálculo, calcular el **VPN paso a paso** y pasar al **flujo económico con RPC** y tasa social de descuento.
+- Probar **escenarios, estrés, variable crítica y valor de quiebre**, revisar el **impacto distributivo** y defender la decisión ante un **comité evaluador**.
+- Diagnosticar una **falla regulatoria**, elegir instrumentos proporcionales y sustentar los **ODS** con evidencia.
 
-- `src/data/`: misiones, ODS, marcos históricos y parámetros de balance.
-- `src/domain/`: tipos, reglas, economía, persistencia, eventos, evaluación y pruebas.
-- `src/features/`: módulos de las ocho etapas, aprendizaje, resultados y centro de mando.
-- `src/components/`: controles, gráficos, navegación, personajes y efectos.
-- `public/art/`: ilustraciones locales.
-- `scripts/`: lanzador Windows.
-- `.local/`: registros y comprobaciones de desarrollo, fuera del build.
+## Cómo jugar
 
-## Persistencia y compatibilidad
+1. En el inicio elige una misión (nueve territorios de Aurora), la dificultad (guiado, intermedio · profesional, experto) y el modo (**Aprendizaje** o **Evaluación**). El perfil de la misión indica qué módulos aplican.
+2. Recorre las etapas en orden. Cada etapa se divide en herramientas (pestañas numeradas); lo que confirmas cambia el estado del proyecto: saldo, plazo, información, apoyo, legitimidad y riesgo.
+3. Puedes volver a una etapa completada desde el menú lateral sin repetir el recorrido. Cambiar algo ya confirmado cuesta un mes y 0,2 % del presupuesto, y marca como **«Requiere revisión»** lo que dependía de ello (con el motivo concreto).
+4. La alternativa en estudio aparece siempre en el panel derecho; se puede cambiar en Formulación sin borrar el trabajo.
+5. Al comprometer la inversión (Decisión) el plan se congela y comienza la ejecución: eventos condicionados, dilemas y consecuencias diferidas.
+6. En Ex post ves la nota con cada dimensión explicada, errores y aciertos, la historia del proyecto y recomendaciones.
 
-localStorage del mismo navegador y origen. `proyecta-v1` conserva partida activa, resultados, campaña y partidas en pausa. `?qa=1` usa un espacio independiente para pruebas. No hay cuentas, sincronización ni seguimiento externo. Limpiar datos del navegador elimina las partidas; cambiar de puerto o navegador usa otro origen. Si falla el guardado, aparece un aviso y la sesión continúa en memoria.
+Apoyos: **Centro de aprendizaje** (menú lateral o «Cómo jugar»), tutorial interactivo de tres minutos, **Práctica rápida** (VPN y RPC sin jugar una misión) y **Examen 2** (caso aplicado independiente, en el encabezado).
 
-`createGame` conserva las reglas anteriores; la interfaz inicia con `createGameV2`, que agrega estado V2 sin migrar silenciosamente puntuaciones antiguas. Las partidas nuevas tienen navegación libre antes de invertir y revisiones de dependencias. Confirmar cambios en una etapa ya completada tiene un costo explícito; visitar no cuesta. Después de comprometer inversión, se usan respuestas de ejecución.
+## Modos
 
-## Compilación y distribución
+| Modo | Retroalimentación | Pistas | Indicador de coherencia |
+|---|---|---|---|
+| Aprendizaje | Inmediata en cada herramienta | Ilimitadas (pistas guiadas en dificultad guiado) | Con detalle |
+| Evaluación | Diferida: se ve la nota al final | Una por pregunta | Solo nivel |
 
-El resultado de `pnpm build` está en `dist/`. No se ha publicado. Para distribuirlo se puede servir esa carpeta mediante un servidor estático bajo su ruta raíz; abrir `index.html` con `file://` no es el modo de ejecución. `pnpm preview` verifica el build, no es una configuración de producción. El simulador no requiere servicios de red durante la partida; instalar dependencias sí requiere conectividad. Las referencias oficiales se abren solo al pulsarlas.
+La dificultad cambia lo que conoces y tu exposición al riesgo, no la realidad subyacente: guiado (100 % del efectivo, explicaciones), intermedio (92 %), experto (85 %, menos ayudas).
+
+## Fases del simulador
+
+| # | Fase | Objetivo | Conceptos | Qué recibe | Qué hace el jugador | Decisiones clave | Salida | Dependencias | Puntuación |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | Diagnóstico | Entender el problema antes de proponer | Árbol del problema, causa-efecto, actores, población objetivo | Caso, centro de información, actores | Compra estudios, conecta causas y efectos, ubica actores, focaliza | Qué información comprar; qué nodos y enlaces | Árbol del problema y población | Ninguna | Diagnóstico y Árbol del problema |
+| 2 | Formulación | Convertir el problema en objetivos y elegir alternativa | Objetivo general y específicos, alternativas, costo de oportunidad | Árbol del problema confirmado | Construye objetivos desde el Árbol del problema; compara 3–4 alternativas | Objetivo; alternativa | Objetivos y alternativa en estudio | Diagnóstico | Alternativa y objetivos |
+| 3 | Preparación | Traducir la alternativa en recursos | Cadena de valor, presupuesto, contingencia, O&M, indicadores, efectos e impactos | Alternativa y objetivos | Arma la cadena de valor (arrastrar o seleccionar), el presupuesto sin valores precargados, indicadores; clasifica efectos e impactos | Asignación del presupuesto; clasificación | Plan de recursos y mapa de impactos | Formulación | Cadena de valor y presupuesto; efectos e impactos |
+| 4 | Evaluación | Saber si el proyecto crea valor | Valoración económica, flujo financiero, VPN, RPC, tasa social, costos hundidos, doble conteo, sensibilidad | Presupuesto, impactos, datos del caso | Elige métodos de valoración (con costo de estudio y confianza), construye el flujo financiero y el económico, prueba escenarios y valor de quiebre, revisa la distribución | Método por impacto; qué entra al flujo; RPC | VPN financiero y económico, variable crítica | Preparación | Efectos, impactos y valoración; Flujos, VPN y RPC; Evaluación ex ante |
+| 5 | Regulación | Corregir fallas sin crear otras | Falla de mercado/regulatoria, instrumentos, proporcionalidad, ODS | Proyecto evaluado | Resuelve el puzzle regulatorio (falla → evidencia → instrumento → efecto) y sustenta ODS | Instrumento; ODS con evidencia | Argumento regulatorio y ODS | Evaluación | Regulación y ODS |
+| 6 | Decisión | Comprometer o no la inversión | Comparación de alternativas, matriz de decisión, riesgo, financiación | Todo lo anterior | Compara alternativas, responde al comité evaluador, fija contingencia y financiación, justifica | Invertir, esperar o rediseñar | Plan congelado | Regulación | Compromisos y riesgo; Comité evaluador |
+| 7 | Ejecución | Gestionar lo que sale distinto | Eventos condicionados, dilemas, consecuencias diferidas | Plan congelado | Responde eventos y dilemas | Adaptar o continuar | Servicio entregado | Decisión | Ejecución y servicio |
+| 8 | Ex post | Aprender de la experiencia | Evaluación ex post, valor observado, trazabilidad | Resultado | Revisa nota, historia, errores y recomendaciones | Rejugar con otra estrategia | Informe y logros | Ejecución | Valor observado; Coherencia y trazabilidad |
+
+## Mecánicas principales
+
+- **Recursos escasos:** cada estudio, actor o mitigación cuesta dinero y tiempo; avanzar de etapa consume un mes.
+- **Dependencias y «Requiere revisión»:** cambiar una decisión anterior invalida lo que dependía de ella y explica por qué.
+- **Dilemas y eventos condicionados:** aparecen según tus decisiones previas y su efecto puede llegar etapas después.
+- **Hoja de flujo:** celdas con colores por tipo (dato entregado, debes calcular, debes ingresar, calculado automáticamente); al seleccionar una celda se explica su cálculo.
+- **Plataforma de proyectos:** `NormalizedProject` (`src/domain/project/types.ts`, `schemaVersion` 1) es el contrato común; `MissionGenerator` (`generator.ts`) lo traduce al mismo `Scenario` de las misiones oficiales y registra la misión en tiempo de ejecución (`store.ts`). No hay simuladores paralelos para PDF, Excel o proyectos manuales.
+- **Flujos:** `src/domain/flows.ts` es el único motor de flujos, VPN, RPC, escenarios y valor de quiebre; lo usan las misiones, la calculadora y el Examen 2.
+- **Semilla:** el código de condiciones reproduce demanda, costos, eventos y dilemas para comparar estrategias.
+
+## Puntuación
+
+Las partidas V2.2 usan **12 dimensiones**: Diagnóstico y Árbol del problema, Alternativa y objetivos, Cadena de valor y presupuesto, Efectos/impactos y valoración, Flujos/VPN/RPC, Evaluación ex ante, Regulación y ODS, Compromisos y riesgo, Ejecución y servicio, Valor observado, Coherencia y trazabilidad, Comité evaluador. Los pesos dependen del rol (público o privado) y del perfil de la misión; si un módulo no aplica, su peso se reparte (`src/data/balance.ts`, `scoringWeightsV3`).
+
+Nota final = (base ponderada − penalizaciones + bonificaciones) × factor de dificultad. Cada dimensión explica su cálculo, los errores y aciertos. La nota usa el estado confirmado, no el número de intentos: reconfirmar un módulo o repetir el Examen 2 no acumula puntos.
+
+## Stack
+
+| Capa | Tecnología |
+|---|---|
+| Interfaz | React 19 + TypeScript 5.8 |
+| Compilación | Vite 6 |
+| Estilos | Tailwind CSS 4 y hojas CSS propias (`src/*.css`) |
+| Gráficos | Recharts |
+| Íconos | Lucide |
+| Pruebas | Vitest |
+| Paquetes | pnpm 11.19.0 |
+
+No hay backend, base de datos, cuentas ni servicios externos: es una aplicación estática.
+
+## Requisitos
+
+- **Node.js 24** (fijado en `.nvmrc` y en `engines` de `package.json`). Con Node 22 funciona, pero pnpm muestra un aviso «Unsupported engine».
+- **pnpm 11.19.0**. Si no lo tienes: `npm install -g pnpm@11.19.0`.
+
+## Instalación
+
+```bash
+git clone https://github.com/jjgarciam15/simulador-proyectos.git
+cd simulador-proyectos
+pnpm install --frozen-lockfile
+```
+
+`pnpm-lock.yaml` fija las versiones exactas.
+
+## Variables de entorno
+
+No se requieren variables de entorno ni claves API.
+
+## Desarrollo y ejecución
+
+| Comando | Qué hace |
+|---|---|
+| `pnpm dev` | Servidor de desarrollo en http://127.0.0.1:5173 |
+| `pnpm typecheck` | Comprobación de tipos (`tsc -b`) |
+| `pnpm test` | Pruebas Vitest del motor, puntuación y contenido |
+| `pnpm build` | Tipos + compilación de producción en `dist/` |
+| `pnpm preview` | Sirve `dist/` localmente para revisarlo |
+| `pnpm check` | Tipos, pruebas y compilación (lo que ejecuta la CI) |
+| `pnpm repo:check` | Revisa que no se versionen dependencias, compilaciones ni credenciales |
+
+No hay comando de lint configurado.
+
+En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o reutiliza) Vite en el puerto 5173 y abre una ventana de aplicación. Los registros quedan en `.local/`.
+
+## Pruebas
+
+```bash
+pnpm test
+```
+
+Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y su diagnóstico, cadena de valor, dependencias y «requiere revisión», dilemas y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder (vacío, parcial, completo, varias alternativas, validaciones), la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, persistencia de borradores, formato portable, reset y personajes. Última ejecución: 224 pruebas en 21 archivos, todas aprobadas (incluye la regla de 5–7 opciones por pregunta). Las pruebas de extremo a extremo (misión oficial, crear, importar PDF, importar Excel y reset) se ejecutaron en navegador con Playwright.
+
+## Compilación
+
+```bash
+pnpm build
+```
+
+Genera `dist/` con `index.html`, `assets/` y `art/`. Es un sitio estático.
+
+## Despliegue
+
+`dist/` se puede publicar en cualquier hosting estático. No abras `index.html` con `file://`: debe servirse por HTTP.
+
+**En la raíz de un dominio** (Netlify, Vercel, Cloudflare Pages, un servidor Nginx/Apache):
+
+1. Comando de compilación: `pnpm build`.
+2. Carpeta de publicación: `dist`.
+3. Versión de Node: 24.
+
+La app no tiene rutas internas (no usa router), así que no requiere reglas de reescritura.
+
+**En una subruta** (por ejemplo GitHub Pages en `https://usuario.github.io/simulador-proyectos/`):
+
+```bash
+pnpm typecheck
+pnpm exec vite build --base=/simulador-proyectos/
+```
+
+Las imágenes y los recursos respetan la ruta base (`import.meta.env.BASE_URL`). Publica el contenido de `dist/` en esa subruta.
+
+**Comprobación local del build:** `pnpm preview` (no es un servidor de producción).
+
+La CI de GitHub (`.github/workflows/ci.yml`, «Validar simulador») ejecuta `pnpm install --frozen-lockfile`, `pnpm repo:check` y `pnpm check` en cada push a `main` y en cada pull request. **No despliega.**
+
+## Persistencia
+
+- La partida se guarda automáticamente en el `localStorage` del navegador (clave `proyecta-v1`) tras cada decisión confirmada. Los proyectos, borradores y misiones generadas se guardan en `proyecta-projects-v1` con autoguardado.
+- Se puede cerrar la pestaña y continuar después («Continuar misión»). Al empezar otra misión, la actual queda **en pausa** y se puede retomar desde el inicio.
+- `?qa=1` usa espacios de guardado separados (`proyecta-qa-v1`, `proyecta-qa-projects-v1`) para pruebas.
+- Si el guardado falla, aparece un aviso y la sesión sigue en memoria.
+- Limpiar los datos del navegador borra las partidas. Otro navegador, puerto o dominio usa otro almacenamiento.
+- No hay cuentas, sincronización ni seguimiento externo.
+
+## Arquitectura
+
+```
+src/
+  data/        Contenido y balance: misiones, dilemas, ODS, reglas de dificultad y puntuación
+  domain/      Reglas puras: motor (act), estado, dilemas, regulación, presupuesto,
+               coherencia, puntuación, persistencia, validación y pruebas
+  features/    Pantallas de cada etapa y herramientas (dilemas, laboratorio, resultados)
+  domain/project  NormalizedProject, validación, MissionGenerator, almacén, esquema y
+                  migraciones, importación PDF/XLSX (import/)
+  features/projects  Mis proyectos, Project Builder, importación, reset, inicio
+  features/v22 Objetivos, efectos e impactos, valoración, hoja de flujo, RPC, sensibilidad,
+               comparador, comité, Centro de aprendizaje, Cómo jugar y Examen 2
+  components/  Controles, gráficos, navegación, personajes y efectos
+public/art/    Ilustraciones locales
+scripts/       Lanzador de Windows y revisión del repositorio
+```
+
+- **Motor único y puro:** `act(estado, acción)` en `src/domain/engine.ts` valida y devuelve un estado nuevo. La interfaz nunca calcula reglas ni puntuación.
+- **Estado central:** `GameState` (`src/domain/types.ts`) con `v2` versionado (`src/domain/projectV2.ts`): etapas completadas, revisiones, cadena, actores, ODS, regulación, dilemas, consecuencias, etc.
+- **Contenido configurable:** las nueve misiones se generan desde datos (`src/data/scenarios.ts`, `expansion.ts`); los dilemas son plantillas declarativas (`src/data/dilemmas.ts`); el balance está en `src/data/balance.ts`.
+- **Flujos:** `src/domain/flows.ts` es el único motor de flujos, VPN, RPC, escenarios y valor de quiebre; lo usan las misiones, la calculadora y el Examen 2.
+- **Semilla:** el código de condiciones reproduce demanda, costos técnicos, severidad de la falla regulatoria, eventos y dilemas.
+
+La memoria técnica completa está en [`MANUAL_CREACION.md`](MANUAL_CREACION.md) y la ejecución de esta versión en [`IMPLEMENTATION_PLAN_V2.md`](IMPLEMENTATION_PLAN_V2.md).
 
 ## Solución de problemas
 
-- Dependencias ausentes: ejecutar `pnpm install --frozen-lockfile`.
-- Puerto ocupado: cerrar la otra instancia o revisar `.local/servidor-error.log`; el lanzador exige 5173 para conservar el origen del guardado.
-- Node no reconocido: instalar Node 24 y abrir otra terminal.
-- Guardado no disponible: mantener la pestaña abierta y revisar permisos/cuota del navegador.
-- Los gráficos y las dependencias se distribuyen en paquetes separados. Revisa el informe de Vite si futuras ampliaciones vuelven a superar su umbral de tamaño.
+| Problema | Solución |
+|---|---|
+| `Cannot find module` o dependencias ausentes | `pnpm install --frozen-lockfile` |
+| Aviso «Unsupported engine» | Usa Node 24 (`nvm use`); con Node 22 funciona igual |
+| Puerto 5173 ocupado | Cierra la otra instancia o revisa `.local/servidor-error.log` (lanzador Windows) |
+| La partida no se guarda | Revisa permisos o cuota del almacenamiento del navegador; mantén la pestaña abierta |
+| «No se pudo leer la partida guardada» | El guardado es de un formato incompatible; se conserva una copia en `proyecta-v1:unreadable` al guardar una nueva |
+| «La misión generada no está disponible» | El proyecto se eliminó o se restablecieron los datos: genera la partida de nuevo desde Mis proyectos |
+| Un PDF importado no muestra datos | Probablemente es escaneado (sin texto). Completa el proyecto en el Builder o exporta el PDF con texto seleccionable |
+| El Excel se rechaza | Guárdalo como .xlsx sin macros |
+| Imágenes rotas tras publicar en una subruta | Compila con `--base=/tu-subruta/` (ver Despliegue) |
+| Pantalla en blanco al abrir `dist/index.html` | Sírvelo por HTTP (`pnpm preview` o un hosting estático) |
 
-## Continuar el desarrollo
+## Documentación
 
-V2 añade cadena de valor construible, clasificación de actores, argumentos regulatorios/ODS, práctica con pistas, radar de puntuación y reinicio de etapa con confirmación. El reinicio conserva compras y gastos, y marca evaluaciones dependientes para revisión. Para probar las nuevas reglas, iniciar una misión nueva; las partidas anteriores mantienen su formato. Ver `ENTREGA_V2.md` para la cobertura real de pruebas y trabajo pendiente.
-
-Leer `MANUAL_CREACION.md`, `AUDITORIA_V2.md` y `APRENDIZAJE_MGA.md`. Agregar contenido mediante datos, reglas en domain y presentación en features. No sustituir la realidad oculta al comprar estudios ni usar sorteos nuevos al recargar. Mantener las pruebas anteriores y agregar casos V2 antes de cambiar compatibilidad, puntuación o compromisos. Consultar el estado de implementación al principio del manual y registrar futuras instrucciones en su historial.
-
-## GitHub y documentación
-
-Repositorio preparado para revisión local; no publicado. Sigue [la guía para GitHub](docs/GUIA_GITHUB.md). El flujo de CI valida el proyecto sin desplegarlo. Node y pnpm están fijados en `.nvmrc` y `package.json`.
-
-- [Estado de la entrega](ENTREGA_V2.md) y [cambios](CHANGELOG.md).
-- [Cómo contribuir](CONTRIBUTING.md) y [seguridad](SECURITY.md).
-- [Licencia pendiente y recursos](docs/LICENCIA_Y_RECURSOS.md).
-- [Protocolo de validación con estudiantes](docs/PILOTO_PEDAGOGICO.md).
-
-El repositorio incluye el historial de instrucciones de diseño en `MANUAL_CREACION.md`, conservado por requisito del proyecto. No incluye conversaciones privadas externas, partidas del navegador ni datos de estudiantes.
+- [Memoria de creación e historial de prompts](MANUAL_CREACION.md)
+- [Plan y resultado de la implementación V2](IMPLEMENTATION_PLAN_V2.md)
+- [Entrega V2](ENTREGA_V2.md) · [Cambios](CHANGELOG.md)
+- [Cómo contribuir](CONTRIBUTING.md) · [Seguridad](SECURITY.md)
+- [Guía para GitHub](docs/GUIA_GITHUB.md) · [Licencia pendiente y recursos](docs/LICENCIA_Y_RECURSOS.md) · [Protocolo de piloto pedagógico](docs/PILOTO_PEDAGOGICO.md)

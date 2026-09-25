@@ -3,6 +3,7 @@ import { learningChallenges } from "./learning";
 import { random } from "./finance";
 import { difficultyRules, retryFactors } from "../data/balance";
 import {appliedCases} from './appliedCases';
+import { generatedQuestions } from './project/activityRegistry';
 export interface QuestionV2 {
   id: string;
   phase: number;
@@ -18,38 +19,55 @@ export interface QuestionV2 {
   penalty: number;
   tags: string[];
 }
+/** Four plausible traps per stage: they reuse the vocabulary of the right answer with a conceptual error. */
 const distractors = [
   [
     "Tomar la población total como afectada, porque todos pagan impuestos",
     "Usar una encuesta de satisfacción como única medida de demanda",
+    "Definir la causa directa como la falta del proyecto que se quiere construir",
+    "Tratar un efecto del problema como si fuera su causa principal",
   ],
   [
     "Comparar el costo inicial y dejar operación para después",
     "Priorizar la alternativa de mayor cobertura sin revisar restricciones",
+    "Elegir la alternativa con mayor VPN aunque no atienda las causas del Árbol del problema",
+    "Descartar no intervenir sin compararlo con la situación optimizada",
   ],
   [
     "Verificar desembolsos como prueba suficiente de entrega",
     "Clasificar la contratación como un cambio permanente en bienestar",
+    "Registrar la actividad «construir» como producto porque tiene un costo asociado",
+    "Asignar toda la contingencia a la obra para evitar recortes de alcance",
   ],
   [
     "Descontar únicamente la inversión inicial",
     "Usar la suma de ingresos brutos sin restar inversión",
+    "Aplicar la tasa nominal a flujos expresados en precios constantes",
+    "Aprobar el proyecto porque su TIR supera la inflación esperada",
   ],
   [
     "Asumir que la elegibilidad garantiza aprobación presupuestal",
     "Usar alineación estratégica como reemplazo de factibilidad técnica",
+    "Regular siempre, porque la intervención pública corrige cualquier falla",
+    "Seleccionar todos los ODS relacionados para mostrar mayor contribución",
   ],
   [
     "Contar toda entrada de financiación como creación de valor",
     "Valorar los beneficios y omitir la sostenibilidad operativa",
+    "Comprometer la inversión antes de resolver revisiones porque el plazo apremia",
+    "Usar la contingencia como fuente para ampliar cobertura desde el inicio",
   ],
   [
     "Cambiar el indicador para hacerlo coincidir con lo ejecutado",
     "Confundir correlación temporal con evidencia causal suficiente",
+    "Mantener el cronograma original aunque un evento cambie la ruta crítica",
+    "Absorber cada sobrecosto con caja libre sin revisar la contingencia",
   ],
   [
     "Comparar con la alternativa más rentable aunque no sea financiable",
     "Sumar al beneficio sacrificado todos los gastos del proyecto",
+    "Atribuir el resultado solo a la suerte de los eventos",
+    "Juzgar la decisión con información que no existía al invertir",
   ],
 ];
 function questionDraft(g: GameState): QuestionV2[] {
@@ -111,6 +129,10 @@ export function questionsV2(g: GameState):QuestionV2[] {
               id: "population",
               text: "Contar toda la población del municipio como atendida",
             },
+            {
+              id: "contractor",
+              text: "Preguntar al contratista si el servicio funciona como se diseñó",
+            },
           ].sort(
             (a, b) => random(g.seed, q.id + a.id) - random(g.seed, q.id + b.id),
           ),
@@ -124,7 +146,7 @@ export function questionsV2(g: GameState):QuestionV2[] {
           ],
         }
       : q,
-  ).concat(appliedCases(g));
+  ).concat(appliedCases(g), generatedQuestions(g.scenarioId));
 }
 export type QuestionAction =
   | { type: "answerV2"; id: string; choices: string[] }
@@ -144,7 +166,7 @@ export function assessQuestion(original: GameState, a: QuestionAction) {
   if (prior.solved || prior.choices.length >= 3)
     throw new Error("Ejercicio cerrado; revisa la explicación.");
   if (a.type === "hintV2") {
-    if (prior.hints >= 3) throw new Error("Ya consultaste todas las pistas.");
+    if (prior.hints >= helpPolicy(original).maxHints) throw new Error(helpPolicy(original).exam ? "En modo evaluación solo hay una pista por ejercicio." : "Ya consultaste todas las pistas.");
     v.assessments[q.id] = { ...prior, hints: prior.hints + 1 };
     return g;
   }
@@ -231,3 +253,5 @@ export function practiceAnalytics(g: GameState) {
     retries: rows.reduce((n, r) => n + Math.max(0, r.choices.length - 1), 0),
   };
 }
+
+import { helpPolicy } from "./help";

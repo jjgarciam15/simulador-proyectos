@@ -43,6 +43,11 @@ const medalCatalog = [
     "Reconstructor del distrito",
     "Ejecución dentro del plazo, cobertura ≥ 60 % y VPN social positivo.",
   ],
+  ["planner", "Planificador", "Sin crédito, presupuesto diagnosticado ≥ 80 y sobrecostos cubiertos por la contingencia."],
+  ["analyst", "Analista", "Cadena de valor ≥ 80/100 al invertir."],
+  ["regulator", "Regulador", "Cadena regulatoria ≥ 75 e instrumento proporcional a la severidad real."],
+  ["riskmanager", "Gestor de riesgo", "Superar un evento y cerrar a tiempo con cobertura ≥ 50 %."],
+  ["sustainable", "Proyecto sostenible", "ODS pertinentes y sustentados (≥ 75) sin selección indiscriminada."],
 ];
 export function FinalRecognition({ g }: { g: GameState }) {
   const [downloadError, setDownloadError] = useState(""),
@@ -84,7 +89,7 @@ export function FinalRecognition({ g }: { g: GameState }) {
             </h3>
             <p>
               {medals.length
-                ? `Obtuviste ${medals.length} de 5 insignias por decisiones verificables.`
+                ? `Obtuviste ${medals.length} de ${medalCatalog.length} insignias por decisiones verificables.`
                 : "Cerraste una estrategia y conservas su historia para aprender. Aún faltan evidencias para las insignias de formulación."}
             </p>
           </div>

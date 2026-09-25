@@ -78,6 +78,7 @@ export function projectMedals(g: GameState): Medal[] {
       evidence:
         "Terminaste dentro del plazo, con cobertura observada de al menos 60 % y VPN social positivo.",
     });
+  for (const m of v2Medals(g)) medals.push(m);
   return medals;
 }
 export function updateCampaign(
@@ -180,7 +181,7 @@ export function projectReport(g:GameState){
  `<table>${row('Alternativa',s.alternatives.find(a=>a.id===g.alternative)?.name??'Sin seleccionar')}${row('Rol / dificultad',s.role+' / '+g.difficulty)}${row('Semilla / versión',g.seed+' / '+g.contentVersion+(g.v2?' · reglas V2':''))}${row('Mes de cierre / plazo',g.month+' / '+s.deadline)}${row('Partida',g.id)}</table>`,
  `<h2>Resultados esperados y observados</h2><table><tr><th>Medida</th><th>Esperado</th><th>Observado</th></tr><tr><td>VPN financiero · M COP</td><td>${money(o.expectedFinancial)}</td><td>${money(o.financial)}</td></tr><tr><td>VPN social · M COP</td><td>${money(o.expectedSocial)}</td><td>${money(o.social)}</td></tr></table>`,
  `<table>${row('Cobertura observada',(o.coverage*100).toFixed(1)+' %')}${row('Personas atendidas estimadas',Math.round(s.affected*o.coverage))}${row('Gastos ejecutados',money(g.spent))}${row('Caja al cierre',money(g.cash))}${row('Beneficio sacrificado observado',money(o.opportunity))}${row('Diferencia esperada',money(o.expectedOpportunity))}${row('Recursos desperdiciados / sobrecostos',money(o.wasted))}</table><p>Montos en millones de COP. No se suman recursos desperdiciados y costo de oportunidad. El beneficio social no es caja.</p>`,
- `<h2>Cómo se obtuvo el indicador</h2><p>Nota = redondear [máximo(0, mínimo(100, Σ(valor × peso) − ${(a?.penalty??0).toFixed(2)})) × ${factor}].</p><table><tr><th>Dimensión</th><th>Valor /100</th><th>Peso</th><th>Aporte antes del factor</th></tr>${o.dimensions.map(d=>`<tr><td>${escape(d.name)}</td><td>${d.value.toFixed(1)}</td><td>${(d.weight*100).toFixed(0)} %</td><td>${(d.value*d.weight).toFixed(2)}</td></tr>`).join('')}</table><p>Bandas educativas: 85–100 destacado; 70–84 sólido; 50–69 en desarrollo; 0–49 necesita revisión.</p>`,
+ `<h2>Cómo se obtuvo el indicador</h2><p>Nota = redondear [máximo(0, mínimo(100, Σ(valor × peso) − ${(a?.penalty??0).toFixed(2)} + ${(a?.bonus??0).toFixed(2)})) × ${factor}].</p>${a?.adjustments?`<ul>${[...a.adjustments.bonuses.map(b=>`<li>+${b.points} ${escape(b.label)}: ${escape(b.reason)}</li>`),...a.adjustments.penalties.map(p=>`<li>−${p.points} ${escape(p.label)}: ${escape(p.reason)}</li>`)].join('')}</ul>`:''}<table><tr><th>Dimensión</th><th>Valor /100</th><th>Peso</th><th>Aporte antes del factor</th></tr>${o.dimensions.map(d=>`<tr><td>${escape(d.name)}</td><td>${d.value.toFixed(1)}</td><td>${(d.weight*100).toFixed(0)} %</td><td>${(d.value*d.weight).toFixed(2)}</td></tr>`).join('')}</table><p>Bandas educativas: 85–100 destacado; 70–84 sólido; 50–69 en desarrollo; 0–49 necesita revisión.</p>`,
  a?`<h2>Explicación V2</h2><p>${escape(a.story)}</p><ul>${a.notes.map(n=>`<li>${escape(n)}</li>`).join('')}</ul>`:'',
  `<h2>Seguimiento de indicadores</h2><table><tr><th>Indicador</th><th>Base / meta declaradas</th><th>Observado simulado</th><th>Verificación</th></tr>${reportIndicators(g).map(i=>`<tr><td>${escape(i.name)} · ${escape(i.kind)}</td><td>${i.baseline} / ${i.target} ${escape(i.unit)}</td><td>${i.observed.toLocaleString('es-CO',{maximumFractionDigits:1})} ${escape(i.observedUnit)}</td><td>${escape(i.source)} · ${escape(i.owner)} · ${escape(i.frequency)}</td></tr>`).join('')}</table><p>Revisa unidades declaradas y calculadas. Un cierre sin servicio no atribuye beneficios operativos del proyecto terminado.</p>`,
  `<h2>Reconocimientos por evidencias</h2>${medals.length?medals.map(m=>`<div class="medal"><strong>${escape(m.title)}</strong><p>${escape(m.evidence)}</p></div>`).join(''):'<p>Bitácora de experiencia: revisa las evidencias que faltan para obtener insignias.</p>'}`,
@@ -192,4 +193,26 @@ export function projectReport(g:GameState){
  g.v2?`<h2>Argumentos ODS</h2><ul>${g.sdgs.map(id=>`<li>ODS ${id}: ${escape(g.v2?.sdgReasons[id]?.text??'Sin argumento')}</li>`).join('')}</ul><h2>Argumento regulatorio</h2><blockquote>${escape(g.v2.regulatory.reason)}</blockquote><h2>Prácticas V2</h2><ul>${Object.entries(g.v2.assessments).map(([id,r])=>`<li>${escape(id)}: ${r.choices.length} intentos, ${r.hints} pistas, ${r.score.toFixed(0)}/100.</li>`).join('')}</ul>`:'',
  '<footer><small>Datos simulados · adaptación educativa MGA · informe local sin servicios externos.</small></footer></body></html>'
  ].join('');
+}
+
+import { budgetReview } from "./budgetReview";
+import { puzzleResult, recommendedPolicies } from "./regulationLab";
+import { sdgReasonScore } from "./projectV2";
+/** Iteration-2 achievements: each requires observable evidence, never mere progress. */
+function v2Medals(g: GameState): Medal[] {
+  if (!g.v2 || !g.outcome || !g.snapshot?.decisionState) return [];
+  const plan = g.snapshot.decisionState,
+    out: Medal[] = [],
+    completed = g.outcome.status === "completado";
+  if (completed && !g.loans.length && budgetReview(plan).score >= 80 && g.extraCost <= (plan.budget.contingency || 0))
+    out.push({ id: "planner", title: "Planificador", evidence: "Terminaste sin crédito, con un presupuesto bien diagnosticado (≥ 80) y sobrecostos cubiertos por la contingencia." });
+  if (chainV2Score(plan) >= 80)
+    out.push({ id: "analyst", title: "Analista", evidence: "Tu cadena de valor alcanzó 80/100 o más al invertir." });
+  if (plan.v2?.regulatory.chain && puzzleResult(plan).score >= 75 && recommendedPolicies(plan).includes(plan.policy))
+    out.push({ id: "regulator", title: "Regulador", evidence: "La cadena causal regulatoria fue coherente (≥ 75) y el instrumento proporcional a la severidad real, incluso si fue no intervenir." });
+  if (completed && g.eventIds.filter((id) => id !== "technical-reveal").length > 0 && g.outcome.coverage >= 0.5 && g.month <= scenarioById(g.scenarioId).deadline)
+    out.push({ id: "riskmanager", title: "Gestor de riesgo", evidence: "Superaste al menos un evento y cerraste a tiempo con cobertura de 50 % o más." });
+  if (sdgReasonScore(plan) >= 75 && plan.sdgs.length <= scenarioById(g.scenarioId).sdgs.length)
+    out.push({ id: "sustainable", title: "Proyecto sostenible", evidence: "Seleccionaste y sustentaste ODS pertinentes (≥ 75) sin selección indiscriminada." });
+  return out;
 }

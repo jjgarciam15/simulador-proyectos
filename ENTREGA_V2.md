@@ -1,5 +1,7 @@
 # Entrega V2 · PROYECTA
 
+> Actualización del 25 de septiembre de 2026: la iteración 2 de la V2 (dilemas, laboratorio regulatorio, planificador presupuestal, coherencia transversal y más) se documenta en `IMPLEMENTATION_PLAN_V2.md` y en `MANUAL_CREACION.md`. Este documento conserva el estado de la entrega anterior.
+
 Fecha de revisión: 23 de septiembre de 2026. Evolución local del proyecto existente, sin publicación. Este documento distingue implementación, verificación y pendientes del prompt maestro.
 
 ## IMPLEMENTADO

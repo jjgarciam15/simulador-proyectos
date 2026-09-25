@@ -13,7 +13,7 @@ Registrar versión del simulador, misión, dificultad, semilla y condiciones de 
 | Bloque | Minutos orientativos | Evidencia |
 |---|---:|---|
 | Diagnóstico inicial de conceptos | 8 | Respuestas antes de jugar |
-| Instrucciones y diagnóstico del proyecto | 12 | Población, déficit y árbol causal |
+| Instrucciones y diagnóstico del proyecto | 12 | Población, déficit y Árbol del problema |
 | Formulación y preparación | 18 | Alternativas, cadena, presupuesto, indicadores |
 | Evaluación y regulación | 15 | Flujos, sensibilidad, incentivos y ODS |
 | Decisión y ejecución | 12 | Justificación y respuestas a eventos |
