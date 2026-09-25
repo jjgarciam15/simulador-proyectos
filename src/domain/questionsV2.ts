@@ -79,7 +79,8 @@ function questionDraft(g: GameState): QuestionV2[] {
     difficulty: g.difficulty,
     question: c.question,
     options: [
-      ...c.options.map(({ id, text }) => ({ id, text })),
+      // The practice already adds four stage traps: keep the three base options so the total stays at 7.
+      ...c.options.filter(({ id }) => !id.startsWith("trap")).map(({ id, text }) => ({ id, text })),
       ...distractors[c.phase].map((text, i) => ({ id: "plausible" + i, text })),
     ].sort((a, b) => random(g.seed, c.id + a.id) - random(g.seed, c.id + b.id)),
     answers: [c.answer],

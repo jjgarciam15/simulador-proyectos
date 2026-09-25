@@ -11,6 +11,7 @@ import { generateActivities } from "./project/generator";
 import { prepareV2 } from "../testSupport/gameFixture";
 import { sampleProject } from "../testSupport/projectFixture";
 import { tutorial } from "../features/v22/HowToPlay";
+import { learningChallenges } from "./learning";
 
 const inRange = (n: number) => n >= 5 && n <= 7;
 describe("Regla de preguntas: entre 5 y 7 opciones, con trampas", () => {
@@ -25,6 +26,11 @@ describe("Regla de preguntas: entre 5 y 7 opciones, con trampas", () => {
     for (const list of [exam2.objectives, exam2.tradeoff.options, exam2.sunkQuestion.options, sensitivityOptions(), decisionReasons]) expect(inRange(list.length)).toBe(true);
     for (const t of tutorial) expect(inRange(t.o.length), t.q).toBe(true);
     for (const a of generateActivities(sampleProject())) expect(inRange(a.options.length), a.id).toBe(true);
+    for (const s of scenarios)
+      for (const c of learningChallenges(createGameV2(s.id))) {
+        expect(inRange(c.options.length), `${s.id}/${c.id}`).toBe(true);
+        expect(new Set(c.options.map((o) => o.text)).size, `${s.id}/${c.id} opciones repetidas`).toBe(c.options.length);
+      }
   });
   it("la respuesta correcta no aparece siempre en la primera posición", () => {
     const firstCorrect = concepts.filter((c) => stableShuffle(c.id, c.exercise.options)[0].correct).length;

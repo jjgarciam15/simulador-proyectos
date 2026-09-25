@@ -15,7 +15,7 @@ describe("Aprender, contrastar y aplicar", () => {
       expect(cases).toHaveLength(16);
       expect(new Set(cases.map((c) => c.id)).size).toBe(16);
       for (const c of cases) {
-        expect(new Set(c.options.map((o) => o.text)).size).toBe(3);
+        expect(new Set(c.options.map((o) => o.text)).size).toBe(5); // 5 opciones: respuesta, dos errores y dos trampas
         expect(c.options.filter((o) => o.id === c.answer)).toHaveLength(1);
       }
     }

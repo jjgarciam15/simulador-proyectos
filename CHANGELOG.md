@@ -1,5 +1,11 @@
 # Cambios
 
+## 2.4.2 · «Tu misión de criterio» con 5 opciones (26 de septiembre de 2026)
+
+- Los 16 casos de aprendizaje (iniciales y de transferencia) tienen 5 opciones: respuesta razonada, dos errores y dos trampas plausibles. La práctica V2 conserva 7 opciones.
+- La regla de 5–7 opciones cubre también estos casos en la prueba `questionRules.test.ts`.
+- Corrección de redacción: «En «Una ciudad en movimiento», …».
+
 ## 2.4.1 · paquete portátil (25 de septiembre de 2026)
 
 - `pnpm portable` genera `PROYECTA-<versión>-portable.zip`: aplicación compilada + servidor PowerShell; se abre con doble clic en Windows sin instalar Node.js.
