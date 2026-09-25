@@ -1008,3 +1008,315 @@ p.pb-issues.error {
   margin: 2px 0 0;
   accent-color: var(--primary);
 }
+.projects-center .panel,
+.projects-center .panel h3,
+.pb-main h3 {
+  color: var(--text-primary);
+}
+.aurora-home .pc-tabs .v22-tab:hover {
+  border-color: var(--accent);
+}
+.aurora-home .pc-tabs .v22-tab[aria-selected="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1b1405;
+}
+.aurora-home .pc-tabs .v22-tab[aria-selected="false"] {
+  background: transparent;
+  color: #e8f1ec;
+}
+.pb-import-note {
+  display: block;
+}
+.pb-import-note svg {
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+.pb-field > span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+}
+.pb-field > span .pb-evidence {
+  margin-left: 0;
+}
+
+/* ---------- Personajes animados (estados con propósito) ---------- */
+.character-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.character-frame > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  transform-origin: 50% 80%;
+  animation: char-enter var(--dur-slow) var(--ease) both, char-idle 6s ease-in-out 0.6s infinite;
+}
+.advisor-portrait span.character-role {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #f1d4a4;
+}
+.advisor-card {
+  transition: box-shadow var(--dur) var(--ease);
+}
+.mood-thinking .character-frame > img {
+  animation: char-enter var(--dur-slow) var(--ease) both, char-think 3.2s ease-in-out infinite;
+}
+.mood-speaking .advisor-speech {
+  animation: speak-in var(--dur) var(--ease);
+}
+.mood-speaking .character-frame > img {
+  animation: char-speak 0.9s ease-in-out 3;
+}
+.mood-concerned .advisor-portrait {
+  box-shadow: inset 0 0 0 3px var(--accent);
+}
+.mood-concerned .character-frame > img {
+  animation: char-concern 2.4s ease-in-out infinite;
+}
+.mood-warning .advisor-portrait {
+  box-shadow: inset 0 0 0 3px #e0574a;
+  animation: warn-pulse 1.6s ease-in-out infinite;
+}
+.mood-positive .advisor-portrait {
+  box-shadow: inset 0 0 0 3px #3fb59f;
+}
+.mood-positive .character-frame > img {
+  animation: char-nod 0.8s ease-in-out 2;
+}
+.mood-celebrating .character-frame > img {
+  animation: char-cheer 1s ease-in-out 3;
+}
+.thinking-dots {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  z-index: 2;
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: rgba(10, 30, 34, 0.8);
+}
+.thinking-dots b {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f1d4a4;
+  animation: dot 1.2s ease-in-out infinite;
+}
+.thinking-dots b:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.thinking-dots b:nth-child(3) {
+  animation-delay: 0.4s;
+}
+.celebrate-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle at 20% 30%, #f1b365 0 3px, transparent 4px), radial-gradient(circle at 70% 20%, #6ee0c8 0 3px, transparent 4px), radial-gradient(circle at 50% 60%, #7fc4ff 0 3px, transparent 4px),
+    radial-gradient(circle at 85% 55%, #f1b365 0 2px, transparent 3px), radial-gradient(circle at 30% 70%, #6ee0c8 0 2px, transparent 3px);
+  animation: burst 1.4s var(--ease) 2;
+}
+@keyframes char-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes char-idle {
+  50% {
+    transform: scale(1.015);
+  }
+}
+@keyframes char-think {
+  50% {
+    transform: rotate(-1.2deg) scale(1.01);
+  }
+}
+@keyframes char-speak {
+  50% {
+    transform: translateY(-2px) scale(1.01);
+  }
+}
+@keyframes char-concern {
+  50% {
+    transform: rotate(1deg) translateX(1px);
+  }
+}
+@keyframes char-nod {
+  50% {
+    transform: translateY(3px);
+  }
+}
+@keyframes char-cheer {
+  30% {
+    transform: translateY(-6px) scale(1.03);
+  }
+  60% {
+    transform: translateY(0);
+  }
+}
+@keyframes warn-pulse {
+  50% {
+    box-shadow: inset 0 0 0 5px rgba(224, 87, 74, 0.55);
+  }
+}
+@keyframes dot {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@keyframes burst {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  40% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+@keyframes speak-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Microinteracciones: recursos, consecuencias, eventos y logros ---------- */
+.resource-meter i {
+  transition: width var(--dur-slow) var(--ease), background var(--dur) var(--ease);
+}
+.impact-toast strong {
+  animation: speak-in var(--dur) var(--ease) both;
+}
+.impact-toast strong:nth-child(2) {
+  animation-delay: 80ms;
+}
+.impact-toast strong:nth-child(3) {
+  animation-delay: 160ms;
+}
+.event-panel {
+  animation: event-in var(--dur-slow) var(--ease) both;
+  border-left: 5px solid var(--accent);
+}
+@keyframes event-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+    box-shadow: 0 0 0 0 rgba(217, 137, 43, 0.5);
+  }
+  60% {
+    box-shadow: 0 0 0 8px rgba(217, 137, 43, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.medal-earned,
+.achievement,
+.recognition-badge {
+  animation: achievement-in var(--dur-slow) var(--ease) both;
+}
+@keyframes achievement-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85) rotate(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .character-frame > img,
+  .mood-thinking .character-frame > img,
+  .mood-speaking .character-frame > img,
+  .mood-concerned .character-frame > img,
+  .mood-positive .character-frame > img,
+  .mood-celebrating .character-frame > img,
+  .mood-warning .advisor-portrait,
+  .thinking-dots b,
+  .celebrate-burst,
+  .event-panel,
+  .medal-earned,
+  .achievement,
+  .recognition-badge,
+  .pb-tree-card,
+  .pb-alt,
+  .pb-impact,
+  .impact-toast strong {
+    animation: none !important;
+  }
+  .home-action,
+  .pc-card,
+  .pb-chain-link,
+  .pb-bar i,
+  .resource-meter i {
+    transition: none !important;
+  }
+}
+/* Mapa del proyecto: las etapas completadas se «conectan» con una línea animada. */
+.project-map nav {
+  position: relative;
+}
+.project-map nav button {
+  position: relative;
+  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+.project-map nav button.map-done {
+  border-color: var(--success) !important;
+}
+.project-map nav button.map-done::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--success), #3fb59f);
+  transform-origin: left;
+  animation: link-grow var(--dur-slow) var(--ease) both;
+}
+@keyframes link-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-map nav button.map-done::after {
+    animation: none;
+  }
+}

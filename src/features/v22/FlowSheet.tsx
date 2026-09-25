@@ -54,7 +54,7 @@ export function Timeline({ c }: { c: FlowCase }) {
 }
 
 /** Reusable Excel-like editor over any FlowCase (missions and Examen 2 share it). */
-export function FlowTable({ c, draft, setDraft }: { c: FlowCase; draft: Draft[]; setDraft: (d: Draft[]) => void }) {
+export function FlowTable({ c, draft, setDraft, marks }: { c: FlowCase; draft: Draft[]; setDraft: (d: Draft[]) => void; marks?: Record<string, "alerta" | "grave"> }) {
   const [inspect, setInspect] = useState<{ rubroId: string; period: number } | null>(null),
     net = netFlow(c, toRows(draft)),
     periods = Array.from({ length: c.horizon + 1 }, (_, p) => p);
@@ -87,6 +87,8 @@ export function FlowTable({ c, draft, setDraft }: { c: FlowCase; draft: Draft[];
         <span className="cell-compute">Debes calcular</span>
         <span className="cell-input">Debes ingresar</span>
         <span className="cell-auto">Calculado automáticamente</span>
+        {marks && <span className="cell-warning">Advertencia</span>}
+        {marks && <span className="cell-error">Error</span>}
       </p>
       <div className="table-wrap v22-sheet-wrap">
         <table className="v22-sheet">
@@ -106,9 +108,10 @@ export function FlowTable({ c, draft, setDraft }: { c: FlowCase; draft: Draft[];
               const r = c.rubros.find((x) => x.id === d.rubroId)!,
                 cells = d.kind ? rowCells(c, { ...d, kind: d.kind }) : periods.map(() => 0);
               return (
-                <tr key={d.rubroId}>
+                <tr key={d.rubroId} className={marks?.[d.rubroId] ? "row-" + marks[d.rubroId] : ""}>
                   <th className="sticky" scope="row">
                     {r.label}
+                    {marks?.[d.rubroId] && <small className={"cell-tag " + (marks[d.rubroId] === "grave" ? "cell-error" : "cell-warning")}>{marks[d.rubroId] === "grave" ? "Error" : "Advertencia"}</small>}
                     <small className={"cell-tag cell-" + (r.given === "entregado" ? "given" : r.given === "calcular" ? "compute" : "input")}>{givenLabel[r.given]}</small>
                     {r.formula && <small className="muted">{r.formula}</small>}
                   </th>
@@ -208,7 +211,7 @@ export default function FlowSheet({ g, send }: { g: GameState; send: (a: Action)
         decide="Clasifica cada rubro, calcula los valores que faltan y ubícalos en los periodos correctos. Algunos rubros no deben entrar."
         next="VPN financiero, flujo económico con RPC, sensibilidad y comparación de alternativas."
       />
-      <FlowTable c={c} draft={draft} setDraft={setDraft} />
+      <FlowTable c={c} draft={draft} setDraft={setDraft} marks={saved && help.immediate && help.detail !== "score" ? Object.fromEntries(errors.filter((e) => e.rubroId).map((e) => [e.rubroId!, e.severity === "grave" ? "grave" : "alerta"])) : undefined} />
       <p>
         <strong>VPN financiero a {fmtPct(c.financialRate)}: {fmtMoney(value)}</strong>
       </p>

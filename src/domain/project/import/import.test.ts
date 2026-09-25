@@ -8,7 +8,7 @@ import { extractPdfLines, type PdfJsLike } from "./pdf";
 import { simplePdf } from "../../../testSupport/pdfWriter";
 import { excelSheets, pdfPages } from "../../../testSupport/importFixtures";
 import { generateMission } from "../generator";
-import { validateProject } from "../validation";
+import { reviewProject, validateProject } from "../validation";
 import { parseProject } from "../schema";
 
 const config = { difficulty: "guiado", mode: "aprendizaje", duration: "normal" } as const;
@@ -131,6 +131,7 @@ describe("Las tres fuentes llegan al mismo MissionGenerator", () => {
   it("un proyecto importado requiere revisión; tras revisarlo y completarlo genera la partida", async () => {
     const excel = normalizeExcel(readXlsx(writeXlsx(excelSheets)), "biblioteca.xlsx").project;
     expect(validateProject(excel).some((i) => i.path === "metadata.importReviewed" && i.level === "error")).toBe(true);
+    expect(reviewProject(excel).ready).toBe(false);
     excel.metadata.importReviewed = true;
     const res = generateMission(parseProject(JSON.parse(JSON.stringify(excel))), config, "gen-xlsx");
     expect(res.ok).toBe(true);

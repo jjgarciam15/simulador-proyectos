@@ -191,6 +191,8 @@ export function projectConfidence(p: NormalizedProject) {
 export function reviewProject(p: NormalizedProject) {
   const issues = validateProject(p);
   const groups: { label: string; section: BuilderSection; paths: string[] }[] = [
+    ...(p.source.type === "imported_pdf" || p.source.type === "imported_excel" ? [{ label: "Revisión de datos importados", section: "general" as const, paths: ["metadata"] }] : []),
+    { label: "Información general", section: "general", paths: ["title", "horizon"] },
     { label: "Problema", section: "problema", paths: ["problem"] },
     { label: "Causas", section: "problema", paths: ["causes"] },
     { label: "Efectos", section: "problema", paths: ["problemEffects"] },
@@ -209,7 +211,7 @@ export function reviewProject(p: NormalizedProject) {
     return { ...g, status: mine.some((i) => i.level === "error") ? ("error" as const) : mine.length ? ("revisar" as const) : ("ok" as const), messages: mine.map((i) => i.message) };
   });
   const pending = items.filter((i) => i.status !== "ok").length,
-    blocking = items.filter((i) => i.status === "error").length;
+    blocking = Math.max(items.filter((i) => i.status === "error").length, errorsOf(issues).length ? 1 : 0);
   return {
     items,
     ready: blocking === 0,

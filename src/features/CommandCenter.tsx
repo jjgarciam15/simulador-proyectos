@@ -115,7 +115,7 @@ export function ProjectMap({
               i > g.maxPhase || !!g.snapshot || !!g.outcome || i === g.phase
             }
             onClick={() => send({ type: "visit", phase: i })}
-            className={g.v2!.reviews[i]?.length ? "needs-review" : ""}
+            className={(g.v2!.reviews[i]?.length ? "needs-review " : "") + (g.v2!.completed.includes(i) ? "map-done" : "")}
           >
             <b>
               {i + 1} · {name}

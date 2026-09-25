@@ -738,3 +738,23 @@
 .aurora-home .reading .panel .text-btn {
   color: var(--primary);
 }
+.cell-warning {
+  background: var(--cell-warning);
+}
+.cell-error {
+  background: var(--cell-error);
+}
+.v22-sheet tr.row-alerta > th,
+.v22-sheet tr.row-alerta > td {
+  background-color: var(--cell-warning) !important;
+}
+.v22-sheet tr.row-grave > th,
+.v22-sheet tr.row-grave > td {
+  background-color: var(--cell-error) !important;
+}
+.v22-sheet tr.row-grave > th {
+  box-shadow: inset 4px 0 0 var(--danger);
+}
+.v22-sheet tr.row-alerta > th {
+  box-shadow: inset 4px 0 0 var(--warning);
+}
