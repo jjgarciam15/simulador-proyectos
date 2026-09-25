@@ -5,6 +5,7 @@ import { causalQuality, indicatorReview } from "./mga";
 import { clamp } from "./finance";
 import { learningPenalty } from "./questionsV2";
 import { scoringWeightsV2 } from "../data/balance";
+import { regulatoryLabScore } from "./regulationLab";
 export interface AssessmentV2 {
   base: number;
   penalty: number;
@@ -14,6 +15,8 @@ export interface AssessmentV2 {
 }
 export function regulatoryScore(g: GameState) {
   const r = g.v2!.regulatory;
+  // Games that built the causal puzzle are scored with the regulatory lab (chain + proportionality).
+  if (r.chain) return Math.round(regulatoryLabScore(g));
   const expected =
     g.policy === "none"
       ? ["baseline", "persistence"]

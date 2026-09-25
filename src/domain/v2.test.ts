@@ -83,9 +83,15 @@ describe("Construcción y evaluación V2", () => {
       actor0: { consulted: true, status: "acuerdo", rounds: [] },
     };
     g.budget.social = 500;
+    // Baseline without agreements isolates the settlement from dilemma and regulatory consequences.
+    const plain = act(
+      { ...g, v2: { ...g.v2!, negotiations: {} } },
+      { type: "commit" },
+      false,
+    );
     const backed = act(g, { type: "commit" }, false);
-    expect(backed.support).toBe(g.support + 8);
-    expect(backed.reputation).toBe(g.reputation + 3);
+    expect(backed.support).toBe(plain.support + 8);
+    expect(backed.reputation).toBe(plain.reputation + 3);
     const replay = act(
       backed.snapshot!.decisionState!,
       { type: "commit" },
@@ -95,8 +101,8 @@ describe("Construcción y evaluación V2", () => {
     expect(replay.reputation).toBe(backed.reputation);
     const broken = { ...g, budget: { ...g.budget, social: 0 } };
     const result = act(broken, { type: "commit" }, false);
-    expect(result.support).toBe(g.support - 10);
-    expect(result.reputation).toBe(g.reputation - 12);
+    expect(result.support).toBe(plain.support - 10);
+    expect(result.reputation).toBe(plain.reputation - 12);
     expect(g.support).toBe(50);
   });
   it("reinicia una etapa sin reembolsar estudios ni borrar el trabajo posterior", () => {

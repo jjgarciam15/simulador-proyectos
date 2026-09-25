@@ -8,12 +8,25 @@ import {
   available,
 } from "../domain/engine";
 import { scenarioById } from "../data/scenarios";
-import { chainBank } from "../domain/projectV2";
+import { chainBank, chainLevels } from "../domain/projectV2";
+import { pendingDilemma } from "../domain/dilemmas";
+/** Resolve any pending dilemma with the given option index (tests must decide explicitly). */
+export function settleDilemma(g: GameState, choiceIndex = 0) {
+  const t = pendingDilemma(g);
+  if (!t) return g;
+  return act(g, {
+    type: "dilemma",
+    choice: t.choices[Math.min(choiceIndex, t.choices.length - 1)].id,
+  });
+}
 export function prepareV2(
   id = "agua",
   initial?: GameState,
   alternativeIndex = 1,
+  dilemmaChoice = 0,
 ) {
+  const next = (state: GameState) =>
+    settleDilemma(act(state, { type: "next" }), dilemmaChoice);
   let g = initial ?? createGameV2(id, "guiado", "V2-TEST");
   g = act(g, { type: "nodes", ids: ["n0", "n1", "n2", "n3", "n4"] });
   g = act(g, {
@@ -29,10 +42,10 @@ export function prepareV2(
       ],
     },
   });
-  g = act(g, { type: "next" });
+  g = next(g);
   g = act(g, { type: "objective", id: "n0" });
   g = act(g, { type: "alternative", id: "a" + alternativeIndex });
-  g = act(g, { type: "next" });
+  g = next(g);
   g = act(g, {
     type: "budget",
     value: budgetFor(g, scenarioById(id).alternatives[alternativeIndex]),
@@ -53,9 +66,11 @@ export function prepareV2(
       },
     ],
   });
-  const bank = chainBank(g).filter((c) =>
-    ["capital", "design", "service", "access", "welfare"].includes(c.id),
-  );
+  const bank = chainBank(g)
+    .filter((c) =>
+      ["capital", "design", "service", "access", "welfare"].includes(c.id),
+    )
+    .sort((a, b) => chainLevels.indexOf(a.level) - chainLevels.indexOf(b.level));
   g = act(g, {
     type: "chain",
     cards: bank.map(({ id, level }) => ({ id, level })),
@@ -63,9 +78,9 @@ export function prepareV2(
   });
   if (projectCost(g) > available(g))
     g = act(g, { type: "finance", source: "credito" });
-  g = act(g, { type: "next" });
+  g = next(g);
   g = act(g, { type: "ack", id: "evaluation" });
-  g = act(g, { type: "next" });
+  g = next(g);
   g = act(g, {
     type: "policy",
     id: "none",
@@ -94,6 +109,6 @@ export function prepareV2(
       reason: "Comparar costos regulatorios con la evidencia disponible.",
     },
   });
-  g = act(g, { type: "next" });
+  g = next(g);
   return g;
 }

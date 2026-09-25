@@ -31,7 +31,9 @@ function execute(g: GameState) {
     }
     expect(available(g)).toBeGreaterThanOrEqual(-0.000001);
     expect(g.cash + g.spent).toBeCloseTo(
-      g.v2!.initialCash + g.loans.reduce((sum, l) => sum + l.principal, 0),
+      g.v2!.initialCash +
+        (g.v2!.inflows ?? 0) +
+        g.loans.reduce((sum, l) => sum + l.principal, 0),
       5,
     );
   }

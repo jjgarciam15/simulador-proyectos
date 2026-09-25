@@ -2,6 +2,7 @@ import type { GameState } from "./types";
 import { scenarioById } from "../data/scenarios";
 import { dependencyRules, difficultyRules } from "../data/balance";
 import { directSDGs } from "../data/relationships";
+import { random } from "./finance";
 export const chainLevels = [
   "Insumos",
   "Actividades",
@@ -19,6 +20,17 @@ export interface V2State {
   budgetLines?:import('./budgetLines').BudgetLine[];
   challenge?:import('./challenges').Challenge;
   negotiations?:Record<string,import('./negotiations').NegotiationRecord>;
+  /** Dilemmas drawn in this game (seeded), with the choice once resolved. */
+  dilemmas?: import('./dilemmas').DilemmaRecord[];
+  pendingDilemma?: string;
+  /** Consequences that materialise when the investment is committed. */
+  delayed?: import('./dilemmas').DelayedEffect[];
+  /** Additive change in execution event exposure (systemic consequence). */
+  eventRisk?: number;
+  /** Money received from dilemma choices (co-financing, supplier credit). */
+  inflows?: number;
+  /** Project log of immediate, delayed and systemic consequences. */
+  consequences?: import('./regulationLab').Consequence[];
   version: 2;
   completed: number[];
   reviews: Record<number, string[]>;
@@ -35,6 +47,8 @@ export interface V2State {
     incentive: string;
     adverse: string;
     reason: string;
+    /** Regulatory causal puzzle: card id per slot (optional for older games). */
+    chain?: Record<string, string>;
   };
   actorMap: Record<
     string,
@@ -112,105 +126,92 @@ export function stageStatus(g: GameState, phase: number) {
           ? "completada"
           : "pendiente";
 }
-export function chainBank(g: GameState) {
+export interface ChainCard {
+  id: string;
+  label: string;
+  /** Level where the card belongs conceptually. */
+  level: ChainLevel;
+  valid: boolean;
+  /** Related but weaker: earns half credit (e.g. a management milestone presented as a product). */
+  partial?: boolean;
+  /** Explanation shown after confirming, depending on difficulty. */
+  why: string;
+}
+/**
+ * Card bank built from the mission and the selected alternative. Legacy ids (capital, knowledge, design,
+ * build, service, access, welfare, publicity, spending, promise, grant, building) are preserved so older
+ * saved chains remain valid. The order is shuffled by seed so the list does not reveal the levels.
+ */
+export function chainBank(g: GameState): ChainCard[] {
   const s = scenarioById(g.scenarioId),
-    a = s.alternatives.find((a) => a.id === g.alternative);
-  return [
-    {
-      id: "capital",
-      label: "Capital y equipo técnico",
-      level: "Insumos",
-      valid: true,
-    },
-    {
-      id: "knowledge",
-      label: "Estudios y conocimiento territorial",
-      level: "Insumos",
-      valid: true,
-    },
-    {
-      id: "design",
-      label: "Diseñar y obtener permisos",
-      level: "Actividades",
-      valid: true,
-    },
-    {
-      id: "build",
-      label: "Implementar y poner en servicio",
-      level: "Actividades",
-      valid: true,
-    },
-    {
-      id: "service",
-      label: a?.product ?? "Servicio por definir",
-      level: "Productos",
-      valid: true,
-    },
-    {
-      id: "access",
-      label: s.nodes[0].objective,
-      level: "Resultados",
-      valid: true,
-    },
-    {
-      id: "welfare",
-      label: s.nodes[4].objective,
-      level: "Impactos",
-      valid: true,
-    },
-    {
-      id: "publicity",
-      label: "Aumentar visibilidad del Consejo",
-      level: "Resultados",
-      valid: false,
-    },
-    {
-      id: "spending",
-      label: "Gastar todo el presupuesto como bienestar",
-      level: "Impactos",
-      valid: false,
-    },
-    {
-      id: "promise",
-      label: "Prometer cobertura sin operación",
-      level: "Productos",
-      valid: false,
-    },
-    {
-      id: "grant",
-      label: "Obtener crédito como impacto social",
-      level: "Impactos",
-      valid: false,
-    },
-    {
-      id: "building",
-      label: "Diseño contratado como servicio ya prestado",
-      level: "Productos",
-      valid: false,
-    },
-  ] as { id: string; label: string; level: ChainLevel; valid: boolean }[];
+    a = s.alternatives.find((a) => a.id === g.alternative),
+    obj = (i: number) => s.nodes.find((n) => n.id === "n" + i)?.objective ?? "",
+    decoy = s.nodes.find((n) => n.id === "d1")?.objective ?? "Construir una obra emblemática";
+  const cards: ChainCard[] = [
+    { id: "capital", label: a ? `Recursos de inversión y equipo técnico para ${a.name.toLowerCase()}` : "Capital y equipo técnico", level: "Insumos", valid: true, why: "Recursos que se consumen para ejecutar actividades." },
+    { id: "knowledge", label: "Estudios y conocimiento territorial", level: "Insumos", valid: true, why: "La información es un insumo: permite diseñar y focalizar." },
+    { id: "goal-input", label: "Meta de cobertura del 100 % de la población", level: "Insumos", valid: false, why: "Una meta describe un resultado esperado, no un recurso que se consume." },
+    { id: "design", label: "Diseñar y obtener permisos", level: "Actividades", valid: true, why: "Acción del equipo que transforma insumos." },
+    { id: "build", label: a ? `Implementar: ${a.description.toLowerCase()}` : "Implementar y poner en servicio", level: "Actividades", valid: true, why: "Actividad central que produce el bien o servicio." },
+    { id: "cause-activity", label: `Ejecutar acciones para ${obj(2).toLowerCase()}`, level: "Actividades", valid: true, why: "Actúa sobre la causa indirecta identificada en el Árbol del problema." },
+    { id: "campaign", label: "Campaña de comunicación sobre el proyecto", level: "Actividades", valid: false, partial: true, why: "Es una actividad real, pero no actúa sobre las causas del problema: aporta poco a la cadena." },
+    { id: "service", label: a?.product ?? "Servicio por definir", level: "Productos", valid: true, why: "Bien o servicio entregado por el proyecto y verificable." },
+    { id: "operators", label: "Operadores capacitados y protocolos de operación", level: "Productos", valid: true, why: "Producto que permite sostener el servicio." },
+    { id: "contract", label: "Contrato de obra firmado", level: "Productos", valid: false, partial: true, why: "Es un hito de gestión: demuestra avance administrativo, no un producto entregado a la población." },
+    { id: "promise", label: "Prometer cobertura sin operación", level: "Productos", valid: false, why: "Una promesa sin operación no es un producto verificable." },
+    { id: "building", label: "Diseño contratado como servicio ya prestado", level: "Productos", valid: false, why: "Confunde una actividad en curso con el servicio entregado." },
+    { id: "access", label: obj(0), level: "Resultados", valid: true, why: "Cambio en la población atendida: es el objetivo central." },
+    { id: "direct-result", label: obj(1), level: "Resultados", valid: true, why: "Corrige la causa directa: cambio observable en las condiciones del servicio." },
+    { id: "publicity", label: "Aumentar visibilidad del Consejo", level: "Resultados", valid: false, why: "Beneficia a la institución, no a la población objetivo." },
+    { id: "executed", label: "Presupuesto ejecutado al 100 %", level: "Resultados", valid: false, why: "Ejecutar el presupuesto mide gestión, no un cambio en la población." },
+    { id: "effect-impact", label: obj(3), level: "Impactos", valid: true, why: "Reduce un efecto del problema en el largo plazo." },
+    { id: "welfare", label: obj(4), level: "Impactos", valid: true, why: "Cambio de largo plazo en bienestar al que contribuye el proyecto." },
+    { id: "spending", label: "Gastar todo el presupuesto como bienestar", level: "Impactos", valid: false, why: "Gastar no equivale a generar bienestar." },
+    { id: "grant", label: "Obtener crédito como impacto social", level: "Impactos", valid: false, why: "La financiación es una fuente de recursos, no un impacto." },
+    { id: "emblem", label: decoy, level: "Impactos", valid: false, why: "Proviene de una causa mal planteada (falta de una obra), no del problema diagnosticado." },
+  ];
+  return cards.sort((x, y) => random(g.seed, "chain" + x.id) - random(g.seed, "chain" + y.id));
+}
+/** Per-card review after confirmation. */
+export function chainReview(g: GameState) {
+  const bank = chainBank(g);
+  return (g.v2?.chain ?? []).map((p) => {
+    const c = bank.find((c) => c.id === p.id);
+    const status = !c
+      ? "desconocida"
+      : c.valid && c.level === p.level
+        ? "correcta"
+        : c.partial && c.level === p.level
+          ? "parcial"
+          : c.valid || c.partial
+            ? "mal clasificada"
+            : "distractor";
+    return { id: p.id, label: c?.label ?? p.id, placed: p.level, expected: c?.level, status, why: c?.why ?? "" };
+  });
 }
 export function chainV2Score(g: GameState) {
   const p = g.v2?.chain ?? [],
     links = g.v2?.connections ?? [],
     bank = chainBank(g);
   if (!p.length) return 0;
-  const valid = p.filter((p) => {
-    const c = bank.find((c) => c.id === p.id);
-    return c?.valid && c.level === p.level;
-  });
-  const covered = new Set(valid.map((p) => p.level)).size / 5;
-  const precision = valid.length / p.length;
-  const validIds = new Set(valid.map((p) => p.id));
+  const credit = (x: ChainPlacement) => {
+    const c = bank.find((c) => c.id === x.id);
+    if (!c || c.level !== x.level) return 0;
+    return c.valid ? 1 : c.partial ? 0.5 : 0;
+  };
+  const valid = p.filter((x) => credit(x) === 1);
+  const covered = new Set(valid.map((x) => x.level)).size / 5;
+  const precision = p.reduce((n, x) => n + credit(x), 0) / p.length;
+  const usable = new Set(p.filter((x) => credit(x) > 0).map((x) => x.id));
   const good = links.filter(
     (l) =>
-      validIds.has(l.from) &&
-      validIds.has(l.to) &&
-      chainLevels.indexOf(p.find((p) => p.id === l.to)!.level) ===
-        chainLevels.indexOf(p.find((p) => p.id === l.from)!.level) + 1,
+      usable.has(l.from) &&
+      usable.has(l.to) &&
+      chainLevels.indexOf(p.find((x) => x.id === l.to)!.level) ===
+        chainLevels.indexOf(p.find((x) => x.id === l.from)!.level) + 1,
   );
   const linkedLevels =
-    new Set(good.map((l) => p.find((p) => p.id === l.from)!.level)).size / 4;
+    new Set(good.map((l) => p.find((x) => x.id === l.from)!.level)).size / 4;
   return Math.round(
     100 *
       (0.4 * covered + 0.3 * precision + 0.3 * linkedLevels) *

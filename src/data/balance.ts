@@ -6,6 +6,10 @@ export const difficultyRules: Record<
     cash: number;
     hintPenalty: number;
     event: number;
+    /** Multiplier for the money cost of dilemma choices. */
+    dilemmaCost: number;
+    /** How much the value-chain builder explains after confirming: reasons, wrong cards only, or score only. */
+    feedback: "full" | "cards" | "score";
     description: string;
   }
 > = {
@@ -14,6 +18,8 @@ export const difficultyRules: Record<
     cash: 1.08,
     hintPenalty: 1,
     event: 0.8,
+    dilemmaCost: 0.8,
+    feedback: "full",
     description:
       "Orientación contextual y pistas graduales; fondo inicial +8 %. Puedes analizar antes de confirmar.",
   },
@@ -22,6 +28,8 @@ export const difficultyRules: Record<
     cash: 1,
     hintPenalty: 2,
     event: 1,
+    dilemmaCost: 1,
+    feedback: "cards",
     description:
       "Sin recomendaciones de solución; pistas con mayor costo pedagógico y recursos base.",
   },
@@ -30,6 +38,8 @@ export const difficultyRules: Record<
     cash: 0.92,
     hintPenalty: 3,
     event: 1.25,
+    dilemmaCost: 1.2,
+    feedback: "score",
     description:
       "Fondo inicial −8 %, información menos precisa y mayor exposición a eventos. Ayudas a demanda.",
   },
@@ -57,4 +67,29 @@ export const dependencyRules: Record<string, number[]> = {
   mitigate: [3, 5],
   chain: [3, 4, 5],
   regulatory: [5],
+};
+/**
+ * Educational regulatory lab. Harm of the market failure under no intervention = harmScale × severity
+ * (severity is hidden, seeded per game, 0.3–1.4). Each instrument corrects a share of the harm and has
+ * fixed costs (administration + compliance) and side effects (capture, barriers, oversight gaps).
+ * Instruments within `tolerance` of the best net value are considered defensible.
+ */
+export const regulationBalance = {
+  harmScale: 100,
+  tolerance: 8,
+  severity: { min: 0.3, range: 1.1 },
+  /** Half-width of the severity band shown to the player, with and without a demand/market study. */
+  uncertainty: { studied: 0.1, unstudied: { guiado: 0.35, profesional: 0.4, experto: 0.5 } },
+  instruments: {
+    none: { correction: 0, cost: 0, side: 0 },
+    targeted: { correction: 0.55, cost: 35, side: 5 },
+    strict: { correction: 0.85, cost: 55, side: 20 },
+  } as Record<string, { correction: number; cost: number; side: number }>,
+  /** Systemic consequences applied when the investment is committed. */
+  consequences: {
+    overRegulation: { performance: -0.05, sustainability: -3, reputation: -2 },
+    needlessCost: { reputation: -3, performance: -0.01 },
+    persistentFailure: { performance: -0.04, eventRisk: 0.15 },
+    wrongDiagnosis: { performance: -0.03, reputation: -2 },
+  },
 };

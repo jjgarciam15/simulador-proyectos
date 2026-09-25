@@ -480,7 +480,7 @@ export function Results({
               </p>
             ))}
             <p>
-              Coherencia base: 45 % árbol, 25 % objetivo, 30 % vínculos. En contenido 3: 70 % de esa base + 15 % conexiones causales + 15 % cadena de valor. Los textos no se califican. Valor: 50 +
+              Coherencia base: 45 % Árbol del problema, 25 % objetivo, 30 % vínculos. En contenido 3: 70 % de esa base + 15 % conexiones causales + 15 % cadena de valor. Los textos no se califican. Valor: 50 +
               VPN / presupuesto × 30. Cobertura/equidad: 65/35.
               Información/riesgo: 50/50. Disciplina: 100 menos sobrecostos
               relativos ×150 y deuda relativa ×15. Plazo: −4 por mes fuera de
