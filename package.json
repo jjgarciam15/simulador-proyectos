@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "tsc -b",
     "check": "pnpm typecheck && pnpm test && pnpm build",
-    "repo:check": "node scripts/check-repository.mjs"
+    "repo:check": "node scripts/check-repository.mjs",
+    "portable": "pnpm build && node scripts/build-portable.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

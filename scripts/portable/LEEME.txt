@@ -1,0 +1,30 @@
+PROYECTA {version} - Simulador de formulacion y evaluacion de proyectos (version portatil)
+==============================================================================
+
+COMO ABRIRLO
+1. Descomprime el archivo .zip (clic derecho > Extraer todo). No lo abras desde dentro del zip.
+2. Entra a la carpeta y haz doble clic en ABRIR_PROYECTA.cmd.
+3. Se abre el simulador en el navegador. Deja abierta la ventana negra mientras juegas;
+   para terminar, cierra esa ventana.
+
+No necesitas instalar nada: ni Node.js, ni npm, ni pnpm, ni internet.
+Funciona en Windows 10 y 11.
+
+COMO COPIARLO A OTRO COMPUTADOR
+Copia la carpeta completa (o el .zip) con una memoria USB, OneDrive o correo.
+No separes los archivos: ABRIR_PROYECTA.cmd, servidor-portatil.ps1 y la carpeta "app" deben ir juntos.
+
+PARTIDAS GUARDADAS
+Las partidas y los proyectos se guardan en el navegador de cada computador, no en la carpeta.
+Al copiar la carpeta a otro equipo se empieza sin partidas. Para llevar un proyecto propio, usa
+"Exportar proyecto (.proyecta.json)" en el Project Builder e importalo en el otro equipo desde
+"Importar proyecto".
+
+SI ALGO FALLA
+- Windows muestra "Windows protegio su PC": pulsa "Mas informacion" > "Ejecutar de todas formas".
+  Ocurre porque el archivo viene de otro equipo o de internet.
+- "No hay un puerto libre": cierra otras ventanas de PROYECTA y vuelve a abrirlo.
+- El navegador no se abre solo: abre http://127.0.0.1:5173 manualmente.
+
+Datos simulados con fines academicos. La version para desarrollo (codigo fuente) esta en
+https://github.com/jjgarciam15/simulador-proyectos
