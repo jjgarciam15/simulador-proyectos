@@ -12,6 +12,7 @@ import {
 import { missionFlowCase } from "./missionFlow";
 import { valuationSummary } from "./valuation";
 
+
 /** The player's own flow when it exists and was built for this alternative; otherwise the case reference. */
 export function playerFlow(g: GameState, c: FlowCase) {
   const v = g.v2?.v22,
@@ -99,4 +100,32 @@ export function decisionMatrix(rows: ComparisonRow[], weights: Record<string, nu
     });
     return { id: row.id, name: row.name, parts, score: parts.reduce((n, p) => n + p.weighted, 0) * 100 };
   });
+}
+
+/**
+ * Evaluación distributiva: present value (social rate) of what each group gains or loses.
+ * Valued impacts go to the group that receives them; tariffs are a transfer from users to the operator;
+ * investment and O&M are borne by the executing entity (Gobierno in public missions, Productores in private ones).
+ */
+export function distribution(g: GameState) {
+  const c = missionFlowCase(g);
+  if (!c) return [];
+  const s = scenarioById(g.scenarioId),
+    summary = valuationSummary(g),
+    f = playerFlow(g, c),
+    ops = operatingPeriodsPV(c),
+    groups = new Map<string, number>();
+  const add = (k: string, v: number) => groups.set(k, (groups.get(k) ?? 0) + v);
+  for (const r of summary.rows.filter((r) => !r.card.valuation?.overlap)) add(r.card.group ?? "Comunidad", r.result.annual * ops);
+  const tariffs = c.rubros.find((r) => r.id === "tarifas")?.amount ?? 0,
+    executor = s.role === "publico" ? "Gobierno" : "Productores",
+    costs = -evaluate(c, f.rows.filter((r) => r.kind !== "ingreso" && r.kind !== "residual"), [], [], { rate: c.socialRate }).npvF;
+  add("Usuarios", -tariffs * ops);
+  add(executor, tariffs * ops - costs);
+  return [...groups.entries()].map(([group, value]) => ({ group, value })).sort((a, b) => b.value - a.value);
+}
+function operatingPeriodsPV(c: FlowCase) {
+  let pv = 0;
+  for (let p = c.constructionEnd + 1; p <= c.horizon; p++) pv += 1 / Math.pow(1 + c.socialRate, p);
+  return pv;
 }

@@ -66,6 +66,8 @@ export function Decision({
     [confirm, setConfirm] = useState(false);
   return (
     <>
+      {g.v2?.v22 && <Comparator g={g} send={send} />}
+      {g.v2?.v22 && moduleEnabled(g.scenarioId, "committee") && <Committee g={g} send={send} />}
       <Panel
         title="Es momento de tomar posición"
         kicker="COMPROMISO DE INVERSIÓN"
@@ -539,3 +541,7 @@ export function Results({
 }
 
 import ScoreV2 from './ScoreV2';
+
+import Comparator from "./v22/Comparator";
+import Committee from "./v22/Committee";
+import { moduleEnabled } from "../data/missionProfiles";

@@ -19,6 +19,10 @@ const short: Record<string, string> = {
   "Ejecución y servicio": "Ejecución",
   "Valor observado": "Valor",
   "Coherencia transversal": "Coherencia",
+  "Efectos, impactos y valoración": "Valoración",
+  "Flujos, VPN y RPC": "Flujos",
+  "Coherencia y trazabilidad": "Coherencia",
+  "Comité evaluador": "Comité",
 };
 export default function ScoreV2({ g }: { g: GameState }) {
   const a = g.outcome?.assessment;
