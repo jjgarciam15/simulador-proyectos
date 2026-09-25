@@ -54,6 +54,8 @@ export function validateProject(p: NormalizedProject): Issue[] {
   const err = (section: BuilderSection, path: string, message: string) => out.push({ level: "error", section, path, message });
   const warn = (section: BuilderSection, path: string, message: string) => out.push({ level: "advertencia", section, path, message });
 
+  if ((p.source.type === "imported_pdf" || p.source.type === "imported_excel") && !p.metadata.importReviewed)
+    err("general", "metadata.importReviewed", "Revisa y confirma los datos importados antes de generar la partida.");
   if (blank(p.title)) err("general", "title", "El proyecto necesita un nombre.");
   if (num(p.horizon) && (p.horizon < 1 || p.horizon > 50)) err("general", "horizon", "Horizonte inválido: usa entre 1 y 50 años.");
   if (!num(p.horizon)) warn("general", "horizon", "No definiste horizonte: se usará la vida útil de cada alternativa.");

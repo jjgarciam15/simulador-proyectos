@@ -91,6 +91,7 @@ export function parseProject(input: unknown): NormalizedProject {
       profile: oneOf(meta.profile, ["estudiante", "creador"] as const, "estudiante"),
       status: oneOf(meta.status, ["borrador", "listo"] as const, "borrador"),
       revision: Math.max(0, Math.round(nOrNull(meta.revision) ?? 0)),
+      importReviewed: meta.importReviewed === true,
     },
     source: {
       type: oneOf(source.type, sourceTypes, "manual"),

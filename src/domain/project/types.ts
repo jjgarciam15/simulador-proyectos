@@ -219,6 +219,8 @@ export interface NormalizedProject {
     status: ProjectStatus;
     /** Increases on every saved edit (used to know if a generated mission is outdated). */
     revision: number;
+    /** Imported projects: the person confirmed the review of the extracted data. */
+    importReviewed?: boolean;
   };
   source: ProjectSource;
   title: string;
