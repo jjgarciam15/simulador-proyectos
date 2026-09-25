@@ -252,11 +252,20 @@ scripts/       Lanzador de Windows y revisión del repositorio
 
 La memoria técnica completa está en [`MANUAL_CREACION.md`](MANUAL_CREACION.md) y la ejecución de esta versión en [`IMPLEMENTATION_PLAN_V2.md`](IMPLEMENTATION_PLAN_V2.md).
 
+## Actualizar a una versión nueva
+
+```bash
+git pull origin main
+pnpm install
+```
+
+Si el simulador estaba abierto, ciérralo antes (o reinicia el servidor): una instancia iniciada con las dependencias anteriores sigue fallando aunque ya estén instaladas.
+
 ## Solución de problemas
 
 | Problema | Solución |
 |---|---|
-| `Cannot find module` o dependencias ausentes | `pnpm install --frozen-lockfile` |
+| `Cannot find module`, dependencias ausentes o «Failed to resolve import "fflate"» después de actualizar | Cierra el simulador y ejecuta `pnpm install`. `ABRIR_PROYECTA.cmd` ahora detecta dependencias faltantes y las instala solo |
 | Aviso «Unsupported engine» | Usa Node 24 (`nvm use`); con Node 22 funciona igual |
 | Puerto 5173 ocupado | Cierra la otra instancia o revisa `.local/servidor-error.log` (lanzador Windows) |
 | La partida no se guarda | Revisa permisos o cuota del almacenamiento del navegador; mantén la pestaña abierta |

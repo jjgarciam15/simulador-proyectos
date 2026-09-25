@@ -4,8 +4,30 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $appUrl = 'http://127.0.0.1:5173/'
 try {
     $vitePath = Join-Path $projectRoot 'node_modules\vite\bin\vite.js'
-    if (-not (Test-Path -LiteralPath $vitePath)) {
-        throw 'Faltan las dependencias del proyecto. Consulta ACCESO_RAPIDO.md.'
+    # Every dependency declared in package.json must exist in node_modules. After updating the code
+    # (git pull) new dependencies can be missing: install them before starting the server.
+    $package = Get-Content -LiteralPath (Join-Path $projectRoot 'package.json') -Raw | ConvertFrom-Json
+    $declared = @()
+    foreach ($group in @($package.dependencies, $package.devDependencies)) {
+        if ($group) { $declared += $group.PSObject.Properties.Name }
+    }
+    $missing = @($declared | Where-Object { -not (Test-Path -LiteralPath (Join-Path $projectRoot ('node_modules\' + ($_ -replace '/', '\')))) })
+    if ($missing.Count -gt 0 -or -not (Test-Path -LiteralPath $vitePath)) {
+        Write-Host ('Instalando dependencias nuevas: ' + ($missing -join ', ')) -ForegroundColor Yellow
+        $pnpm = Get-Command pnpm.cmd, pnpm -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $pnpm) {
+            throw 'Faltan dependencias y no se encontro pnpm. Ejecuta: npm install -g pnpm@11.19.0  y luego  pnpm install'
+        }
+        # A server started with the old dependencies must be restarted.
+        Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue |
+            ForEach-Object { Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue } |
+            Where-Object { $_.ProcessName -eq 'node' } |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+        Push-Location $projectRoot
+        try { & $pnpm.Source install --frozen-lockfile } finally { Pop-Location }
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $vitePath)) {
+            throw 'No se pudieron instalar las dependencias. Ejecuta  pnpm install  en esta carpeta y revisa el mensaje.'
+        }
     }
     function Test-Proyecta {
         try {
