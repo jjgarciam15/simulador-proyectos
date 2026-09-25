@@ -21,7 +21,7 @@ import { useDraftGuard, different } from "../../components/workbench";
 import { Deferred, ModuleIntro, Status } from "./common";
 import NpvCalculator from "./NpvCalculator";
 
-type Draft = { rubroId: string; kind: RubroKind | ""; amount: number; timing: Timing; overrides?: Record<number, number> };
+export type Draft = { rubroId: string; kind: RubroKind | ""; amount: number; timing: Timing; overrides?: Record<number, number> };
 const timingOf = (t: Timing) => (t.type === "periodo" ? "periodo" : t.type);
 const givenLabel = { entregado: "Dato entregado", calcular: "Debes calcular", ingresar: "Debes ingresar" } as const;
 
@@ -53,19 +53,11 @@ export function Timeline({ c }: { c: FlowCase }) {
   );
 }
 
-/** Flujo financiero tipo hoja de cálculo: el jugador clasifica, calcula y ubica cada rubro; los totales son reactivos. */
-export default function FlowSheet({ g, send }: { g: GameState; send: (a: Action) => void }) {
-  const c = missionFlowCase(g)!,
-    help = helpPolicy(g),
-    saved = g.v2!.v22!.flow?.rows,
-    [draft, setDraft] = useState<Draft[]>(() => initialDraft(c, saved)),
-    [inspect, setInspect] = useState<{ rubroId: string; period: number } | null>(null);
-  useDraftGuard(saved ? different(toRows(draft), saved) : draft.some((d) => d.kind));
-  const rows = toRows(draft),
-    net = netFlow(c, rows),
-    value = npv(net, c.financialRate),
-    periods = Array.from({ length: c.horizon + 1 }, (_, p) => p),
-    errors = saved ? detectFlowErrors(c, saved) : [];
+/** Reusable Excel-like editor over any FlowCase (missions and Examen 2 share it). */
+export function FlowTable({ c, draft, setDraft }: { c: FlowCase; draft: Draft[]; setDraft: (d: Draft[]) => void }) {
+  const [inspect, setInspect] = useState<{ rubroId: string; period: number } | null>(null),
+    net = netFlow(c, toRows(draft)),
+    periods = Array.from({ length: c.horizon + 1 }, (_, p) => p);
   const set = (id: string, patch: Partial<Draft>) => setDraft(draft.map((d) => (d.rubroId === id ? { ...d, ...patch } : d)));
   const setTiming = (id: string, type: string, period = 0) =>
     set(id, { timing: (type === "periodo" ? { type, period } : { type }) as Timing, overrides: undefined });
@@ -88,13 +80,7 @@ export default function FlowSheet({ g, send }: { g: GameState; send: (a: Action)
     return `${r.label} · periodo ${p}: ${sg} ${fmtMoney(d.amount)} (${kindLabels[d.kind]}); ${where}.${r.formula ? " Cálculo del caso: " + r.formula + "." : ""}`;
   };
   return (
-    <Panel title="Flujo financiero del proyecto" kicker="HOJA DE CÁLCULO EDUCATIVA">
-      <ModuleIntro
-        what={`Horizonte de ${c.horizon} años (vida útil de la alternativa). Tasa de descuento financiera: ${fmtPct(c.financialRate)}.`}
-        why="El flujo ordena en el tiempo cuándo se invierte, cuándo se opera y cuándo llegan los ingresos: sin él no hay VPN."
-        decide="Clasifica cada rubro, calcula los valores que faltan y ubícalos en los periodos correctos. Algunos rubros no deben entrar."
-        next="VPN financiero, flujo económico con RPC, sensibilidad y comparación de alternativas."
-      />
+    <>
       <Timeline c={c} />
       <p className="v22-legend">
         <span className="cell-given">Dato entregado</span>
@@ -199,6 +185,30 @@ export default function FlowSheet({ g, send }: { g: GameState; send: (a: Action)
           </button>
         )}
       </p>
+    </>
+  );
+}
+
+/** Flujo financiero tipo hoja de cálculo: el jugador clasifica, calcula y ubica cada rubro; los totales son reactivos. */
+export default function FlowSheet({ g, send }: { g: GameState; send: (a: Action) => void }) {
+  const c = missionFlowCase(g)!,
+    help = helpPolicy(g),
+    saved = g.v2!.v22!.flow?.rows,
+    [draft, setDraft] = useState<Draft[]>(() => initialDraft(c, saved));
+  useDraftGuard(saved ? different(toRows(draft), saved) : draft.some((d) => d.kind));
+  const rows = toRows(draft),
+    net = netFlow(c, rows),
+    value = npv(net, c.financialRate),
+    errors = saved ? detectFlowErrors(c, saved) : [];
+  return (
+    <Panel title="Flujo financiero del proyecto" kicker="HOJA DE CÁLCULO EDUCATIVA">
+      <ModuleIntro
+        what={`Horizonte de ${c.horizon} años (vida útil de la alternativa). Tasa de descuento financiera: ${fmtPct(c.financialRate)}.`}
+        why="El flujo ordena en el tiempo cuándo se invierte, cuándo se opera y cuándo llegan los ingresos: sin él no hay VPN."
+        decide="Clasifica cada rubro, calcula los valores que faltan y ubícalos en los periodos correctos. Algunos rubros no deben entrar."
+        next="VPN financiero, flujo económico con RPC, sensibilidad y comparación de alternativas."
+      />
+      <FlowTable c={c} draft={draft} setDraft={setDraft} />
       <p>
         <strong>VPN financiero a {fmtPct(c.financialRate)}: {fmtMoney(value)}</strong>
       </p>

@@ -1,3 +1,4 @@
+import ProjectTrace from "./v22/ProjectTrace";
 import InformationCenter from "./InformationCenter";
 import ResetStage from "./ResetStage";
 import { useState } from "react";
@@ -261,6 +262,7 @@ export function CommandCenter({
           Guardar planificación
         </Button>
       </details>
+      <ProjectTrace g={g} />
       <InformationCenter g={g} send={send} />
     </>
   );

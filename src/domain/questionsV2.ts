@@ -165,7 +165,7 @@ export function assessQuestion(original: GameState, a: QuestionAction) {
   if (prior.solved || prior.choices.length >= 3)
     throw new Error("Ejercicio cerrado; revisa la explicación.");
   if (a.type === "hintV2") {
-    if (prior.hints >= 3) throw new Error("Ya consultaste todas las pistas.");
+    if (prior.hints >= helpPolicy(original).maxHints) throw new Error(helpPolicy(original).exam ? "En modo evaluación solo hay una pista por ejercicio." : "Ya consultaste todas las pistas.");
     v.assessments[q.id] = { ...prior, hints: prior.hints + 1 };
     return g;
   }
@@ -252,3 +252,5 @@ export function practiceAnalytics(g: GameState) {
     retries: rows.reduce((n, r) => n + Math.max(0, r.choices.length - 1), 0),
   };
 }
+
+import { helpPolicy } from "./help";

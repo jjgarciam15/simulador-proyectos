@@ -1,6 +1,7 @@
 import type { GameState } from "../domain/types";
 import { Panel } from "../components/ui";
 import { outcomeLedger } from "../domain/ledger";
+import { conceptById, dimensionConcepts } from "../data/concepts";
 import {
   ResponsiveContainer,
   RadarChart,
@@ -205,6 +206,17 @@ export default function ScoreV2({ g }: { g: GameState }) {
           </p>
         </div>
       </div>
+      {review.length > 0 && (
+        <div className="v22-recommend">
+          <h4>Te recomendamos repasar</h4>
+          <p className="muted">Según las dimensiones con menor nota en esta partida.</p>
+          {[...new Set(review.flatMap((d) => dimensionConcepts[d.name] ?? []))].slice(0, 6).map((id) => (
+            <button key={id} className="text-btn v22-chip" onClick={() => window.dispatchEvent(new CustomEvent("proyecta:learn", { detail: id }))}>
+              {conceptById(id)?.name ?? id}
+            </button>
+          ))}
+        </div>
+      )}
       <p>
         El perfil combina proceso y resultados. Las justificaciones se conservan
         para discusión; el texto libre no recibe una nota automática.
