@@ -164,6 +164,7 @@ export function CommandCenter({
     m = a ? model(g) : null;
   return (
     <>
+      <div id="alternativa-en-estudio" />
       <Panel title="Alternativa en estudio">
         <h4>{a?.name ?? "Aún por decidir"}</h4>
         <p>{a?.description ?? "Compara opciones en Formulación."}</p>
@@ -265,5 +266,32 @@ export function CommandCenter({
       <ProjectTrace g={g} />
       <InformationCenter g={g} send={send} />
     </>
+  );
+}
+
+/** Pinned at the top of the right panel as soon as an alternative is chosen, so it is always visible. */
+export function PinnedAlternative({ g }: { g: GameState }) {
+  const s = scenarioById(g.scenarioId),
+    a = s.alternatives.find((x) => x.id === g.alternative);
+  if (!a) return null;
+  const scale = g.target / s.affected;
+  return (
+    <section className="pinned-alternative" aria-label="Alternativa en estudio">
+      <span className="eyebrow">ALTERNATIVA EN ESTUDIO</span>
+      <strong>{a.name}</strong>
+      <dl>
+        <dt>Inversión</dt>
+        <dd>$ {money(a.capex * scale)}</dd>
+        <dt>Operación anual</dt>
+        <dd>$ {money(a.opex * scale)}</dd>
+        <dt>Cobertura</dt>
+        <dd>{(a.coverage * 100).toFixed(0)} %</dd>
+        <dt>Obra</dt>
+        <dd>{a.months} meses</dd>
+      </dl>
+      <button type="button" className="text-btn" onClick={() => document.getElementById("alternativa-en-estudio")?.scrollIntoView({ behavior: "smooth", block: "start" })}>
+        Ver detalle y variables vivas
+      </button>
+    </section>
   );
 }

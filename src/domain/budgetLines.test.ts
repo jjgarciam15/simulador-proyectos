@@ -1,10 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { act, createGameV2 } from "./engine";
 import { decode } from "./storage";
+import { prepareV2 } from "../testSupport/gameFixture";
 import {
   type BudgetLine,
   validBudgetLines,
   detailedTotals,
+  budgetBasics,
 } from "./budgetLines";
 const line: BudgetLine = {
   id: "maintenance-1",
@@ -84,5 +86,29 @@ describe("Detalle presupuestal", () => {
     const reset = act(next, { type: "resetStage" });
     expect(reset.v2?.budgetLines).toEqual([]);
     expect(reset.spent).toBe(next.spent);
+  });
+});
+
+describe("datos básicos del presupuesto", () => {
+  const zero = { operation: 0, maintenance: 0, environment: 0, social: 0, oversight: 0, contingency: 0 };
+  it("lista lo que falta en un presupuesto vacío", () => {
+    expect(budgetBasics(zero, [])).toHaveLength(6);
+  });
+  it("queda completo con montos básicos y partidas de operación y mantenimiento", () => {
+    const b = { ...zero, operation: 100, maintenance: 80, oversight: 20, contingency: 10 };
+    const lines: BudgetLine[] = [
+      { id: "op", category: "operation", description: "Operarios", unit: "año", quantity: 1, unitCost: 100 },
+      { ...line, id: "mt", unitCost: 80, quantity: 1 },
+    ];
+    expect(budgetBasics(b, lines)).toEqual([]);
+    expect(budgetBasics(b, lines.slice(0, 1))).toEqual(["una partida detallada de mantenimiento"]);
+  });
+});
+describe("salida de Preparación", () => {
+  it("no deja avanzar con el presupuesto sin construir", () => {
+    let g = act(prepareV2("agua"), { type: "reopen", phase: 2 });
+    expect(g.phase).toBe(2);
+    g = act(g, { type: "budget", value: { ...g.budget, oversight: 0 }, lines: [] });
+    expect(() => act(g, { type: "next" })).toThrow(/datos básicos del presupuesto.*interventoría.*partida detallada de operación/);
   });
 });

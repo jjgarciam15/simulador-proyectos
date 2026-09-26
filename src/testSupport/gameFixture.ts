@@ -29,6 +29,7 @@ export function prepareV2(
     settleDilemma(act(state, { type: "next" }), dilemmaChoice);
   let g = initial ?? createGameV2(id, "guiado", "V2-TEST");
   g = act(g, { type: "nodes", ids: ["n0", "n1", "n2", "n3", "n4"] });
+  if (g.v2) g = act(g, { type: "tree", placements: referenceTree(g) });
   g = act(g, {
     type: "mga",
     section: "links",
@@ -47,9 +48,18 @@ export function prepareV2(
   g = act(g, { type: "alternative", id: "a" + alternativeIndex });
   if (g.v2?.v22) g = act(g, { type: "objectives", general: "n0", specific: ["n1", "n2"] });
   g = next(g);
+  const budget = budgetFor(g, scenarioById(id).alternatives[alternativeIndex]);
   g = act(g, {
     type: "budget",
-    value: budgetFor(g, scenarioById(id).alternatives[alternativeIndex]),
+    value: budget,
+    ...(g.v2
+      ? {
+          lines: [
+            { id: "op-1", category: "operation", description: "Personal de operación", unit: "año", quantity: 1, unitCost: budget.operation },
+            { id: "mt-1", category: "maintenance", description: "Mantenimiento preventivo", unit: "año", quantity: 1, unitCost: budget.maintenance },
+          ],
+        }
+      : {}),
   });
   g = act(g, { type: "activities", value: defaultActivities(g) });
   g = act(g, {
@@ -139,3 +149,4 @@ import { impactCards, referenceValuation } from "../domain/valuation";
 import { missionFlowCase } from "../domain/missionFlow";
 import { referenceRows, referenceEconomic, referenceBenefits } from "../domain/flows";
 import { referenceCommittee } from "../domain/committee";
+import { referenceTree } from "../domain/problemTree";

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createGame, act } from "./engine";
+import { createGame, createGameV2, act } from "./engine";
 import {
   learningChallenges,
   learningSummary,
@@ -15,7 +15,7 @@ describe("Aprender, contrastar y aplicar", () => {
       expect(cases).toHaveLength(16);
       expect(new Set(cases.map((c) => c.id)).size).toBe(16);
       for (const c of cases) {
-        expect(new Set(c.options.map((o) => o.text)).size).toBe(3);
+        expect(new Set(c.options.map((o) => o.text)).size).toBe(5); // 5 opciones: respuesta, dos errores y dos trampas
         expect(c.options.filter((o) => o.id === c.answer)).toHaveLength(1);
       }
     }
@@ -85,7 +85,7 @@ describe("Aprender, contrastar y aplicar", () => {
     expect(summary.overconfident).toBe(1);
   });
   it("recupera respuestas y orden de opciones después de guardar", () => {
-    let g = createGame("salud");
+    let g = createGameV2("salud");
     const c = learningChallenges(g)[0];
     g = act(g, {
       type: "learn",

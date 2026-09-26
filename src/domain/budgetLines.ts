@@ -70,3 +70,21 @@ export function validSavedBudgetLines(g: GameState) {
   // Execution consumes contingency; compare the original detail with the budget approved at investment.
   return validBudgetLines(g.v2.budgetLines, g.snapshot?.budget ?? g.budget);
 }
+/**
+ * Datos básicos que el jugador debe construir antes de salir de Preparación (partidas V2):
+ * montos de operación, mantenimiento, interventoría y contingencias, y al menos una partida detallada
+ * (descripción, unidad, cantidad y costo unitario) de operación y otra de mantenimiento.
+ */
+export function budgetBasics(budget: Budget, lines: BudgetLine[] = []) {
+  const labels: [keyof Budget, string][] = [
+    ["operation", "reserva de operación"],
+    ["maintenance", "mantenimiento anual"],
+    ["oversight", "interventoría"],
+    ["contingency", "contingencias"],
+  ];
+  const missing = labels.filter(([k]) => !(budget[k] > 0)).map(([, label]) => `${label} mayor que cero`);
+  const cats = new Set(lines.map((l) => l.category));
+  if (!cats.has("operation")) missing.push("una partida detallada de operación");
+  if (!cats.has("maintenance")) missing.push("una partida detallada de mantenimiento");
+  return missing;
+}

@@ -19,7 +19,7 @@ export interface LearningChallenge {
   answer: string;
   application: string;
 }
-const options = (good: string, bad: string, other: string, why: string) => [
+const options = (good: string, bad: string, other: string, why: string, traps: [string, string]) => [
   { id: "reasoned", text: good, feedback: why },
   {
     id: "shortcut",
@@ -33,6 +33,26 @@ const options = (good: string, bad: string, other: string, why: string) => [
       "Con esta decisión faltaría evidencia para sostener la conclusión. " +
       why,
   },
+  ...traps.map((text, i) => ({
+    id: "trap" + (i + 1),
+    text,
+    feedback: "Es una trampa frecuente: suena razonable, pero no responde al criterio. " + why,
+  })),
+];
+/**
+ * Two extra plausible traps per micro-case (initial and transfer), so every question offers 5 options.
+ * Index = phase of the case.
+ */
+
+const transferTraps: [string, string][] = [
+  ["Uso 900 como déficit porque todos están afectados", "Divido 900 entre 500 para obtener el déficit"],
+  ["Lo reemplazo por «construir una sede más grande»", "Lo mantengo y agrego la fecha de inauguración"],
+  ["Contar los certificados de recibo de obra firmados", "Preguntar al contratista si el servicio funciona"],
+  ["Depende solo de la inflación, no de la tasa", "Se reduce a cero, porque ya no ocurre en el horizonte"],
+  ["Sí, si la alcaldía lo firmó en su plan de acción", "No: solo importa la alineación con los ODS"],
+  ["Sí, porque el subsidio mejora la caja del operador", "Lo sumo como beneficio y también lo resto como costo"],
+  ["El costo de los estudios ya pagados", "Solo el número de trabajadores de operación"],
+  ["160 M COP: el mayor valor posible", "110 M COP: el valor de la otra opción factible"],
 ];
 // Fixed micro-cases are independent of hidden scenario truth and player forecasts.
 export function learningChallenges(g: GameState): LearningChallenge[] {
@@ -40,10 +60,20 @@ export function learningChallenges(g: GameState): LearningChallenge[] {
     u = Math.max(10, Math.round(s.budget / 1000)),
     annual = Math.round(u * 60) / 100,
     net = npv([-u, annual, annual], 0.1);
+  const caseTraps: [string, string][] = [
+    ["Contratar primero el estudio de diseño de los equipos", "Preguntar a los proveedores cuántos equipos recomiendan comprar"],
+    ["Elegir la que tenga el menor costo inicial, sin mirar la operación", "Preferir la que el Consejo haya propuesto primero"],
+    ["Que se firmaron todos los contratos a tiempo", "Que el informe financiero cuadra con el presupuesto aprobado"],
+    [`${(-u + annual / 1.1).toFixed(2)} M COP`, `${(annual / 1.1 + annual / 1.21).toFixed(2)} M COP`],
+    ["Que cumple automáticamente los requisitos ambientales y jurídicos", "Que su VPN ya fue validado por el sistema"],
+    ["Rechazarlo porque el VPN financiero manda sobre cualquier otro análisis", "Subir las tarifas hasta que el VPN financiero sea positivo, sin revisar asequibilidad"],
+    ["Suspender el proyecto hasta que termine la interrupción externa", "Aumentar el presupuesto para compensar la caída sin analizar la causa"],
+    ["120 M COP: el valor de la alternativa no elegida", "0 M COP: ambas alternativas eran factibles"],
+  ];
   const cases: [string, string, string, string, string, string, string][] = [
     [
       "Problema y evidencia",
-      `En ${s.title}, el Consejo pide comprar equipos antes de estudiar la necesidad. ¿Cuál es tu primer paso?`,
+      `En «${s.title}», el Consejo pide comprar equipos antes de estudiar la necesidad. ¿Cuál es tu primer paso?`,
       "Describir la situación negativa, la población afectada y su magnitud",
       "Convertir la compra en el problema central",
       "Usar el presupuesto disponible como medida de la necesidad",
@@ -178,8 +208,8 @@ export function learningChallenges(g: GameState): LearningChallenge[] {
       return [false, true].map((transfer) => {
         const id = `aprendizaje-v1-${phase}-${transfer ? "transferencia" : "caso"}`;
         const opts = transfer
-          ? options(t[1], t[2], t[3], t[4])
-          : options(good, bad, other, why);
+          ? options(t[1], t[2], t[3], t[4], transferTraps[phase])
+          : options(good, bad, other, why, caseTraps[phase]);
         return {
           id,
           phase,

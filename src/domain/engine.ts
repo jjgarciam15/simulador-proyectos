@@ -1,4 +1,4 @@
-import {validBudgetLines,type BudgetLine} from './budgetLines';
+import {validBudgetLines,budgetBasics,type BudgetLine} from './budgetLines';
 import {emptyDossier,causalQuality,chainQuality,type MgaDossier} from './mga';
 import type { GameState, Difficulty, Assumptions, Budget, Indicator, Activity, Outcome, Alternative } from './types';
 import { scenarioById } from '../data/scenarios';
@@ -165,7 +165,7 @@ import {applyV2,type ActionV2} from './actionsV2';
 import {difficultyRules} from '../data/balance';
 
 export function createGameV2(id:string,d:Difficulty='guiado',seed='PROY-4831',mode:'aprendizaje'|'evaluacion'='aprendizaje'){const g=createGame(id,d,seed);g.v2=newV2State(g);g.v2.v22={version:1,mode};g.cash=g.v2.initialCash;return g;}
-const v2Actions=['visit','chain','actorMap','sdgReasons','regulatory','planner','resetStage'];
+const v2Actions=['visit','chain','actorMap','sdgReasons','regulatory','planner','resetStage','tree'];
 const v22Actions=['objectives','impacts','valuation','flow','economic','committee'];
 const dependencyFields:Record<string,keyof GameState>={nodes:'nodes',target:'target',objective:'objective',alternative:'alternative',budget:'budget',activities:'activities',indicators:'indicators',assumptions:'assumptions',policy:'policy',alignment:'sdgs',study:'studies',actor:'actorActions',mitigate:'mitigations',mga:'mga'};
 export function act(original:GameState,action:Action,withComparison=true):GameState{
@@ -187,6 +187,8 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
  }
  if(original.v2&&action.type==='next'){
   const missing22=v22Missing(original,original.phase);if(missing22)throw new Error(missing22);
+  if(original.phase===0&&!original.v2.tree)throw new Error('Construye y confirma el Árbol del problema: ubica cada tarjeta en un nivel o déjala fuera.');
+  if(original.phase===2){const missing=budgetBasics(original.budget,original.v2.budgetLines??[]);if(missing.length)throw new Error('Construye los datos básicos del presupuesto antes de avanzar: '+missing.join('; ')+'. Usa «Presupuesto detallado» para agregar partidas con cantidad y costo unitario.');}
   if(original.phase===2&&(original.v2.chain.length<5||original.v2.connections.length<4))throw new Error('Construye cinco niveles y al menos cuatro conexiones en la cadena de valor.');
   if(original.phase===4&&(!original.v2.regulatory.reason||!original.sdgs.length||original.sdgs.some(id=>!original.v2!.sdgReasons[id])))throw new Error('Confirma el argumento regulatorio y sustenta los ODS seleccionados.');
  }
@@ -207,12 +209,12 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
  if(action.type==='commit'&&next.snapshot)applyCommitConsequences(next);
  if(next.outcome)next.v2.completed=[...new Set([...next.v2.completed,6,7])];
  const key=dependencyFields[action.type];
- const changed=key?(JSON.stringify(original[key])!==JSON.stringify(next[key])||(action.type==='budget'&&JSON.stringify(original.v2?.budgetLines??[])!==JSON.stringify(next.v2.budgetLines??[]))):['chain','actorMap','sdgReasons','regulatory','resetStage',...v22Actions].includes(action.type)&&JSON.stringify(original.v2)!==JSON.stringify(next.v2);
+ const changed=key?(JSON.stringify(original[key])!==JSON.stringify(next[key])||(action.type==='budget'&&JSON.stringify(original.v2?.budgetLines??[])!==JSON.stringify(next.v2.budgetLines??[]))):['chain','actorMap','sdgReasons','regulatory','resetStage','tree',...v22Actions].includes(action.type)&&JSON.stringify(original.v2)!==JSON.stringify(next.v2);
  if(changed){
-  const label=action.type==='resetStage'?['nodes','alternative','chain','regulatory','policy'][original.phase]:action.type==='mga'?(action.section==='links'?'nodes':action.section==='chain'?'chain':'regulatory'):action.type==='sdgReasons'?'alignment':action.type;
+  const label=action.type==='resetStage'?['nodes','alternative','chain','regulatory','policy'][original.phase]:action.type==='mga'?(action.section==='links'?'nodes':action.section==='chain'?'chain':'regulatory'):action.type==='sdgReasons'?'alignment':action.type==='tree'?'nodes':action.type;
   invalidateV2(next,label);
   if(v2Actions.includes(action.type))record(next,'Expediente V2 confirmado',label+' registrado; consulta las dependencias pendientes.');
-  if(original.v2?.completed.includes(original.phase)&&['nodes','target','objective','alternative','budget','activities','indicators','assumptions','policy','alignment','chain','regulatory','sdgReasons','resetStage',...v22Actions].includes(action.type)){
+  if(original.v2?.completed.includes(original.phase)&&['nodes','tree','target','objective','alternative','budget','activities','indicators','assumptions','policy','alignment','chain','regulatory','sdgReasons','resetStage',...v22Actions].includes(action.type)){
    if(next.v2?.v22?.exploration)record(next,'Revisión confirmada','Modo exploración: el cambio no consume recursos. Revisa etapas afectadas.',0,0);else{const fee=scenarioById(next.scenarioId).budget*.002;spend(next,fee);advanceTime(next,1);record(next,'Revisión confirmada','Se conservó el trabajo. Revisa etapas afectadas: 0,2 % del presupuesto base y un mes.',fee,1);}
   }
  }

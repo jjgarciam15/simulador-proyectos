@@ -2,6 +2,7 @@ import type { GameState, Outcome } from "./types";
 import { scenarioById } from "../data/scenarios";
 import { chainV2Score, actorMapScore, sdgReasonScore } from "./projectV2";
 import { causalQuality, indicatorReview } from "./mga";
+import { treeReview } from "./problemTree";
 import { clamp } from "./finance";
 import { learningPenalty } from "./questionsV2";
 import { scoringWeightsV2 } from "../data/balance";
@@ -79,10 +80,11 @@ export function scoreV2(
   const indicators = g.indicators.length
     ? clamp(100 - indicatorReview(g).length * 20)
     : 0;
-  const diagnosis =
-    0.5 * causalQuality(g) +
-    0.3 * actorMapScore(g) +
-    0.2 * (g.target > 0 && g.target <= s.affected ? 100 : 0);
+  const focal = g.target > 0 && g.target <= s.affected ? 100 : 0;
+  // With the player-built tree: 35 % causal links, 25 % tree construction, 25 % actors, 15 % targeting.
+  const diagnosis = g.v2?.tree
+    ? 0.35 * causalQuality(g) + 0.25 * treeReview(g).score + 0.25 * actorMapScore(g) + 0.15 * focal
+    : 0.5 * causalQuality(g) + 0.3 * actorMapScore(g) + 0.2 * focal;
   const alternative =
     50 * Number(g.objective === "n0") +
     (50 * a.causes.filter((id) => g.nodes.includes(id)).length) /
@@ -129,7 +131,9 @@ export function scoreV2(
     weight: weights[i],
   }));
   const notes = [
-    `Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`,
+    g.v2?.tree
+      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100), 25 % ubicación de actores y 15 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`
+      : `Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`,
     `Alternativa: 50 % correspondencia del objetivo central y 50 % causas atendidas.`,
     `Preparación: 50 % cadena (${chainV2Score(g)}), 30 % presupuesto (${budget.toFixed(0)}) y 20 % indicadores (${indicators}). Presupuesto: suficiencia de asignación y mantenimiento, con descuento por reserva superior al 15 % del fondo base.`,
     `Evaluación: 50 % revisión confirmada, 25 % valor esperado normalizado y 25 % información disponible al invertir. Los eventos posteriores no cambian esta dimensión.`,
@@ -270,7 +274,9 @@ function scoreV3Parts(g: GameState, plan: GameState, v2Values: number[], transve
     total = raw.reduce((n, w) => n + w, 0);
   const dimensions = values.map((value, i) => ({ name: names[i], value: clamp(value), weight: raw[i] / total }));
   const notes = [
-    "Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida.",
+    g.v2?.tree
+      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100), 25 % ubicación de actores y 15 % focalización válida.`
+      : "Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida.",
     `Alternativa y objetivos: 60 % correspondencia de objetivo y causas; 40 % objetivos general y específicos (${objectives.toFixed(0)}/100).`,
     "Preparación: 50 % cadena de valor, 30 % presupuesto (suficiencia, mantenimiento y diagnóstico) y 20 % indicadores.",
     on("valuation")

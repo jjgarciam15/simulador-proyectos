@@ -6,7 +6,6 @@ import {
   emptyDossier,
   mgaChecks,
   causalQuality,
-  chainQuality,
   indicatorReview,
 } from "../domain/mga";
 import { Panel, Field, Button, Tip } from "../components/ui";
@@ -24,8 +23,8 @@ export default function MgaLab({
     [from, setFrom] = useState(""),
     [to, setTo] = useState(""),
     [reviewed, setReviewed] = useState(false);
-  const editable = [0, 2, 3].includes(g.phase),
-    section = g.phase === 0 ? "links" : g.phase === 2 ? "chain" : "prediction";
+  const editable = [0, 3].includes(g.phase),
+    section = g.phase === 0 ? "links" : "prediction";
   const dirty =
     editable &&
     (section === "prediction"
@@ -144,117 +143,6 @@ export default function MgaLab({
           </Tip>
         </>
       )}
-      {g.phase === 2 && !g.v2 && (
-        <>
-          <h4>Ensambla una ruta de la cadena de valor</h4>
-          <p className="muted">
-            Confirma antes tu cronograma. Esta ruta representa un objetivo
-            específico y un producto; los nombres de productos son educativos,
-            no códigos del catálogo oficial.
-          </p>
-          <div className="two-col">
-            <Field label="Causa que vas a intervenir">
-              <select
-                value={draft.chain.cause}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    chain: { ...draft.chain, cause: e.target.value },
-                  })
-                }
-              >
-                <option value="">Elige la causa</option>
-                {s.nodes
-                  .filter((n) => g.nodes.includes(n.id))
-                  .map((n) => (
-                    <option key={n.id} value={n.id}>
-                      {n.label}
-                    </option>
-                  ))}
-              </select>
-            </Field>
-            <Field label="Objetivo específico asociado">
-              <select
-                value={draft.chain.objective}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    chain: { ...draft.chain, objective: e.target.value },
-                  })
-                }
-              >
-                <option value="">Elige el cambio</option>
-                {s.nodes
-                  .filter((n) => g.nodes.includes(n.id))
-                  .map((n) => (
-                    <option key={n.id} value={n.id}>
-                      {n.objective}
-                    </option>
-                  ))}
-              </select>
-            </Field>
-            <Field label="Producto que entregarás">
-              <select
-                value={draft.chain.product}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    chain: { ...draft.chain, product: e.target.value },
-                  })
-                }
-              >
-                <option value="">Elige el producto</option>
-                <option value="service">{selected(g)?.product}</option>
-                <option value="activity">Contratar al equipo ejecutor</option>
-                <option value="population">
-                  Población priorizada del distrito
-                </option>
-              </select>
-            </Field>
-          </div>
-          <h4>Actividades que generan el producto</h4>
-          {g.activities.length === 0 && (
-            <p>
-              Confirma las actividades en la herramienta de cronograma para
-              vincularlas aquí.
-            </p>
-          )}
-          {g.activities.map((a) => (
-            <label className="checkline" key={a.id}>
-              <input
-                type="checkbox"
-                checked={draft.chain.activities.includes(a.id)}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    chain: {
-                      ...draft.chain,
-                      activities: e.target.checked
-                        ? [...draft.chain.activities, a.id]
-                        : draft.chain.activities.filter((id) => id !== a.id),
-                    },
-                  })
-                }
-              />
-              {a.name} · {a.cost.toLocaleString("es-CO")} M COP
-            </label>
-          ))}
-          <Button onClick={confirm}>Confirmar cadena de valor</Button>
-          {reviewed && (
-            <p role="status">
-              Consistencia estructural: {Math.round(chainQuality(g))}/100.
-              Comprueba causa directa, objetivo correspondiente, bien o servicio
-              y al menos dos actividades financiadas.
-            </p>
-          )}
-          <Tip title="La entrega y el cambio se miden por separado">
-            En indicadores, define uno de producto y otro de resultado.
-            Especifica la fuente, frecuencia, unidad, línea base y meta. Un
-            desembolso mide gestión; por sí solo no acredita entrega ni
-            bienestar.
-          </Tip>
-        </>
-      )}
       {g.phase === 3 && (
         <>
           <h4>Predecir → probar → explicar</h4>
@@ -362,7 +250,7 @@ export default function MgaLab({
                   ],
                   [
                     "Producto",
-                    (g.v2 ? g.v2.chain.some(c=>c.id==='service'&&c.level==='Productos') : g.mga?.chain.product === "service")
+                    !!g.v2?.chain.some(c=>c.id==="service"&&c.level==="Productos")
                       ? selected(g)?.product
                       : "Revisar clasificación del producto",
                     "Producto",
