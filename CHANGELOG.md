@@ -1,6 +1,9 @@
 # Cambios
 
-## 2.4.2 · «Tu misión de criterio» con 5 opciones (26 de septiembre de 2026)
+## 2.4.2 · Árbol del problema construido por el jugador y aprendizaje con 5 opciones (26 de septiembre de 2026)
+
+- Árbol del problema (partidas V2): ya no aparece ordenado por niveles. Banco mezclado de 14 tarjetas por misión: 8 correctas (incluye una causa directa, una indirecta y un efecto adicionales propios de cada misión) y 6 trampas (solución disfrazada «Falta de…», objetivo redactado en positivo, causa demasiado general, situación que no explica el problema y las dos trampas anteriores). El jugador arrastra cada tarjeta a su nivel o la ubica con una lista accesible por teclado; las trampas van a «No pertenece al árbol».
+- Puntuación: nivel exacto 1, lado correcto (causa/efecto) pero nivel equivocado 0,5, trampa incluida o tarjeta válida descartada 0. El diagnóstico pondera 35 % enlaces causales, 25 % construcción del árbol, 25 % actores y 15 % focalización. Es obligatorio confirmar el árbol para avanzar.
 
 - Los 16 casos de aprendizaje (iniciales y de transferencia) tienen 5 opciones: respuesta razonada, dos errores y dos trampas plausibles. La práctica V2 conserva 7 opciones.
 - La regla de 5–7 opciones cubre también estos casos en la prueba `questionRules.test.ts`.

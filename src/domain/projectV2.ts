@@ -61,6 +61,8 @@ export interface V2State {
     { choices: string[][]; hints: number; score: number; solved: boolean }
   >;
   planner: number;
+  /** Árbol del problema built by the player: card id → level (or "fuera"). */
+  tree?: { placements: Record<string, import("./problemTree").TreeSlot> };
   /** Local analytics: seconds spent in each stage (not scored). */
   stageSeconds?: Record<number, number>;
   changes: { phase: number; action: string; month: number }[];

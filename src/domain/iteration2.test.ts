@@ -18,6 +18,7 @@ import { budgetGuide, budgetReview } from "./budgetReview";
 import { adjustments, coherenceMatrix, transversalCoherence } from "./coherence";
 import { chainBank, chainReview, chainV2Score, sdgReview } from "./projectV2";
 import { outcomeLedger } from "./ledger";
+import { referenceTree } from "./problemTree";
 import { validateDilemmas, validateRegulationLab } from "./missions";
 import { decode } from "./storage";
 import type { GameState } from "./types";
@@ -53,6 +54,7 @@ describe("Motor de dilemas", () => {
       section: "links",
       value: { ...g.mga!, links: [{ from: "n2", to: "n1" }, { from: "n1", to: "n0" }, { from: "n0", to: "n3" }, { from: "n3", to: "n4" }] },
     });
+    g = act(g, { type: "tree", placements: referenceTree(g) });
     g = settleDilemma(act(g, { type: "next" }));
     g = act(g, { type: "objective", id: "n0" });
     g = act(g, { type: "alternative", id: "a1" });
