@@ -1534,26 +1534,5 @@ tr.current-attempt td {
     animation: none;
   }
 }
-.legacy-banner {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  align-items: center;
-  margin: 0 0 var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  border-left: 5px solid var(--warning);
-  background: var(--warning-soft);
-  color: #4d3300;
-}
-.legacy-banner > svg {
-  color: var(--warning);
-}
-.legacy-banner > div {
-  display: grid;
-  gap: 2px;
-  flex: 1 1 320px;
-  font-size: var(--text-sm);
-}
 .budget-basics{border:1px solid var(--line,#d8d2c4);border-radius:10px;padding:10px 14px;margin:12px 0;display:grid;gap:4px}
 .budget-basics ul{margin:0;padding-left:18px}

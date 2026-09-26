@@ -18,7 +18,7 @@ export default function Evaluation({g,send}:{g:GameState;send:(a:Action)=>void})
  </>}
 
 
-import {EconomicExperiment} from './LearningJourney';
+import {EconomicExperiment} from './EconomicExperiment';
 
 import ExAnteBrief from './ExAnteBrief';
 
