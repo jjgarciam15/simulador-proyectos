@@ -208,7 +208,9 @@ function RiskSection({ g }: { g: GameState }) {
   const e = r.economic,
     top = Math.max(...r.bins.map((b) => b.count)),
     band = Math.round(r.ranges.demand[2] * 100 - 100),
-    level = e.probNegative <= 0.1 ? "ok" : e.probNegative <= 0.35 ? "alerta" : "grave";
+    // An analysis result, not a player error: high risk is shown as «Revisar», never as «Error».
+    level = e.probNegative <= 0.1 ? "ok" : "alerta",
+    high = e.probNegative > 0.35;
   return (
     <section className="risk-lab" aria-labelledby="risk-title">
       <h4 id="risk-title">Análisis de riesgo · simulación Monte Carlo</h4>
@@ -251,7 +253,7 @@ function RiskSection({ g }: { g: GameState }) {
         <Status level={level}>
           {e.probNegative === 0
             ? "En ninguna simulación el VPN económico es negativo: la conclusión es robusta a estos rangos."
-            : `En ${Math.round(e.probNegative * 100)} % de las simulaciones el proyecto destruye valor para la sociedad. ${level === "grave" ? "El riesgo es alto: revisa la variable crítica, compra información o rediseña." : "Considera contingencias y estudios que reduzcan la incertidumbre."}`}{" "}
+            : `En ${Math.round(e.probNegative * 100)} % de las simulaciones el proyecto destruye valor para la sociedad. ${high ? "El riesgo es alto: revisa la variable crítica, compra información o rediseña." : "Considera contingencias y estudios que reduzcan la incertidumbre."}`}{" "}
           VPN financiero: probabilidad de pérdida {Math.round(r.financial.probNegative * 100)} %, mediano {fmtMoney(r.financial.p50)}.
         </Status>
       </ul>

@@ -1,5 +1,15 @@
 # Cambios
 
+## 2.4.3 · Preguntas de 5 opciones, revisión del repositorio y pendientes terminados (6 de octubre de 2026)
+
+- **Preguntas: 5 opciones como máximo.** Práctica de la partida (antes 7), casos aplicados (antes 6), comité (algunas tenían 6), objetivo general (4) y específicos (6), métodos de valoración (5–7 según dificultad), Examen 2 (7 métodos) y actividades de proyectos propios (hasta 7) pasan a 5. La respuesta válida nunca se recorta. En los métodos de valoración la dificultad cambia cuántas de las 5 opciones son cercanas a la correcta, no su número. La prueba `questionRules.test.ts` exige exactamente 5.
+- **Análisis de riesgo Monte Carlo** (Evaluación → Sensibilidad): 500 simulaciones reproducibles del flujo del jugador. Los rangos salen de los escenarios optimista y pesimista; la banda de demanda depende de si se compró el estudio de demanda. Muestra probabilidad de VPN negativo, P10/P50/P90 e histograma.
+- **Tutor por concepto a demanda:** cada herramienta del juego (árbol, objetivos, alternativas, cadena de valor, presupuesto, actores, impactos, valoración, flujos, sensibilidad, comparación, regulación, ODS y comité) enlaza los conceptos que usa en el Centro de aprendizaje. Leerlos no cambia la partida.
+- **Eventos de ejecución condicionales:** aceptan condiciones y modificadores de probabilidad declarados como datos, evaluados igual que los dilemas. La regla «el estudio reduce el evento a la mitad» ahora es un dato; 54 partidas de referencia dan resultados idénticos antes y después.
+- **Robustez:** el motor valida la forma de cada acción. Se corrige que reabrir o visitar con una etapa no numérica dejara la partida en la etapa «NaN». Nueva prueba con miles de acciones aleatorias y malformadas.
+- **Calidad del código:** ESLint (`pnpm lint`, incluido en `pnpm check` y en la CI), TypeScript sin variables ni importaciones sin uso, y pruebas E2E permanentes con Playwright (`pnpm e2e`, trabajo nuevo en la CI).
+- **Carga inicial más liviana:** el lector de PDF (≈460 KB) ya no se descarga al abrir el simulador; solo al importar un PDF.
+
 ## 2.4.2 · Árbol y presupuesto construidos por el jugador, aprendizaje con 5 opciones y retiro de la versión 1 (26 de septiembre de 2026)
 
 - Árbol del problema (partidas V2): ya no aparece ordenado por niveles. Banco mezclado de 14 tarjetas por misión: 8 correctas (incluye una causa directa, una indirecta y un efecto adicionales propios de cada misión) y 6 trampas (solución disfrazada «Falta de…», objetivo redactado en positivo, causa demasiado general, situación que no explica el problema y las dos trampas anteriores). El jugador arrastra cada tarjeta a su nivel o la ubica con una lista accesible por teclado; las trampas van a «No pertenece al árbol».
