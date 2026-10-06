@@ -87,6 +87,14 @@ Con «Preparar el simulador para compartir» la página se recarga y verifica el
 5. Al comprometer la inversión (Decisión) el plan se congela y comienza la ejecución: eventos condicionados, dilemas y consecuencias diferidas.
 6. En Ex post ves la nota con cada dimensión explicada, errores y aciertos, la historia del proyecto y recomendaciones.
 
+**Modo presentación:** en el inicio, «Modo presentación» abre una partida de ejemplo completa y resuelta. Es la misión «Agua para todos», jugada por el mismo motor con las respuestas de referencia de cada herramienta, y termina con su nota y el desglose completo. Una barra guía indica qué mostrar en cada etapa y permite pasar de una etapa a otra. Es de solo lectura y no se guarda: no toca tus partidas ni tus resultados.
+
+**Desplazamiento:**
+- Cada etapa, incluida Ex post, se recorre por secciones con pestañas que quedan fijas arriba.
+- Ex post tiene el botón «Ver todo en una página».
+- Al cambiar de sección el salto es inmediato.
+- En las páginas largas aparece el botón «Arriba».
+
 **Más espacio de trabajo:** en escritorio y tableta, el botón «Ocultar» de la cabecera del juego esconde el menú de etapas de la izquierda y amplía el área central; «Etapas» lo vuelve a mostrar. La preferencia se recuerda. En teléfonos se usa el menú ☰.
 
 **Tamaño de la pantalla (zoom):** la barra flotante de abajo a la izquierda, visible en todas las pantallas (inicio, juego, Project Builder, exámenes y ventanas), tiene botones para **alejar (−)** y **acercar (+)** de 10 en 10 % entre 60 % y 160 %. El botón del porcentaje vuelve al **ajuste automático**, que adapta el simulador al ancho de la ventana: 75 % en portátiles pequeños, 100 % a 1.440 px y hasta 135 % en monitores grandes; en teléfonos queda en 100 % y el máximo se limita para que nada se salga de la pantalla. El panel ✨ incluye un deslizador fino. La preferencia se guarda en el navegador y no afecta la partida.
@@ -191,13 +199,13 @@ En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o re
 pnpm test
 ```
 
-Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 247 pruebas en 27 archivos, todas aprobadas.
+Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 250 pruebas en 28 archivos, todas aprobadas.
 
 ```bash
 pnpm build && pnpm e2e
 ```
 
-Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje, el límite de 5 opciones, el zoom y el menú de etapas ocultable, y fallan ante cualquier error de consola.
+Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje, el límite de 5 opciones, el zoom, el menú de etapas ocultable y el modo presentación, y fallan ante cualquier error de consola.
 
 ## Compilación
 

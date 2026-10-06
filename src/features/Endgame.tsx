@@ -30,10 +30,18 @@ import { FinancialMetrics } from "./Evaluation";
 import { Finance } from "./Preparation";
 import { Risks } from "./Regulation";
 
-export function Journal({ g }: { g: GameState }) {
+/** Decision log. With `limit`, long histories show the first entries and a button for the rest (shorter scroll). */
+export function Journal({ g, limit }: { g: GameState; limit?: number }) {
+  const [all, setAll] = useState(false),
+    shown = limit && !all ? g.journal.slice(0, limit) : g.journal;
   return (
     <div className="journal">
-      {g.journal.map((d) => (
+      {limit && g.journal.length > limit && (
+        <button type="button" className="text-btn" onClick={() => setAll(!all)}>
+          {all ? "Mostrar solo las primeras decisiones" : `Mostrar las ${g.journal.length} decisiones`}
+        </button>
+      )}
+      {shown.map((d) => (
         <article key={d.id}>
           <span className="journal-dot" />
           <div className="eyebrow">
@@ -536,7 +544,7 @@ export function Results({
         </p>
       </Panel>
       <Panel title="La historia de tus decisiones" kicker={g.seed}>
-        <Journal g={g} />
+        <Journal g={g} limit={10} />
       </Panel>
     </>
   );

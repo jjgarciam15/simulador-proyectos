@@ -98,3 +98,25 @@ test("el menú de etapas se oculta y se muestra durante la partida y amplía el 
   await expect(page.locator(".sidebar")).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test("el modo presentación muestra una partida resuelta, recorre las 8 etapas y no modifica las partidas guardadas", async ({ page }) => {
+  const errors = await fresh(page);
+  const before = await page.evaluate(() => JSON.stringify(Object.entries(localStorage).filter(([k]) => k.startsWith("proyecta-qa"))));
+  await page.getByRole("button", { name: /Modo presentación/ }).click();
+  await expect(page.locator(".presentation-bar")).toContainText("solo lectura");
+  for (let i = 1; i <= 8; i++) {
+    await expect(page.locator(".page-heading .eyebrow")).toContainText(`ETAPA 0${i} DE 08`);
+    if (i < 8) await page.getByRole("button", { name: /Etapa siguiente/ }).click();
+  }
+  await page.locator(".section-nav button", { hasText: /Por qué obtuviste esta nota/ }).first().click();
+  await expect(page.locator(".score-breakdown")).toBeVisible();
+  await page.getByRole("tab", { name: "1", exact: true }).click();
+  await page.locator(".section-nav button", { hasText: /rbol del problema/ }).first().click();
+  await page.getByRole("button", { name: "Confirmar Árbol del problema" }).click({ force: true });
+  await expect(page.getByRole("alert").first()).toContainText("Modo presentación");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: /Salir de la presentación/ }).click();
+  const after = await page.evaluate(() => JSON.stringify(Object.entries(localStorage).filter(([k]) => k.startsWith("proyecta-qa"))));
+  expect(after).toBe(before);
+  expect(errors).toEqual([]);
+});

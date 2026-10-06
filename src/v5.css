@@ -1548,3 +1548,11 @@ tr.current-attempt td {
 .score-breakdown{margin:18px 0}
 .score-breakdown>summary{cursor:pointer;font-weight:600;margin-bottom:8px}
 .score-breakdown td:nth-child(n+3),.score-breakdown th:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.presentation-bar{border:1px solid var(--accent,#d9892b);background:var(--accent-soft,#fdf0dc);color:var(--text-primary,#13201c);border-radius:10px;padding:14px 18px;margin:0 0 20px;display:grid;gap:10px}
+.presentation-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.presentation-tag{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--accent-strong,#9a5a0c)}
+.presentation-bar p{margin:0;font-size:14px;line-height:1.6}
+.presentation-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.presentation-steps{display:flex;gap:6px;flex-wrap:wrap}
+.presentation-steps button{width:34px;height:34px;border-radius:50%;border:1px solid var(--accent-strong,#9a5a0c);background:#fff;color:var(--accent-strong,#9a5a0c);font-weight:700;cursor:pointer}
+.presentation-steps button.active{background:var(--accent-strong,#9a5a0c);color:#fff}

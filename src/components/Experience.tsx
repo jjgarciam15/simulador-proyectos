@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Volume2, VolumeX, Sparkles, X, ZoomIn, ZoomOut } from "lucide-react";
+import { ArrowUp, Volume2, VolumeX, Sparkles, X, ZoomIn, ZoomOut } from "lucide-react";
 import { effectiveZoom, maxZoomFor, readZoom, stepZoom, zoomLabel, zoomMin, type ZoomSetting } from "./zoom";
 import { assets } from "../data/world";
 import type { Cue, ExperienceMoment } from "../domain/experience";
@@ -109,7 +109,8 @@ export default function Experience({ children }: { children: ReactNode }) {
     [systemReduced, setSystemReduced] = useState(
       () => matchMedia("(prefers-reduced-motion: reduce)").matches,
     ),
-    [width, setWidth] = useState(() => window.innerWidth);
+    [width, setWidth] = useState(() => window.innerWidth),
+    [farDown, setFarDown] = useState(false);
   const reduced = systemReduced || !preferences.cinema,
     zoom = effectiveZoom(preferences.zoom, width),
     zoomMax = maxZoomFor(width),
@@ -163,6 +164,13 @@ export default function Experience({ children }: { children: ReactNode }) {
     }
     audio.current?.volume(preferences.sound ? preferences.volume : 0);
   }, [preferences]);
+  // «Ir arriba» appears after scrolling more than one and a half screens (passive listener: no scroll jank).
+  useEffect(() => {
+    const onScroll = () => setFarDown(window.scrollY > window.innerHeight * 1.5);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   // Interface zoom: the whole simulator (game, builder, dialogs) is scaled from the root element.
   useEffect(() => {
     const resize = () => setWidth(window.innerWidth);
@@ -326,6 +334,12 @@ export default function Experience({ children }: { children: ReactNode }) {
           </div>
         </details>
       </aside>
+      {farDown && (
+        <button type="button" className="back-to-top" aria-label="Ir arriba" title="Ir arriba" onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}>
+          <ArrowUp size={18} aria-hidden />
+          <span>Arriba</span>
+        </button>
+      )}
       {moment && (
         <div
           key={moment.id}

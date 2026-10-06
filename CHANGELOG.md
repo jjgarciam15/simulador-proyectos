@@ -1,5 +1,19 @@
 # Cambios
 
+## 2.6.0 · Modo presentación y desplazamiento más ágil (6 de octubre de 2026)
+
+- **Modo presentación** (botón en el inicio):
+  - Abre una partida de ejemplo completa y resuelta: estudios, Árbol del problema, actores y negociación, objetivos, cadena de valor, presupuesto con partidas detalladas, indicadores, impactos, valoración, flujos con RPC, regulación, ODS, mitigaciones, comité, práctica, ejecución y Ex post con la nota y su desglose.
+  - La genera el mismo motor del juego con las respuestas de referencia (`src/domain/demo.ts`): es reproducible y funciona en las nueve misiones.
+  - Una barra guía indica qué mostrar en cada etapa y permite pasar de una a otra.
+  - Es de solo lectura (cualquier cambio muestra un aviso) y nunca se guarda sobre las partidas del jugador.
+- **Desplazamiento más ágil:**
+  - Ex post ahora va por secciones (antes era una sola página de unos 17.000 px; ahora la sección más larga mide unos 5.200 px), con «Ver todo en una página».
+  - El cambio de sección es inmediato.
+  - Botón «Arriba» en páginas largas.
+  - «La historia de tus decisiones» muestra las primeras 10 y un botón para ver todas.
+- La práctica de una partida terminada indica que ya no cambia la nota.
+
 ## 2.5.0 · Puntuación integral, menú de etapas ocultable y revisión de Crear e Importar proyecto (6 de octubre de 2026)
 
 - **Puntuación integral.** Cada dimensión se calcula a partir de las actividades que la forman, y el resultado final muestra el «Desglose completo»: unas 30 actividades con tu resultado, su peso en la nota y los puntos que aportó, con una suma igual a la nota base.

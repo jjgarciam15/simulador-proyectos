@@ -1,7 +1,7 @@
-import { BookOpen, CirclePlay, Compass, FilePlus2, FileUp, GraduationCap } from "lucide-react";
+import { BookOpen, CirclePlay, Compass, FilePlus2, FileUp, GraduationCap, Presentation } from "lucide-react";
 
 /** Main screen: the three experiences plus continue, learn and how to play. */
-export default function HomeActions({ onStory, onImport, onCreate, onContinue, onLearn, onHow, canContinue }: { onStory: () => void; onImport: () => void; onCreate: () => void; onContinue: () => void; onLearn: () => void; onHow: () => void; canContinue: boolean }) {
+export default function HomeActions({ onStory, onImport, onCreate, onContinue, onLearn, onHow, onPresent, canContinue }: { onStory: () => void; onImport: () => void; onCreate: () => void; onContinue: () => void; onLearn: () => void; onHow: () => void; onPresent: () => void; canContinue: boolean }) {
   const main = [
     { title: "Jugar historia", text: "Nueve misiones oficiales en Aurora: aprende con un caso diseñado.", Icon: Compass, action: onStory, tone: "story" },
     { title: "Importar proyecto", text: "Convierte un PDF o un Excel en una estructura académica editable y juégalo.", Icon: FileUp, action: onImport, tone: "import" },
@@ -29,6 +29,9 @@ export default function HomeActions({ onStory, onImport, onCreate, onContinue, o
         </button>
         <button type="button" onClick={onHow}>
           <BookOpen size={17} aria-hidden /> Cómo jugar
+        </button>
+        <button type="button" onClick={onPresent} title="Una partida de ejemplo completa y resuelta para mostrar el simulador">
+          <Presentation size={17} aria-hidden /> Modo presentación
         </button>
       </div>
     </section>
