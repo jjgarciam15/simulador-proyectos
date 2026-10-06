@@ -1,5 +1,13 @@
 # Cambios
 
+## 2.4.4 · Zoom de la interfaz en todas las pantallas (6 de octubre de 2026)
+
+- Barra flotante con **alejar (−)**, **acercar (+)** y el porcentaje actual, visible en todas las pantallas: inicio, juego, Project Builder, exámenes y ventanas. Va de 60 % a 160 % en pasos de 10 %; el panel de ajustes tiene un deslizador fino.
+- **Ajuste automático** (predeterminado) según el ancho de la ventana: 75 % en pantallas de 1.024 px, 95 % a 1.366 px, 100 % a 1.440 px y 135 % en monitores Full HD o mayores. En teléfonos queda en 100 %.
+- En teléfonos el máximo se limita (por ejemplo 120 % a 390 px) para que el contenido nunca quede más angosto que 320 px ni se salga de la pantalla.
+- La preferencia se guarda en el navegador y no cambia la partida ni la puntuación. El menú de etapas deja espacio para que la barra no tape sus últimos enlaces.
+- Verificado con el recorrido completo de 1.218 vistas a 60 %, 100 % y 160 %, sin desbordes ni errores, más una prueba E2E del zoom.
+
 ## 2.4.3 · Preguntas de 5 opciones, revisión del repositorio y pendientes terminados (6 de octubre de 2026)
 
 - **Preguntas: 5 opciones como máximo.** Práctica de la partida (antes 7), casos aplicados (antes 6), comité (algunas tenían 6), objetivo general (4) y específicos (6), métodos de valoración (5–7 según dificultad), Examen 2 (7 métodos) y actividades de proyectos propios (hasta 7) pasan a 5. La respuesta válida nunca se recorta. En los métodos de valoración la dificultad cambia cuántas de las 5 opciones son cercanas a la correcta, no su número. La prueba `questionRules.test.ts` exige exactamente 5.

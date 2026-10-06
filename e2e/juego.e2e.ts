@@ -64,3 +64,21 @@ test("ninguna pregunta visible de una etapa tiene más de 5 opciones", async ({ 
   expect(counts.every((n) => n <= 5)).toBe(true);
   expect(errors).toEqual([]);
 });
+
+test("el zoom acerca y aleja toda la interfaz, se guarda y vuelve al ajuste automático", async ({ page }) => {
+  const errors = await fresh(page);
+  const zoom = () => page.evaluate(() => getComputedStyle(document.documentElement).zoom);
+  await expect(page.locator(".zoom-level")).toContainText("100 %");
+  await page.getByRole("button", { name: /Acercar/ }).click();
+  expect(await zoom()).toBe("1.1");
+  await startMission(page);
+  await page.getByRole("button", { name: /Alejar/ }).click();
+  await page.getByRole("button", { name: /Alejar/ }).click();
+  expect(await zoom()).toBe("0.9");
+  await page.reload();
+  expect(await zoom()).toBe("0.9");
+  await page.getByRole("button", { name: /Volver al ajuste automático/ }).click();
+  expect(await zoom()).toBe("1");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  expect(errors).toEqual([]);
+});

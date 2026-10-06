@@ -64,7 +64,7 @@ Mis proyectos → «Restablecer partidas…». Hay que escribir `RESTABLECER`.
 |---|---|
 | Partidas activas, en pausa y terminadas; puntuaciones, respuestas, progreso y bitácoras (`proyecta-v1`, `proyecta-v1:unreadable`) | Las nueve misiones oficiales, su contenido e ilustraciones |
 | Proyectos importados y creados, borradores y misiones generadas (`proyecta-projects-v1`) | Metodologías y Centro de aprendizaje |
-| Intentos del Examen 2 (`proyecta-exam2-v1`) | Preferencias de sonido y animación, y el código |
+| Intentos del Examen 2 (`proyecta-exam2-v1`) | Preferencias de sonido, animación y tamaño (zoom), y el código |
 
 Con «Preparar el simulador para compartir» la página se recarga y verifica el estado cero (0 partidas, 0 proyectos personales, 0 importados, 0 misiones generadas) y que las misiones oficiales siguen disponibles.
 
@@ -86,6 +86,8 @@ Con «Preparar el simulador para compartir» la página se recarga y verifica el
 4. La alternativa en estudio aparece siempre en el panel derecho; se puede cambiar en Formulación sin borrar el trabajo.
 5. Al comprometer la inversión (Decisión) el plan se congela y comienza la ejecución: eventos condicionados, dilemas y consecuencias diferidas.
 6. En Ex post ves la nota con cada dimensión explicada, errores y aciertos, la historia del proyecto y recomendaciones.
+
+**Tamaño de la pantalla (zoom):** la barra flotante de abajo a la izquierda, visible en todas las pantallas (inicio, juego, Project Builder, exámenes y ventanas), tiene botones para **alejar (−)** y **acercar (+)** de 10 en 10 % entre 60 % y 160 %. El botón del porcentaje vuelve al **ajuste automático**, que adapta el simulador al ancho de la ventana: 75 % en portátiles pequeños, 100 % a 1.440 px y hasta 135 % en monitores grandes; en teléfonos queda en 100 % y el máximo se limita para que nada se salga de la pantalla. El panel ✨ incluye un deslizador fino. La preferencia se guarda en el navegador y no afecta la partida.
 
 Apoyos: **Centro de aprendizaje** (menú lateral o «Cómo jugar»), tutorial interactivo de tres minutos, **Práctica rápida** (VPN y RPC sin jugar una misión) y **Examen 2** (caso aplicado independiente, en el encabezado).
 
@@ -185,13 +187,13 @@ En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o re
 pnpm test
 ```
 
-Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 239 pruebas en 25 archivos, todas aprobadas.
+Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 243 pruebas en 26 archivos, todas aprobadas.
 
 ```bash
 pnpm build && pnpm e2e
 ```
 
-Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje y el límite de 5 opciones, y fallan ante cualquier error de consola.
+Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje, el límite de 5 opciones y el zoom, y fallan ante cualquier error de consola.
 
 ## Compilación
 

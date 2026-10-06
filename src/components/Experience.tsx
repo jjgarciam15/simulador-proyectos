@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Volume2, VolumeX, Sparkles, X } from "lucide-react";
+import { Volume2, VolumeX, Sparkles, X, ZoomIn, ZoomOut } from "lucide-react";
+import { effectiveZoom, maxZoomFor, readZoom, stepZoom, zoomLabel, zoomMin, type ZoomSetting } from "./zoom";
 import { assets } from "../data/world";
 import type { Cue, ExperienceMoment } from "../domain/experience";
 
 const preferenceKey = "aurora-experience-v1";
-type Preferences = { sound: boolean; volume: number; cinema: boolean };
+type Preferences = { sound: boolean; volume: number; cinema: boolean; zoom: ZoomSetting };
 function readPreferences(): Preferences {
   try {
     const p = JSON.parse(localStorage.getItem(preferenceKey) || "{}");
@@ -15,9 +16,10 @@ function readPreferences(): Preferences {
           ? Math.max(0, Math.min(1, p.volume))
           : 0.35,
       cinema: p.cinema !== false,
+      zoom: readZoom(p.zoom),
     };
   } catch {
-    return { sound: false, volume: 0.35, cinema: true };
+    return { sound: false, volume: 0.35, cinema: true, zoom: "auto" };
   }
 }
 
@@ -106,8 +108,12 @@ export default function Experience({ children }: { children: ReactNode }) {
     ),
     [systemReduced, setSystemReduced] = useState(
       () => matchMedia("(prefers-reduced-motion: reduce)").matches,
-    );
-  const reduced = systemReduced || !preferences.cinema;
+    ),
+    [width, setWidth] = useState(() => window.innerWidth);
+  const reduced = systemReduced || !preferences.cinema,
+    zoom = effectiveZoom(preferences.zoom, width),
+    zoomMax = maxZoomFor(width),
+    setZoom = (value: ZoomSetting) => setPreferences((p) => ({ ...p, zoom: value }));
   settings.current = preferences;
   useEffect(() => {
     const synth = new AuroraAudio();
@@ -157,6 +163,21 @@ export default function Experience({ children }: { children: ReactNode }) {
     }
     audio.current?.volume(preferences.sound ? preferences.volume : 0);
   }, [preferences]);
+  // Interface zoom: the whole simulator (game, builder, dialogs) is scaled from the root element.
+  useEffect(() => {
+    const resize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("zoom", String(zoom));
+    root.dataset.zoom = String(zoom);
+    return () => {
+      root.style.removeProperty("zoom");
+      delete root.dataset.zoom;
+    };
+  }, [zoom]);
   useEffect(() => {
     const query = matchMedia("(prefers-reduced-motion: reduce)"),
       change = () => setSystemReduced(query.matches);
@@ -199,7 +220,7 @@ export default function Experience({ children }: { children: ReactNode }) {
   return (
     <>
       {children}
-      <aside className="experience-controls" aria-label="Sonido y efectos">
+      <aside className="experience-controls" aria-label="Sonido, efectos y tamaño de la pantalla">
         <button
           className="sound-toggle"
           aria-label={
@@ -211,11 +232,47 @@ export default function Experience({ children }: { children: ReactNode }) {
           {preferences.sound ? <Volume2 size={17} /> : <VolumeX size={17} />}
           <span>{preferences.sound ? "Sonido activo" : "Activar sonido"}</span>
         </button>
+        <div className="zoom-controls" role="group" aria-label="Tamaño de la interfaz">
+          <button type="button" aria-label="Alejar (reducir tamaño)" title="Alejar" disabled={zoom <= zoomMin} onClick={() => setZoom(stepZoom(zoom, -1))}>
+            <ZoomOut size={16} />
+          </button>
+          <button
+            type="button"
+            className="zoom-level"
+            aria-label={preferences.zoom === "auto" ? `Tamaño automático ${zoomLabel(zoom)}` : `Tamaño ${zoomLabel(zoom)}. Volver al ajuste automático`}
+            title={preferences.zoom === "auto" ? "Ajuste automático a tu pantalla" : "Volver al ajuste automático"}
+            aria-pressed={preferences.zoom === "auto"}
+            onClick={() => setZoom("auto")}
+          >
+            {preferences.zoom === "auto" && <small>Auto</small>}
+            {zoomLabel(zoom)}
+          </button>
+          <button type="button" aria-label="Acercar (aumentar tamaño)" title="Acercar" disabled={zoom >= zoomMax} onClick={() => setZoom(stepZoom(zoom, 1))}>
+            <ZoomIn size={16} />
+          </button>
+        </div>
         <details>
-          <summary aria-label="Ajustar efectos">
+          <summary aria-label="Ajustar efectos y tamaño">
             <Sparkles size={17} />
           </summary>
           <div className="experience-options">
+            <strong>Tamaño de la interfaz · {zoomLabel(zoom)}</strong>
+            <label>
+              <input type="checkbox" checked={preferences.zoom === "auto"} onChange={(e) => setZoom(e.target.checked ? "auto" : zoom)} />
+              Ajustar automáticamente a mi pantalla
+            </label>
+            <label>
+              Acercar o alejar
+              <input
+                aria-label="Tamaño de la interfaz"
+                type="range"
+                min={zoomMin}
+                max={zoomMax}
+                step={0.05}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+              />
+            </label>
             <strong>Ambiente de Aurora</strong>
             <button
               className="preview-effects"
