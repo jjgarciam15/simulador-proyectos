@@ -200,7 +200,7 @@ describe("Partida generada con el motor de las misiones oficiales", () => {
     expect(missionFlowCase(g)!.horizon).toBe(15);
     const done = finish(g);
     expect(done.outcome).toBeTruthy();
-    expect(done.outcome!.assessment!.dimensions.length).toBe(12);
+    expect(done.outcome!.assessment!.dimensions.length).toBe(13);
     expect(Number.isFinite(done.outcome!.score)).toBe(true);
   });
   it("el modo exploración permite reformular sin costo", () => {

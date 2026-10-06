@@ -224,10 +224,10 @@ describe("Presupuesto, coherencia y resultado", () => {
     expect(review.excess).toBeGreaterThan(10);
     expect(adjustments(g).penalties.some((p) => p.label === "ODS indiscriminados")).toBe(true);
   });
-  it("el resultado final explica doce dimensiones (V2.2), ajustes, historia y aciertos/errores", () => {
+  it("el resultado final explica trece dimensiones (V2.2 + práctica), ajustes, historia y aciertos/errores", () => {
     const g = finish(prepareV2("agua"));
     const a = g.outcome!.assessment!;
-    expect(a.dimensions).toHaveLength(12);
+    expect(a.dimensions).toHaveLength(13);
     expect(a.dimensions.reduce((n, d) => n + d.weight, 0)).toBeCloseTo(1);
     expect(a.coherence!.length).toBe(7);
     expect(a.story).toMatch(/cobertura/);

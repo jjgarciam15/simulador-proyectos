@@ -1545,3 +1545,6 @@ tr.current-attempt td {
 .concept-links{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 14px;font-size:14px;color:var(--text-secondary,#3f4f49)}
 .concept-links .text-btn{padding:4px 0}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.score-breakdown{margin:18px 0}
+.score-breakdown>summary{cursor:pointer;font-weight:600;margin-bottom:8px}
+.score-breakdown td:nth-child(n+3),.score-breakdown th:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}

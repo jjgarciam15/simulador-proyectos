@@ -82,3 +82,19 @@ test("el zoom acerca y aleja toda la interfaz, se guarda y vuelve al ajuste auto
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   expect(errors).toEqual([]);
 });
+
+test("el menú de etapas se oculta y se muestra durante la partida y amplía el área de trabajo", async ({ page }) => {
+  const errors = await fresh(page);
+  await startMission(page);
+  const main = () => page.locator(".game-main").evaluate((e) => e.getBoundingClientRect().width);
+  const before = await main();
+  await page.getByRole("button", { name: "Ocultar el menú de etapas" }).click();
+  await expect(page.locator(".sidebar")).toBeHidden();
+  expect(await main()).toBeGreaterThan(before);
+  await page.reload();
+  await page.getByText("Continuar misión").first().click();
+  await expect(page.getByRole("button", { name: "Mostrar el menú de etapas" })).toBeVisible();
+  await page.getByRole("button", { name: "Mostrar el menú de etapas" }).click();
+  await expect(page.locator(".sidebar")).toBeVisible();
+  expect(errors).toEqual([]);
+});

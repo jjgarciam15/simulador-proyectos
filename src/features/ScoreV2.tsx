@@ -1,3 +1,4 @@
+import { scoreBreakdown } from "../domain/scoreParts";
 import type { GameState } from "../domain/types";
 import { Panel } from "../components/ui";
 import { outcomeLedger } from "../domain/ledger";
@@ -24,6 +25,7 @@ const short: Record<string, string> = {
   "Flujos, VPN y RPC": "Flujos",
   "Coherencia y trazabilidad": "Coherencia",
   "Comité evaluador": "Comité",
+  "Práctica de conceptos": "Práctica",
 };
 export default function ScoreV2({ g }: { g: GameState }) {
   const a = g.outcome?.assessment;
@@ -89,6 +91,7 @@ export default function ScoreV2({ g }: { g: GameState }) {
           </tbody>
         </table>
       </div>
+      <ActivityBreakdown g={g} />
       <p>
         Base: {a.base.toFixed(2)} − penalizaciones: {a.penalty.toFixed(2)}
         {a.bonus !== undefined && <> + bonificaciones: {a.bonus.toFixed(2)}</>}.
@@ -127,7 +130,7 @@ export default function ScoreV2({ g }: { g: GameState }) {
           </div>
         </div>
       )}
-      {practice && <p className="muted">{practice}</p>}
+      {practice && !a.dimensions.some((d) => d.name === "Práctica de conceptos") && <p className="muted">{practice}</p>}
       <h4>Aciertos y errores</h4>
       <div className="ledger">
         {[...new Set(ledger.map((l) => l.stage))].map((stage) => {
@@ -222,5 +225,60 @@ export default function ScoreV2({ g }: { g: GameState }) {
         para discusión; el texto libre no recibe una nota automática.
       </p>
     </Panel>
+  );
+}
+
+/** Puntuación integral: every scored activity of the game, its result, its weight in the grade and the points it gave. */
+function ActivityBreakdown({ g }: { g: GameState }) {
+  const a = g.outcome!.assessment!,
+    rows = scoreBreakdown(a.dimensions),
+    indirect = [
+      [g.studies.length, "estudio(s) comprados", "información al invertir y riesgo"],
+      [g.v2?.dilemmas?.length ?? 0, "dilema(s) resueltos", "recursos, apoyo, plazo y ejecución"],
+      [g.eventIds.length, "evento(s) de ejecución atendidos", "plazo, costos, legitimidad y servicio"],
+      [g.mitigations.length, "mitigación(es) de riesgo", "riesgo e información, y la bonificación de gestión de riesgo"],
+    ].filter(([n]) => Number(n) > 0) as [number, string, string][];
+  return (
+    <details className="score-breakdown" open>
+      <summary>
+        Desglose completo: {rows.length} actividades de tu partida suman {a.base.toFixed(2)} puntos base
+      </summary>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Dimensión</th>
+              <th>Actividad</th>
+              <th>Tu resultado</th>
+              <th>Peso en la nota</th>
+              <th>Puntos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.dimension + r.activity}>
+                <td>{r.dimension}</td>
+                <td>{r.activity}</td>
+                <td>{r.value.toFixed(0)}/100</td>
+                <td>{(r.weight * 100).toFixed(1)} %</td>
+                <td>{r.points.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colSpan={3}>Total base</th>
+              <th>100 %</th>
+              <th>{a.base.toFixed(2)}</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      {indirect.length > 0 && (
+        <p className="muted">
+          Sin nota propia, pero cuentan a través de otras dimensiones: {indirect.map(([n, what, where]) => `${n} ${what} (${where})`).join("; ")}.
+        </p>
+      )}
+    </details>
   );
 }

@@ -1,5 +1,24 @@
 # Cambios
 
+## 2.5.0 · Puntuación integral, menú de etapas ocultable y revisión de Crear e Importar proyecto (6 de octubre de 2026)
+
+- **Puntuación integral.** Cada dimensión se calcula a partir de las actividades que la forman, y el resultado final muestra el «Desglose completo»: unas 30 actividades con tu resultado, su peso en la nota y los puntos que aportó, con una suma igual a la nota base.
+  - Nueva dimensión **Práctica de conceptos**, que suma por acertar en lugar de solo descontar por pistas.
+  - La **negociación con actores** cuenta dentro de Diagnóstico cuando se negoció.
+  - Se indica qué decisiones (dilemas, eventos, estudios y mitigaciones) cuentan a través de otras dimensiones.
+- **Menú de etapas ocultable** durante la partida, en escritorio y tableta. Amplía el área de trabajo (en 1.366 px pasa de 893 a 1.102 px) y se recuerda.
+- **Crear proyecto:**
+  - El Árbol del problema del juego incluye todas las causas y efectos del autor (antes solo dos).
+  - Se eliminaron las advertencias duplicadas en Costos y finanzas.
+  - El resumen muestra «sin dato» y explica la cadena de valor y los impactos vacíos.
+  - Las dificultades usan los nombres del juego.
+  - La lista de revisión anuncia su estado a lectores de pantalla.
+- **Importar proyecto:**
+  - La plantilla Excel vacía ya no crea causas y efectos con el texto «Directa» o «Indirecta».
+  - Los avisos dicen «nombre del proyecto».
+  - El error de formato menciona `.proyecta.json`.
+  - Probados archivos inválidos, PDF falso o sin texto, JSON roto, plantilla vacía y exportación con reimportación.
+
 ## 2.4.4 · Zoom de la interfaz en todas las pantallas (6 de octubre de 2026)
 
 - Barra flotante con **alejar (−)**, **acercar (+)** y el porcentaje actual, visible en todas las pantallas: inicio, juego, Project Builder, exámenes y ventanas. Va de 60 % a 160 % en pasos de 10 %; el panel de ajustes tiene un deslizador fino.

@@ -87,6 +87,8 @@ Con «Preparar el simulador para compartir» la página se recarga y verifica el
 5. Al comprometer la inversión (Decisión) el plan se congela y comienza la ejecución: eventos condicionados, dilemas y consecuencias diferidas.
 6. En Ex post ves la nota con cada dimensión explicada, errores y aciertos, la historia del proyecto y recomendaciones.
 
+**Más espacio de trabajo:** en escritorio y tableta, el botón «Ocultar» de la cabecera del juego esconde el menú de etapas de la izquierda y amplía el área central; «Etapas» lo vuelve a mostrar. La preferencia se recuerda. En teléfonos se usa el menú ☰.
+
 **Tamaño de la pantalla (zoom):** la barra flotante de abajo a la izquierda, visible en todas las pantallas (inicio, juego, Project Builder, exámenes y ventanas), tiene botones para **alejar (−)** y **acercar (+)** de 10 en 10 % entre 60 % y 160 %. El botón del porcentaje vuelve al **ajuste automático**, que adapta el simulador al ancho de la ventana: 75 % en portátiles pequeños, 100 % a 1.440 px y hasta 135 % en monitores grandes; en teléfonos queda en 100 % y el máximo se limita para que nada se salga de la pantalla. El panel ✨ incluye un deslizador fino. La preferencia se guarda en el navegador y no afecta la partida.
 
 Apoyos: **Centro de aprendizaje** (menú lateral o «Cómo jugar»), tutorial interactivo de tres minutos, **Práctica rápida** (VPN y RPC sin jugar una misión) y **Examen 2** (caso aplicado independiente, en el encabezado).
@@ -125,7 +127,9 @@ La dificultad cambia lo que conoces y tu exposición al riesgo, no la realidad s
 
 ## Puntuación
 
-Las partidas V2.2 usan **12 dimensiones**: Diagnóstico y Árbol del problema, Alternativa y objetivos, Cadena de valor y presupuesto, Efectos/impactos y valoración, Flujos/VPN/RPC, Evaluación ex ante, Regulación y ODS, Compromisos y riesgo, Ejecución y servicio, Valor observado, Coherencia y trazabilidad, Comité evaluador. Los pesos dependen del rol (público o privado) y del perfil de la misión; si un módulo no aplica, su peso se reparte (`src/data/balance.ts`, `scoringWeightsV3`).
+Las partidas V2.2 usan **13 dimensiones**: Diagnóstico y Árbol del problema, Alternativa y objetivos, Cadena de valor y presupuesto, Efectos/impactos y valoración, Flujos/VPN/RPC, Evaluación ex ante, Regulación y ODS, Compromisos y riesgo, Ejecución y servicio, Valor observado, Coherencia y trazabilidad, Comité evaluador y **Práctica de conceptos**. Los pesos dependen del rol (público o privado) y del perfil de la misión; si un módulo no aplica, su peso se reparte (`src/data/balance.ts`, `scoringWeightsV3`).
+
+**Puntuación integral:** cada dimensión se compone de las actividades que la forman, con su propio peso. Por ejemplo, Diagnóstico combina enlaces causales, Árbol del problema, mapa de actores, focalización y, si negociaste, la negociación con actores. Al final de la partida, «Desglose completo» lista unas 30 actividades con tu resultado, su peso en la nota y los puntos que aportó, y la suma coincide con la nota base. La práctica de conceptos suma por acertar: es el promedio de los ejercicios que se pueden responder antes del cierre, y un ejercicio sin responder cuenta 0. Las pistas y los intentos extra ya descuentan dentro de cada ejercicio. Los dilemas, eventos, estudios y mitigaciones no tienen nota propia, pero cuentan a través de los recursos, el riesgo y la ejecución, y el desglose lo indica.
 
 Nota final = (base ponderada − penalizaciones + bonificaciones) × factor de dificultad. Cada dimensión explica su cálculo, los errores y aciertos. La nota usa el estado confirmado, no el número de intentos: reconfirmar un módulo o repetir el Examen 2 no acumula puntos.
 
@@ -187,13 +191,13 @@ En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o re
 pnpm test
 ```
 
-Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 243 pruebas en 26 archivos, todas aprobadas.
+Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 247 pruebas en 27 archivos, todas aprobadas.
 
 ```bash
 pnpm build && pnpm e2e
 ```
 
-Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje, el límite de 5 opciones y el zoom, y fallan ante cualquier error de consola.
+Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje, el límite de 5 opciones, el zoom y el menú de etapas ocultable, y fallan ante cualquier error de consola.
 
 ## Compilación
 
