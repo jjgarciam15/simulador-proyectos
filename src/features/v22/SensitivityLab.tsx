@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { GameState } from "../../domain/types";
 import {
   criticalVariable,
@@ -19,13 +19,14 @@ import { helpPolicy } from "../../domain/help";
 import { fmtMoney, fmtPct } from "../../domain/format";
 import { Panel } from "../../components/ui";
 import { ModuleIntro, Status } from "./common";
+import { demandBand, riskAnalysis } from "../../domain/risk";
 
 /** Supuestos del proyecto: each datum labelled as observed data, estimate, assumption or player decision. */
 export function AssumptionsPanel({ g }: { g: GameState }) {
   const s = scenarioById(g.scenarioId),
     c = missionFlowCase(g),
     studied = g.studies.includes("demanda"),
-    band = studied ? 0.08 : g.difficulty === "experto" ? 0.3 : 0.2,
+    band = demandBand(g),
     demand = s.demand * estimate(g, "demand");
   const rows: [string, string, string][] = [
     ["Demanda estimada", `${Math.round(demand * (1 - band)).toLocaleString("es-CO")}–${Math.round(demand * (1 + band)).toLocaleString("es-CO")} ${s.unit}`, studied ? "Estimación · confianza alta (estudio de demanda)" : "Estimación · confianza media o baja: sin estudio de demanda"],
@@ -84,6 +85,7 @@ export default function SensitivityLab({ g }: { g: GameState }) {
   return (
     <Panel title="Sensibilidad, escenarios y estrés" kicker="¿QUÉ PUEDE CAMBIAR LA DECISIÓN?">
       <ModuleIntro
+        concepts={["sensibilidad", "tasa-descuento"]}
         what={`Tu flujo${f.own ? "" : " de referencia (aún no confirmas el tuyo)"} tiene VPN financiero ${fmtMoney(base.npvF)} y VPN económico ${fmtMoney(base.npvE)}.`}
         why="Las estimaciones son inciertas. Saber qué variable amenaza la viabilidad orienta estudios, contingencias y la defensa del proyecto."
         decide="Explora cambios, identifica la variable crítica y observa la resiliencia ante choques combinados."
@@ -152,6 +154,7 @@ export default function SensitivityLab({ g }: { g: GameState }) {
           </ul>
         </>
       )}
+      <RiskSection g={g} />
       <h4>Variable crítica</h4>
       <p>¿Qué variable amenaza más la viabilidad económica si empeora 10 %?</p>
       <div className="v22-choice methods">
@@ -190,5 +193,70 @@ export default function SensitivityLab({ g }: { g: GameState }) {
         </>
       )}
     </Panel>
+  );
+}
+
+/** Análisis de riesgo: 500 simulaciones Monte Carlo del flujo del jugador, reproducibles con la semilla. */
+function RiskSection({ g }: { g: GameState }) {
+  // 500 flow evaluations: recompute only when the game state changes.
+  const r = useMemo(() => {
+    const c = missionFlowCase(g),
+      f = c ? playerFlow(g, c) : null;
+    return c && f ? riskAnalysis(c, f.rows, f.econ, f.benefits, g.seed, demandBand(g)) : null;
+  }, [g]);
+  if (!r) return null;
+  const e = r.economic,
+    top = Math.max(...r.bins.map((b) => b.count)),
+    band = Math.round(r.ranges.demand[2] * 100 - 100),
+    // An analysis result, not a player error: high risk is shown as «Revisar», never as «Error».
+    level = e.probNegative <= 0.1 ? "ok" : "alerta",
+    high = e.probNegative > 0.35;
+  return (
+    <section className="risk-lab" aria-labelledby="risk-title">
+      <h4 id="risk-title">Análisis de riesgo · simulación Monte Carlo</h4>
+      <p className="muted">
+        {r.runs} simulaciones de tu flujo. En cada una, inversión, O&amp;M y beneficios valorados varían entre los escenarios optimista y pesimista; la demanda, ±{band} % según la
+        información que compraste{g.studies.includes("demanda") ? " (el estudio de demanda redujo la banda)" : " (el estudio de demanda la reduciría)"}; y la operación puede retrasarse un año. Con la misma
+        semilla el resultado se repite.
+      </p>
+      <div className="metric-grid compact">
+        <div className="metric">
+          <span>Probabilidad de VPN económico negativo</span>
+          <strong>{Math.round(e.probNegative * 100)} %</strong>
+        </div>
+        <div className="metric">
+          <span>VPN económico P10</span>
+          <strong>{fmtMoney(e.p10)}</strong>
+          <small>1 de cada 10 simulaciones queda por debajo</small>
+        </div>
+        <div className="metric">
+          <span>VPN económico mediano (P50)</span>
+          <strong>{fmtMoney(e.p50)}</strong>
+        </div>
+        <div className="metric">
+          <span>VPN económico P90</span>
+          <strong>{fmtMoney(e.p90)}</strong>
+          <small>1 de cada 10 simulaciones queda por encima</small>
+        </div>
+      </div>
+      <div className="risk-histogram" role="img" aria-label={`Distribución del VPN económico: ${r.bins.map((b) => `${b.count} simulaciones entre ${fmtMoney(b.from)} y ${fmtMoney(b.to)}`).join("; ")}`}>
+        {r.bins.map((b, i) => (
+          <div key={i} className={"risk-bar" + (b.to <= 0 ? " negative" : b.from < 0 ? " mixed" : "")} style={{ height: `${Math.max(2, (b.count / Math.max(1, top)) * 100)}%` }} title={`${fmtMoney(b.from)} a ${fmtMoney(b.to)}: ${b.count}`} />
+        ))}
+      </div>
+      <div className="risk-axis" aria-hidden>
+        <span>{fmtMoney(e.min)}</span>
+        <span>VPN económico</span>
+        <span>{fmtMoney(e.max)}</span>
+      </div>
+      <ul className="findings">
+        <Status level={level}>
+          {e.probNegative === 0
+            ? "En ninguna simulación el VPN económico es negativo: la conclusión es robusta a estos rangos."
+            : `En ${Math.round(e.probNegative * 100)} % de las simulaciones el proyecto destruye valor para la sociedad. ${high ? "El riesgo es alto: revisa la variable crítica, compra información o rediseña." : "Considera contingencias y estudios que reduzcan la incertidumbre."}`}{" "}
+          VPN financiero: probabilidad de pérdida {Math.round(r.financial.probNegative * 100)} %, mediano {fmtMoney(r.financial.p50)}.
+        </Status>
+      </ul>
+    </section>
   );
 }

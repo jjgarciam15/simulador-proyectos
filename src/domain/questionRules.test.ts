@@ -12,18 +12,23 @@ import { prepareV2 } from "../testSupport/gameFixture";
 import { sampleProject } from "../testSupport/projectFixture";
 import { tutorial } from "../features/v22/HowToPlay";
 import { learningChallenges } from "./learning";
+import { generalObjectiveOptions, specificObjectiveOptions, valuableCards, methodOptions } from "./valuation";
 
-const inRange = (n: number) => n >= 5 && n <= 7;
-describe("Regla de preguntas: entre 5 y 7 opciones, con trampas", () => {
+const inRange = (n: number) => n === 5;
+describe("Regla de preguntas: 5 opciones (máximo), con trampas", () => {
   it("práctica, casos aplicados y comité de las nueve misiones", () => {
     for (const s of scenarios) {
       for (const q of questionsV2(createGameV2(s.id))) expect(inRange(q.options.length), `${s.id}/${q.id}`).toBe(true);
-      for (const q of committeeQuestions(prepareV2(s.id))) expect(inRange(q.options.length), `${s.id}/comité ${q.id}`).toBe(true);
+      const g = prepareV2(s.id);
+      for (const q of committeeQuestions(g)) expect(inRange(q.options.length), `${s.id}/comité ${q.id}`).toBe(true);
+      expect(inRange(generalObjectiveOptions(g).length), `${s.id}/objetivo general`).toBe(true);
+      expect(inRange(specificObjectiveOptions(g).length), `${s.id}/objetivos específicos`).toBe(true);
+      for (const c of valuableCards(g)) expect(inRange(methodOptions(g, c).length), `${s.id}/métodos ${c.id}`).toBe(true);
     }
   });
   it("Centro de aprendizaje, Examen 2, tutorial y actividades generadas", () => {
     for (const c of concepts) expect(inRange(c.exercise.options.length), c.id).toBe(true);
-    for (const list of [exam2.objectives, exam2.tradeoff.options, exam2.sunkQuestion.options, sensitivityOptions(), decisionReasons]) expect(inRange(list.length)).toBe(true);
+    for (const list of [exam2.objectives, exam2.valuation.offered, exam2.tradeoff.options, exam2.sunkQuestion.options, sensitivityOptions(), decisionReasons]) expect(inRange(list.length)).toBe(true);
     for (const t of tutorial) expect(inRange(t.o.length), t.q).toBe(true);
     for (const a of generateActivities(sampleProject())) expect(inRange(a.options.length), a.id).toBe(true);
     for (const s of scenarios)

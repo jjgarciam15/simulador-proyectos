@@ -206,6 +206,7 @@ export default function FlowSheet({ g, send }: { g: GameState; send: (a: Action)
   return (
     <Panel title="Flujo financiero del proyecto" kicker="HOJA DE CÁLCULO EDUCATIVA">
       <ModuleIntro
+        concepts={["flujo-caja", "valor-residual", "om"]}
         what={`Horizonte de ${c.horizon} años (vida útil de la alternativa). Tasa de descuento financiera: ${fmtPct(c.financialRate)}.`}
         why="El flujo ordena en el tiempo cuándo se invierte, cuándo se opera y cuándo llegan los ingresos: sin él no hay VPN."
         decide="Clasifica cada rubro, calcula los valores que faltan y ubícalos en los periodos correctos. Algunos rubros no deben entrar."

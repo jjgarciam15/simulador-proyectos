@@ -6,7 +6,7 @@ import { treeCards, treeReview, treeSlots, type TreePlacements, type TreeSlot } 
 import { helpPolicy } from "../domain/help";
 import { useDraftGuard, different } from "../components/workbench";
 import { Button, Panel, Tip } from "../components/ui";
-import { Deferred, Status } from "./v22/common";
+import { ConceptLinks, Deferred, Status } from "./v22/common";
 
 const levels = treeSlots.filter((s) => s.id !== "fuera");
 const levelTitle: Record<string, string> = {
@@ -77,7 +77,7 @@ export default function ProblemTreeBuilder({ g, send }: { g: GameState; send: (a
     );
   };
   return (
-    <Panel title="Construye el Árbol del problema" kicker="02 / CONECTA LAS CAUSAS">
+    <Panel title="Construye el Árbol del problema" kicker="02 / CONECTA LAS CAUSAS"><ConceptLinks ids={["arbol", "causa-efecto"]} />
       <p className="muted">
         Tienes {cards.length} tarjetas mezcladas: algunas son causas o efectos reales del problema y otras son trampas (soluciones disfrazadas, objetivos, causas demasiado generales o situaciones que no explican el problema).
         Arrastra cada una a su nivel o usa la lista «Ubicar en…». Las trampas van a «No pertenece al árbol».

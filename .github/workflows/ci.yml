@@ -34,3 +34,28 @@ jobs:
         run: pnpm repo:check
       - name: Comprobar tipos, reglas y compilación
         run: pnpm check
+
+  e2e:
+    name: Pruebas de extremo a extremo
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Instalar versiones fijadas
+        run: pnpm install --frozen-lockfile
+      - name: Instalar Chromium para Playwright
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Compilar
+        run: pnpm build
+      - name: Ejecutar pruebas E2E
+        run: pnpm e2e

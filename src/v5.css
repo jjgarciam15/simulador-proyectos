@@ -1536,3 +1536,11 @@ tr.current-attempt td {
 }
 .budget-basics{border:1px solid var(--line,#d8d2c4);border-radius:10px;padding:10px 14px;margin:12px 0;display:grid;gap:4px}
 .budget-basics ul{margin:0;padding-left:18px}
+.risk-lab{margin:20px 0}
+.risk-histogram{display:flex;align-items:flex-end;gap:3px;height:120px;padding:8px 0;border-bottom:1px solid var(--border,#c5d0ca)}
+.risk-bar{flex:1;min-width:0;background:var(--success,#1f7a4d);border-radius:3px 3px 0 0}
+.risk-bar.negative{background:var(--danger,#b3261e)}
+.risk-bar.mixed{background:var(--warning,#8f5b00)}
+.risk-axis{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--text-secondary,#3f4f49);margin-top:4px}
+.concept-links{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 14px;font-size:14px;color:var(--text-secondary,#3f4f49)}
+.concept-links .text-btn{padding:4px 0}

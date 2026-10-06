@@ -28,6 +28,7 @@ export default function ImpactsBuilder({ g, send }: { g: GameState; send: (a: Ac
   return (
     <Panel title="Efectos e impactos del proyecto" kicker="PRODUCTO → EFECTO → IMPACTO">
       <ModuleIntro
+        concepts={["efectos-impactos", "doble-conteo"]}
         what="Tu alternativa entrega productos; esos productos generan efectos, y los efectos producen impactos positivos o negativos."
         why="Solo lo que el proyecto cambia se mide y se valora. Un efecto del problema describe la situación actual, no un cambio."
         decide="Clasifica cada tarjeta y, para los impactos, identifica quién los recibe."

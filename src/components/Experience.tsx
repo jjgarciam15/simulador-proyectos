@@ -152,7 +152,9 @@ export default function Experience({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       localStorage.setItem(preferenceKey, JSON.stringify(preferences));
-    } catch {}
+    } catch {
+      // Private window or blocked storage: preferences last only for this session.
+    }
     audio.current?.volume(preferences.sound ? preferences.volume : 0);
   }, [preferences]);
   useEffect(() => {

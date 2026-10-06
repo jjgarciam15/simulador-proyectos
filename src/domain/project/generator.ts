@@ -92,8 +92,10 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
     alts = p.alternatives.filter((a) => a.name.trim());
   const add = (a: Omit<GeneratedActivity, "status" | "options"> & { options: { id: string; text: string }[] }) => {
     const status = answerStatus(p, a.source);
-    const options = a.options.filter((o, i, all) => o.text.trim() && all.findIndex((x) => x.text.trim().toLowerCase() === o.text.trim().toLowerCase()) === i).slice(0, 7);
-    if (options.length < 5) return;
+    const unique = a.options.filter((o, i, all) => o.text.trim() && all.findIndex((x) => x.text.trim().toLowerCase() === o.text.trim().toLowerCase()) === i);
+    // Exactly 5 options: the valid answers always stay, then the first distractors.
+    const options = [...unique.filter((o) => a.validAnswers.includes(o.id)), ...unique.filter((o) => !a.validAnswers.includes(o.id))].slice(0, 5);
+    if (options.length < 5 || !options.some((o) => a.validAnswers.includes(o.id))) return;
     acts.push({ ...a, options: shuffle(a.id, options), status, score: status === "esperada" ? a.score : status === "plausible" ? Math.round(a.score / 2) : 0 });
   };
   if (p.problem.trim() && causes.length && effects.length && alts.length)
@@ -166,7 +168,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         concept: "Costo de oportunidad",
         difficulty: "Básica",
         question: "¿Qué alternativa exige la mayor inversión inicial?",
-        options: [...withInv.map((a) => ({ id: a.id, text: a.name })), { id: "iguales", text: "Todas requieren una inversión similar" }, { id: "vpn", text: "No se puede saber sin calcular el VPN" }, { id: "cobertura", text: "La que tiene mayor cobertura, porque siempre cuesta más" }].slice(0, 7),
+        options: [...withInv.map((a) => ({ id: a.id, text: a.name })), { id: "iguales", text: "Todas requieren una inversión similar" }, { id: "vpn", text: "No se puede saber sin calcular el VPN" }, { id: "cobertura", text: "La que tiene mayor cobertura, porque siempre cuesta más" }],
         validAnswers: [max.id],
         feedback: `${max.name} requiere ${Math.round(max.investment!).toLocaleString("es-CO")} M. Mayor inversión significa renunciar a otros usos de esos recursos: compárala con su cobertura y beneficios.`,
         source: withInv.map((a) => `alternatives.${a.id}.investment`),
@@ -183,7 +185,7 @@ export function generateActivities(p: NormalizedProject): GeneratedActivity[] {
         concept: "Alternativas de solución",
         difficulty: "Básica",
         question: "¿Qué alternativa llega a una mayor parte de la población objetivo?",
-        options: [...withCov.map((a) => ({ id: a.id, text: a.name })), { id: "iguales", text: "Todas llegan a la misma población" }, { id: "inversion", text: "La de mayor inversión, porque siempre llega a más personas" }, { id: "total", text: "Ninguna: la cobertura se mide sobre la población total" }].slice(0, 7),
+        options: [...withCov.map((a) => ({ id: a.id, text: a.name })), { id: "iguales", text: "Todas llegan a la misma población" }, { id: "inversion", text: "La de mayor inversión, porque siempre llega a más personas" }, { id: "total", text: "Ninguna: la cobertura se mide sobre la población total" }],
         validAnswers: [best.id],
         feedback: `${best.name} cubre ${Math.round(best.coverage! * 100)} %. Mayor cobertura no la hace automáticamente mejor: revisa su costo y riesgo.`,
         source: withCov.map((a) => `alternatives.${a.id}.coverage`),

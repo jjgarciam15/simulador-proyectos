@@ -136,7 +136,7 @@ Nota final = (base ponderada − penalizaciones + bonificaciones) × factor de d
 | Estilos | Tailwind CSS 4 y hojas CSS propias (`src/*.css`) |
 | Gráficos | Recharts |
 | Íconos | Lucide |
-| Pruebas | Vitest |
+| Pruebas | Vitest (unitarias) y Playwright (E2E) · ESLint |
 | Paquetes | pnpm 11.19.0 |
 
 No hay backend, base de datos, cuentas ni servicios externos: es una aplicación estática.
@@ -169,11 +169,13 @@ No se requieren variables de entorno ni claves API.
 | `pnpm test` | Pruebas Vitest del motor, puntuación y contenido |
 | `pnpm build` | Tipos + compilación de producción en `dist/` |
 | `pnpm preview` | Sirve `dist/` localmente para revisarlo |
-| `pnpm check` | Tipos, pruebas y compilación (lo que ejecuta la CI) |
+| `pnpm lint` | ESLint: errores de código y reglas de hooks de React |
+| `pnpm check` | Tipos, lint, pruebas y compilación (lo que ejecuta la CI) |
+| `pnpm e2e` | Pruebas de extremo a extremo con Playwright sobre `dist/` (ejecuta `pnpm build` antes) |
 | `pnpm repo:check` | Revisa que no se versionen dependencias, compilaciones ni credenciales |
 | `pnpm portable` | Compila y genera el paquete portátil para Windows en `release/` (no requiere Node para usarlo) |
 
-No hay comando de lint configurado.
+TypeScript se compila en modo estricto, sin variables ni importaciones sin uso.
 
 En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o reutiliza) Vite en el puerto 5173 y abre una ventana de aplicación. Los registros quedan en `.local/`.
 
@@ -183,7 +185,13 @@ En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o re
 pnpm test
 ```
 
-Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y su diagnóstico, cadena de valor, dependencias y «requiere revisión», dilemas y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder (vacío, parcial, completo, varias alternativas, validaciones), la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, persistencia de borradores, formato portable, reset y personajes. Última ejecución: 224 pruebas en 21 archivos, todas aprobadas (incluye la regla de 5–7 opciones por pregunta). Las pruebas de extremo a extremo (misión oficial, crear, importar PDF, importar Excel y reset) se ejecutaron en navegador con Playwright.
+Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 239 pruebas en 25 archivos, todas aprobadas.
+
+```bash
+pnpm build && pnpm e2e
+```
+
+Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje y el límite de 5 opciones, y fallan ante cualquier error de consola.
 
 ## Compilación
 
@@ -216,7 +224,7 @@ Las imágenes y los recursos respetan la ruta base (`import.meta.env.BASE_URL`).
 
 **Comprobación local del build:** `pnpm preview` (no es un servidor de producción).
 
-La CI de GitHub (`.github/workflows/ci.yml`, «Validar simulador») ejecuta `pnpm install --frozen-lockfile`, `pnpm repo:check` y `pnpm check` en cada push a `main` y en cada pull request. **No despliega.**
+La CI de GitHub (`.github/workflows/ci.yml`, «Validar simulador») ejecuta `pnpm install --frozen-lockfile`, `pnpm repo:check` y `pnpm check` (tipos, lint, pruebas y compilación) y después las pruebas E2E con Chromium, en cada push a `main` y en cada pull request. **No despliega.**
 
 ## Persistencia
 

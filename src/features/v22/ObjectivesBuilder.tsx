@@ -23,6 +23,7 @@ export default function ObjectivesBuilder({ g, send }: { g: GameState; send: (a:
   return (
     <Panel title="Del problema a los objetivos" kicker="OBJETIVOS · GENERAL Y ESPECÍFICOS">
       <ModuleIntro
+        concepts={["objetivos", "arbol"]}
         what="Cada situación negativa del Árbol del problema puede transformarse en una situación deseada."
         why="Los objetivos definen qué cambio persigues: la alternativa, la cadena de valor y los indicadores deben responder a ellos."
         decide="Un objetivo general (el cambio central) y los objetivos específicos (los medios para lograrlo)."

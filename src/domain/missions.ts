@@ -55,6 +55,9 @@ export function validateMission(s: Scenario) {
       (e.cost === 0 && e.delay === 0 && e.benefit === 0)
     )
       errors.push("Evento sin consecuencia válida: " + e.id);
+  for (const e of s.events)
+    if ((e.modifiers ?? []).some((m) => !m.when || typeof m.when !== "object" || !Number.isFinite(m.factor) || m.factor <= 0))
+      errors.push("Modificador de probabilidad inválido en el evento: " + e.id);
   if (
     s.sdgs.length < 2 ||
     s.sdgs.some(

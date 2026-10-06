@@ -75,6 +75,7 @@ export default function EconomicFlow({ g, send }: { g: GameState; send: (a: Acti
   return (
     <Panel title="Flujo económico y RPC" kicker="DEL VALOR DE MERCADO AL VALOR ECONÓMICO">
       <ModuleIntro
+        concepts={["flujo-economico", "rpc", "transferencias"]}
         what="El flujo financiero mide la caja del proyecto a precios de mercado. El flujo económico mide su aporte al bienestar de la sociedad."
         why="Los precios de mercado tienen distorsiones (impuestos, salarios, divisa). Las RPC las corrigen; las transferencias no son recursos."
         decide="Qué RPC aplica a cada rubro, qué rubros son transferencias y qué beneficios valorados entran sin doble conteo."

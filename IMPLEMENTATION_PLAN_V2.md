@@ -111,7 +111,7 @@ Correcciones hechas a partir de la prueba manual: unidad «M» duplicada, contra
 | Centro de mando y variables vivas | IMPLEMENTADA | `CommandCenter.tsx`, `ResourceDeck` |
 | Tiempo como recurso | PARCIAL: meses como unidad; no hay días ni semanas | motor, dilemas |
 | Planificador de recursos | IMPLEMENTADA (existente) | panel derecho |
-| Preguntas con 5–7 opciones y trampas | IMPLEMENTADA en la práctica V2 (7 y 6 opciones). El módulo de 3 opciones solo existe para partidas guardadas antes de la V2 | `questionsV2.ts`, `appliedCases.ts` |
+| Preguntas con trampas, 5 opciones como máximo | IMPLEMENTADA (2.4.3): todas las preguntas tienen exactamente 5 opciones; el módulo de 3 opciones de la V1 se retiró en 2.4.2 | `questionsV2.ts`, `appliedCases.ts`, `questionRules.test.ts` |
 | Pistas en tres niveles e intentos 100/80/60 % | IMPLEMENTADA (existente) | `questionsV2.ts` |
 | Cadena de valor construida por el jugador | IMPLEMENTADA | `chainBank`, `ChainBuilder` |
 | Presupuesto sin valores precargados, guía y diagnóstico | IMPLEMENTADA | `budgetReview.ts`, `BudgetReviewPanel` |
@@ -119,7 +119,7 @@ Correcciones hechas a partir de la prueba manual: unidad «M» duplicada, contra
 | Información imperfecta y centro de información | IMPLEMENTADA | `InformationCenter.tsx` |
 | Actores, matriz, negociación y aceptación social | IMPLEMENTADA (existente) | Diagnóstico, `negotiations.ts` |
 | Dilemas sin opción perfecta | IMPLEMENTADA | `data/dilemmas.ts` |
-| Eventos condicionales configurables | PARCIAL: el modelo completo (condiciones, probabilidad dependiente, opciones, efectos diferidos) se aplica a los dilemas previos a la inversión; los eventos de ejecución conservan su lista anterior, modulada ahora por el riesgo sistémico | `dilemmas.ts`, `engine.ts` |
+| Eventos condicionales configurables | IMPLEMENTADA (2.4.3): dilemas y eventos de ejecución usan condiciones y modificadores declarados como datos, con el mismo evaluador; la reducción por estudio es un modificador. Los factores continuos (apoyo social, riesgo sistémico, condición ambiental real) siguen en la fórmula | `dilemmas.ts`, `engine.ts`, `events.test.ts` |
 | Consecuencias inmediatas, diferidas y sistémicas | IMPLEMENTADA | `v2.consequences`, `v2.delayed`, `v2.eventRisk` |
 | Bitácora del proyecto | IMPLEMENTADA | `ConsequenceLog`, `Journal` |
 | Evaluación ex ante explicada con datos de la partida | IMPLEMENTADA | `ExAnteBrief.tsx` |
@@ -128,7 +128,7 @@ Correcciones hechas a partir de la prueba manual: unidad «M» duplicada, contra
 | Catálogo amplio de instrumentos (impuestos, subsidios, provisión pública…) | PARCIAL: tres instrumentos por misión (no intervenir, focalizado, estricto); los subsidios aparecen como dilema | `scenarios.ts` |
 | ODS sin preselección, justificados y valorados | IMPLEMENTADA | `SDGBuilder`, `sdgReview` |
 | Introducción de etapas y «Aprender más» | IMPLEMENTADA | `CommandCenter.tsx` |
-| Tutor contextual | PARCIAL: asesores de la misión y «Aprender más»; no hay un tutor por concepto a demanda | `Characters.tsx` |
+| Tutor contextual | IMPLEMENTADA (2.4.3): asesores, «Aprender más» y enlaces «¿Dudas? Repasa…» al concepto en cada herramienta; sin tutor conversacional | `Characters.tsx`, `ConceptLinks` |
 | Dificultad centralizada y explicada | IMPLEMENTADA; no modifica el plazo | `difficultyRules`, `DifficultyGuide` |
 | Puntuación V2, coherencia transversal, bonificaciones y penalizaciones | IMPLEMENTADA | `scoringV2.ts`, `coherence.ts` |
 | Resultado detallado, aciertos y errores, perfil radar, historia por reglas | IMPLEMENTADA | `ScoreV2.tsx`, `ledger.ts` |
@@ -138,10 +138,10 @@ Correcciones hechas a partir de la prueba manual: unidad «M» duplicada, contra
 | Validación de misiones | IMPLEMENTADA | `missions.ts` |
 | Microinteracciones | IMPLEMENTADA, discretas y con `prefers-reduced-motion` | `v3.css` |
 | Reinicio controlado | IMPLEMENTADA para etapa y misión (existente); no por decisión individual | `ResetStage.tsx` |
-| Analítica local | PARCIAL: intentos, pistas, cambios y decisiones; no mide el tiempo por etapa | — |
+| Analítica local | IMPLEMENTADA: intentos, pistas, cambios, decisiones y tiempo por etapa (2.4.1), solo en el navegador | `stageTime` |
 | Modo docente | PREPARADA / NO IMPLEMENTADA | ver `MANUAL_CREACION.md` |
 | Modo reto | IMPLEMENTADA (existente) | `challenges.ts` |
-| Lint | No configurado (no existía; no se añadió) | — |
+| Lint | IMPLEMENTADA (2.4.3): ESLint en `pnpm check` y en la CI | `eslint.config.js` |
 
 ### Criterios de aceptación
 
@@ -149,11 +149,11 @@ Todos se responden SÍ: el jugador construye presupuesto, cadena de valor y sele
 
 ### Pendientes reales
 
-- Migrar los eventos de ejecución al modelo condicional de los dilemas.
-- Ampliar el catálogo de instrumentos regulatorios por misión.
-- Medir el tiempo por etapa en la analítica local.
-- Piloto con estudiantes para calibrar balance, duración y dificultad percibida.
-- Configurar lint (ESLint) y pruebas E2E permanentes.
+Resueltos en 2.4.1–2.4.3: eventos de ejecución condicionales, tiempo por etapa, ESLint y pruebas E2E permanentes.
+
+- Ampliar el catálogo de instrumentos regulatorios por misión: exige definir parámetros nuevos de balance (costo, corrección, efectos laterales) y recalibrar la puntuación regulatoria; no se añadieron para no inventar datos.
+- Piloto con estudiantes para calibrar balance, duración y dificultad percibida (requiere personas, no código).
+- Fuera del alcance local: OCR de PDF escaneados (requiere modelos de idioma externos), modo docente con cuentas y servidor, y publicación con enlace.
 
 ---
 
@@ -207,7 +207,7 @@ Validación final: `pnpm typecheck` sin errores; `pnpm test` 192 pruebas aprobad
 | Costos hundidos, costo de oportunidad, financiero vs. económico, doble conteo | IMPLEMENTADA | Detección de errores y preguntas del comité |
 | Escenarios, estrés, sensibilidad, variable crítica y valor de quiebre | IMPLEMENTADA | `SensitivityLab` |
 | Supuestos y procedencia de datos | IMPLEMENTADA | `AssumptionsPanel`, etiquetas de tipo de dato |
-| Rangos de incertidumbre | PARCIAL | Escenarios y estrés; no hay simulación Monte Carlo |
+| Rangos de incertidumbre | IMPLEMENTADA (2.4.3) | Escenarios, estrés y simulación Monte Carlo reproducible (`risk.ts`) |
 | Evaluación distributiva | IMPLEMENTADA | `Distribution` |
 | Comparador y matriz de decisión | IMPLEMENTADA | Pesos del jugador; no elige automáticamente |
 | Comité evaluador | IMPLEMENTADA | 5 preguntas derivadas de la partida |
@@ -224,7 +224,7 @@ Validación final: `pnpm typecheck` sin errores; `pnpm test` 192 pruebas aprobad
 | Recomendaciones y rejugabilidad | IMPLEMENTADA | Recomendaciones por dimensión débil; semilla |
 | Tokens de diseño y contraste | IMPLEMENTADO | Auditoría automática WCAG AA de todas las pantallas: 0 textos bajo el umbral (`src/contrast.css`) |
 | Arrastrar y soltar accesible | PARCIAL | Alternativa por selección; DnD verificado con eventos sintéticos |
-| Tutor contextual | PARCIAL | Introducciones y pistas por módulo; sin tutor conversacional |
+| Tutor contextual | IMPLEMENTADA (2.4.3) | Introducciones, pistas y enlaces al concepto en cada módulo; sin tutor conversacional |
 | Modo docente | PREPARADA | Datos y reglas reutilizables; sin interfaz |
 | Analítica de tiempo por etapa | IMPLEMENTADO | Acción `stageTime` (no puntúa); panel «Tiempo por etapa» en resultados |
 | Validación de contenido | IMPLEMENTADA | Pruebas de catálogo: tarjetas de impacto con método idóneo y flujos de las nueve misiones |

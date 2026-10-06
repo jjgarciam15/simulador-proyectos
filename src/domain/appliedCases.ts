@@ -4,7 +4,7 @@ import { scenarioById } from "../data/scenarios";
 import { random } from "./finance";
 import { difficultyRules } from "../data/balance";
 type Option = [string, string, string];
-/** One extra trap per case: it sounds rigorous but repeats a frequent conceptual error. */
+/** One extra trap per case: it sounds rigorous but repeats a frequent conceptual error. Each case has 5 options in total. */
 const traps: Record<string, Option> = {
   gap: [
     "ratio",
@@ -85,11 +85,6 @@ export function appliedCases(g: GameState): QuestionV2[] {
           "La situación sin proyecto incluye oferta disponible y optimizaciones; ignorarla sobredimensiona la intervención.",
         ],
         [
-          "supply",
-          "La oferta existente demuestra que el problema ya está resuelto.",
-          "Puede existir oferta y persistir un déficit de acceso, continuidad o calidad.",
-        ],
-        [
           "growth",
           "Basta proyectar crecimiento poblacional para determinar el déficit actual.",
           "El crecimiento no sustituye medir oferta, demanda y capacidad efectiva en el mismo periodo.",
@@ -124,11 +119,6 @@ export function appliedCases(g: GameState): QuestionV2[] {
           "1.041,32 M COP",
           "Esa es la suma descontada de entradas; el VPN también resta los 1.000 invertidos hoy.",
         ],
-        [
-          "negative",
-          "−90,91 M COP",
-          "Revisa la ubicación temporal: la inversión de hoy no se descuenta y los ingresos llegan en años distintos.",
-        ],
       ],
       "VPN = −1.000 + 600/1,10 + 600/1,21 = 41,32 M COP. Es un excedente sobre la tasa requerida, no ingreso bruto ni caja disponible hoy.",
       [
@@ -152,11 +142,6 @@ export function appliedCases(g: GameState): QuestionV2[] {
           "double",
           "Sumar los 200 M como beneficio social y mantener intactos los beneficios del servicio.",
           "Así cuentas una transferencia interna como creación adicional de bienestar.",
-        ],
-        [
-          "subtract",
-          "Eliminar 200 M del costo de recursos porque el ejecutor no los pagó.",
-          "El costo de oportunidad de los recursos existe aunque lo financie otro actor.",
         ],
         [
           "ignore",
@@ -202,11 +187,6 @@ export function appliedCases(g: GameState): QuestionV2[] {
           "Eliminar la licencia si cualquier operador aumenta precios.",
           "Un precio mayor puede acompañar mejoras de seguridad: compara beneficios, costos y alternativas factibles.",
         ],
-        [
-          "funding",
-          "Aprobarla cuando recaude suficiente dinero para el regulador.",
-          "El recaudo no sustituye el análisis de bienestar ni justifica cargas desproporcionadas.",
-        ],
       ],
       "Compara no intervenir y diseños proporcionales. Explicita la falla, los incentivos y los efectos sobre entrada, calidad, costo y acceso. Los parámetros del simulador son educativos.",
       [
@@ -235,11 +215,6 @@ export function appliedCases(g: GameState): QuestionV2[] {
           "erase",
           "Descartar toda la mejora porque hubo apoyo externo.",
           "Puede existir contribución conjunta; documenta límites y mecanismos en lugar de borrar resultados.",
-        ],
-        [
-          "retarget",
-          "Cambiar la línea base para aislar artificialmente el éxito del proyecto.",
-          "Alterar retrospectivamente la base rompe la comparación y oculta desviaciones.",
         ],
         [
           "money",

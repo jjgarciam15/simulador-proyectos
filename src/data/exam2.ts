@@ -57,7 +57,14 @@ export const exam2 = {
     { id: "guias", text: "Empleo de guías locales", kind: "efecto" },
     { id: "degradado", text: "Humedal degradado (situación actual)", kind: "problema" },
   ],
-  valuation: { visits: 12000, valuePerVisit: 0.025, best: "viaje", valid: ["contingente", "eleccion", "transferencia"] },
+  valuation: {
+    visits: 12000,
+    valuePerVisit: 0.025,
+    best: "viaje",
+    valid: ["contingente", "eleccion", "transferencia"],
+    /** The 5 methods offered (maximum per question): the best one, one valid and three plausible traps. */
+    offered: ["viaje", "contingente", "mercado", "hedonicos", "tiempo"],
+  },
   rpcRows: ["obra", "mo", "guias", "mant", "entradas"],
 };
 /** Flow case of an alternative. Only A is built by the student; B is given for comparison. */
