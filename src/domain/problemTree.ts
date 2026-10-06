@@ -49,14 +49,16 @@ export function treeCards(g: GameState): TreeCard[] {
         { id: "x-effect", label: m.effect, slot: "effect", why: why.effect },
         { id: "t-mission", label: m.trap, slot: "fuera", why: "Puede ser cierto, pero no explica el problema central ni es una consecuencia suya." },
       ]
-    : [];
+    : (s.treeExtras ?? []).map((x, i) => ({ id: "p-" + i, label: x.label, slot: x.level, why: why[x.level] }));
   const alt = s.alternatives[0]?.name ?? "la obra";
   const traps: TreeCard[] = [
     { id: "t-solucion", label: `Falta de ${lower(alt)}`, slot: "fuera", why: "Es una solución disfrazada de problema: «falta de X» anticipa la respuesta antes de analizar." },
     { id: "t-objetivo", label: node("n0")?.objective ?? "Mejorar la situación de la población", slot: "fuera", why: "Está redactada como objetivo (situación deseada), no como problema ni causa." },
     { id: "t-general", label: "Falta de voluntad política y de recursos en general", slot: "fuera", why: "Es demasiado general: no se puede verificar ni atender con un proyecto concreto." },
   ];
-  return [...base, ...extras, ...traps].sort((a, b) => random(g.seed, "tree" + a.id) - random(g.seed, "tree" + b.id));
+  // No two cards with the same text (an author may repeat a phrase used by a generic trap).
+  const unique = [...base, ...extras, ...traps].filter((c, i, all) => all.findIndex((x) => x.label.trim().toLowerCase() === c.label.trim().toLowerCase()) === i);
+  return unique.sort((a, b) => random(g.seed, "tree" + a.id) - random(g.seed, "tree" + b.id));
 }
 export type TreePlacements = Record<string, TreeSlot>;
 /** Review: exact level = 1; right side (cause/effect) but wrong level = 0.5; traps must stay out. */

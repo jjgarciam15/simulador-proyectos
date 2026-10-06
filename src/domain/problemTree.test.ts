@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { scenarios } from "../data/scenarios";
 import { act, createGameV2 } from "./engine";
 import { referenceTree, treeCards, treeReview } from "./problemTree";
+import { sampleProject } from "../testSupport/projectFixture";
+import { createMission, emptyStore, startGeneratedGame, upsertProject } from "./project/store";
 
 describe("Árbol del problema construido por el jugador", () => {
   it("cada misión ofrece un banco mezclado con al menos 8 tarjetas correctas y 5 trampas", () => {
@@ -39,5 +41,20 @@ describe("Árbol del problema construido por el jugador", () => {
     g = act(g, { type: "tree", placements: { ...ref, d1: "direct" } });
     expect(g.nodes).toEqual(expect.arrayContaining(["n0", "n1", "n2", "n3", "n4", "d1"]));
     expect(g.v2!.tree!.placements.d1).toBe("direct");
+  });
+});
+
+describe("Árbol del problema de un proyecto propio", () => {
+  it("incluye como tarjetas todas las causas y efectos del autor, sin textos repetidos", () => {
+    const p = sampleProject();
+    p.causes.push({ id: "c-extra", text: "Mantenimiento comunitario sin recursos", level: "indirecta" });
+    p.problemEffects.push({ id: "e-extra", text: "Abandono escolar en temporada seca", level: "directa" });
+    const c = createMission(upsertProject(emptyStore(), p), p, { difficulty: "guiado", mode: "aprendizaje", duration: "completa" });
+    if (!c.ok) throw new Error(JSON.stringify(c.errors));
+    const cards = treeCards(startGeneratedGame(c.mission.id, "T"));
+    for (const t of [...p.causes, ...p.problemEffects].map((x) => x.text)) expect(cards.some((k) => k.label === t)).toBe(true);
+    expect(cards.find((k) => k.label === "Mantenimiento comunitario sin recursos")!.slot).toBe("indirect");
+    expect(cards.find((k) => k.label === "Abandono escolar en temporada seca")!.slot).toBe("effect");
+    expect(new Set(cards.map((k) => k.label.toLowerCase())).size).toBe(cards.length);
   });
 });

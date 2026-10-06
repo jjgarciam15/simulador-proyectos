@@ -88,7 +88,10 @@ describe("Excel → NormalizedProject", () => {
     const report = normalizeExcel(readXlsx(writeXlsx(projectTemplate())), "plantilla.xlsx");
     expect(report.project.title).toBe("");
     expect(report.project.alternatives).toEqual([]);
-    expect(report.warnings.join(" ")).toMatch(/No identificado en el archivo/);
+    expect(report.warnings.join(" ")).toMatch(/No identificado en el archivo: nombre del proyecto/);
+    // The level column («Directa», «Indirecto») of an empty row is never read as a cause or an effect.
+    expect(report.project.causes).toEqual([]);
+    expect(report.project.problemEffects).toEqual([]);
   });
 });
 

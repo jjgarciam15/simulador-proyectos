@@ -703,8 +703,9 @@ export function FinanceStep({ ctx }: { ctx: BuilderCtx }) {
       <button type="button" className="btn secondary" onClick={() => ctx.edit(["assumptions"], (d) => d.assumptions.push({ id: uid("s"), label: "", value: "" }))}>
         <Plus size={14} /> Agregar supuesto
       </button>
-      <IssuesFor issues={ctx.issues} path="financial" />
-      <IssuesFor issues={ctx.issues} path="economic" />
+      {/* Budget, deadline and rates show their warnings next to each field: only section-level issues here. */}
+      <IssuesFor issues={ctx.issues} path="financial" exact />
+      <IssuesFor issues={ctx.issues} path="economic" exact />
       <IssuesFor issues={ctx.issues} path="costs" />
       <IssuesFor issues={ctx.issues} path="benefits" />
     </>
