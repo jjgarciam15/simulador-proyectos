@@ -229,7 +229,7 @@ export function parseProject(input: unknown): NormalizedProject {
                   k.slice(0, 80),
                   {
                     question: optStr(o.question, 600),
-                    options: Array.isArray(o.options) ? arr(o.options, 7).filter(isObj).map((x) => ({ id: str(x.id, 40), text: str(x.text, 300) })) : undefined,
+                    options: Array.isArray(o.options) ? arr(o.options, 5).filter(isObj).map((x) => ({ id: str(x.id, 40), text: str(x.text, 300) })) : undefined,
                     answers: Array.isArray(o.answers) ? ids(o.answers) : undefined,
                     explanation: optStr(o.explanation, 1000),
                     points: nOrNull(o.points) ?? undefined,

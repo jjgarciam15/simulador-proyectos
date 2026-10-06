@@ -101,6 +101,7 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
         g,
         "critica",
         crit.ranked
+          .slice(0, 5)
           .map((r): CommitteeOption => ({
             id: r.id,
             text: r.label,
@@ -132,9 +133,9 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
             .filter((m) => m.id !== valued.choice.method && methodFitFor(card, m.id) !== "inadecuada")
             .sort((a, b) => fitRank[methodFitFor(card, a.id)] - fitRank[methodFitFor(card, b.id)]),
         ]
-          .slice(0, 5)
+          .slice(0, 4)
           .concat(valuationMethods.filter((m) => m.id !== valued.choice.method && methodFitFor(card, m.id) === "inadecuada"))
-          .slice(0, 6)
+          .slice(0, 5)
           .map((m) => {
             const fit = methodFitFor(card, m.id);
             return {

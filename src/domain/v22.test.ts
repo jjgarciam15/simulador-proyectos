@@ -55,13 +55,12 @@ describe("Contenido académico V2.2", () => {
     expect(rpcTable.find((r) => r.id === "moNoCalificada")!.value).toBe(0.607);
     expect(rpcTable.every((r) => r.source.length > 5)).toBe(true);
   });
-  it("las metodologías ofrecidas son 5–7 e incluyen siempre la óptima", () => {
+  it("las metodologías ofrecidas son 5 e incluyen siempre la óptima", () => {
     for (const d of ["guiado", "profesional", "experto"] as const) {
       const g = prepareV2("agua", createGameV2("agua", d, "MET"));
       for (const c of valuableCards(g)) {
         const o = methodOptions(g, c);
-        expect(o.length).toBeGreaterThanOrEqual(5);
-        expect(o.length).toBeLessThanOrEqual(7);
+        expect(o.length).toBe(5);
         expect(o.some((m) => methodFitFor(c, m.id) === "optima")).toBe(true);
       }
     }

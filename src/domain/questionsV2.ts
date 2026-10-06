@@ -19,57 +19,6 @@ export interface QuestionV2 {
   penalty: number;
   tags: string[];
 }
-/** Four plausible traps per stage: they reuse the vocabulary of the right answer with a conceptual error. */
-const distractors = [
-  [
-    "Tomar la población total como afectada, porque todos pagan impuestos",
-    "Usar una encuesta de satisfacción como única medida de demanda",
-    "Definir la causa directa como la falta del proyecto que se quiere construir",
-    "Tratar un efecto del problema como si fuera su causa principal",
-  ],
-  [
-    "Comparar el costo inicial y dejar operación para después",
-    "Priorizar la alternativa de mayor cobertura sin revisar restricciones",
-    "Elegir la alternativa con mayor VPN aunque no atienda las causas del Árbol del problema",
-    "Descartar no intervenir sin compararlo con la situación optimizada",
-  ],
-  [
-    "Verificar desembolsos como prueba suficiente de entrega",
-    "Clasificar la contratación como un cambio permanente en bienestar",
-    "Registrar la actividad «construir» como producto porque tiene un costo asociado",
-    "Asignar toda la contingencia a la obra para evitar recortes de alcance",
-  ],
-  [
-    "Descontar únicamente la inversión inicial",
-    "Usar la suma de ingresos brutos sin restar inversión",
-    "Aplicar la tasa nominal a flujos expresados en precios constantes",
-    "Aprobar el proyecto porque su TIR supera la inflación esperada",
-  ],
-  [
-    "Asumir que la elegibilidad garantiza aprobación presupuestal",
-    "Usar alineación estratégica como reemplazo de factibilidad técnica",
-    "Regular siempre, porque la intervención pública corrige cualquier falla",
-    "Seleccionar todos los ODS relacionados para mostrar mayor contribución",
-  ],
-  [
-    "Contar toda entrada de financiación como creación de valor",
-    "Valorar los beneficios y omitir la sostenibilidad operativa",
-    "Comprometer la inversión antes de resolver revisiones porque el plazo apremia",
-    "Usar la contingencia como fuente para ampliar cobertura desde el inicio",
-  ],
-  [
-    "Cambiar el indicador para hacerlo coincidir con lo ejecutado",
-    "Confundir correlación temporal con evidencia causal suficiente",
-    "Mantener el cronograma original aunque un evento cambie la ruta crítica",
-    "Absorber cada sobrecosto con caja libre sin revisar la contingencia",
-  ],
-  [
-    "Comparar con la alternativa más rentable aunque no sea financiable",
-    "Sumar al beneficio sacrificado todos los gastos del proyecto",
-    "Atribuir el resultado solo a la suerte de los eventos",
-    "Juzgar la decisión con información que no existía al invertir",
-  ],
-];
 function questionDraft(g: GameState): QuestionV2[] {
   return learningChallenges(g).map((c) => ({
     id: "v2-" + c.id,
@@ -79,9 +28,8 @@ function questionDraft(g: GameState): QuestionV2[] {
     difficulty: g.difficulty,
     question: c.question,
     options: [
-      // The practice already adds four stage traps: keep the three base options so the total stays at 7.
-      ...c.options.filter(({ id }) => !id.startsWith("trap")).map(({ id, text }) => ({ id, text })),
-      ...distractors[c.phase].map((text, i) => ({ id: "plausible" + i, text })),
+      // Five options (the maximum): the reasoned answer, two errors and two case-specific traps.
+      ...c.options.map(({ id, text }) => ({ id, text })),
     ].sort((a, b) => random(g.seed, c.id + a.id) - random(g.seed, c.id + b.id)),
     answers: [c.answer],
     explanation: c.options.find((o) => o.id === c.answer)!.feedback,
@@ -125,14 +73,6 @@ export function questionsV2(g: GameState):QuestionV2[] {
             {
               id: "asset",
               text: "Dar por probado el resultado al recibir el activo físico",
-            },
-            {
-              id: "population",
-              text: "Contar toda la población del municipio como atendida",
-            },
-            {
-              id: "contractor",
-              text: "Preguntar al contratista si el servicio funciona como se diseñó",
             },
           ].sort(
             (a, b) => random(g.seed, q.id + a.id) - random(g.seed, q.id + b.id),

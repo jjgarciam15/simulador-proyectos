@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { exam2, examCase } from "../../data/exam2";
 import { rpcTable, type RpcCategory } from "../../data/rpc";
-import { valuationMethods } from "../../data/valuationMethods";
+import { methodById } from "../../data/valuationMethods";
 import { decisionReasons, examReference, examResults, sensitivityOptions, type ExamAnswers } from "../../domain/exam2";
 import { economicNet, netFlow, npv } from "../../domain/flows";
 import { fmtMoney } from "../../domain/format";
@@ -201,7 +201,7 @@ export default function Exam2({ onExit }: { onExit: () => void }) {
         return (
           <>
             <p>¿Con qué método valoras las visitas recreativas al humedal?</p>
-            <Radio name="met" options={valuationMethods.slice(0, 7).map((m) => ({ id: m.id, text: m.name + " · " + m.family }))} value={a.method} onChange={(id) => set({ method: id })} />
+            <Radio name="met" options={exam2.valuation.offered.map((id) => methodById(id)!).map((m) => ({ id: m.id, text: m.name + " · " + m.family }))} value={a.method} onChange={(id) => set({ method: id })} />
             <label className="v22-compute">
               Beneficio anual de A (M) = visitas × excedente por visita
               <input type="number" value={a.benefit ?? ""} onChange={(e) => set({ benefit: e.target.value === "" ? undefined : Number(e.target.value) })} />

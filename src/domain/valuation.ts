@@ -18,7 +18,7 @@ export interface ObjectiveOption {
   valid: boolean;
   why: string;
 }
-/** General objective options: the transformation of the central problem, plus plausible distractors. */
+/** General objective options (5): the transformation of the central problem, plus plausible distractors. */
 export function generalObjectiveOptions(g: GameState): ObjectiveOption[] {
   const s = scenarioById(g.scenarioId),
     n = (id: string) => s.nodes.find((x) => x.id === id)!;
@@ -27,9 +27,10 @@ export function generalObjectiveOptions(g: GameState): ObjectiveOption[] {
     { id: "n4", text: n("n4").objective, valid: false, why: "Es un fin de largo plazo (impacto), no el objetivo del proyecto." },
     { id: "n3", text: n("n3").objective, valid: false, why: "Transforma un efecto del problema: es un fin, no el objetivo general." },
     { id: "d1", text: n("d1").objective, valid: false, why: "Es una solución disfrazada de objetivo: nace de una causa mal planteada." },
+    { id: "gestion", text: "Ejecutar el presupuesto del proyecto dentro del plazo previsto", valid: false, why: "Es una meta de gestión: describe la ejecución, no el cambio en la situación de la población." },
   ].sort((a, b) => random(g.seed, "og" + a.id) - random(g.seed, "og" + b.id));
 }
-/** Specific objectives: transformations of the causes; distractors include ends, activities and products. */
+/** Specific objectives (5): transformations of the causes; distractors include ends, activities and products. */
 export function specificObjectiveOptions(g: GameState): ObjectiveOption[] {
   const s = scenarioById(g.scenarioId),
     n = (id: string) => s.nodes.find((x) => x.id === id)!,
@@ -38,7 +39,6 @@ export function specificObjectiveOptions(g: GameState): ObjectiveOption[] {
     { id: "n1", text: n("n1").objective, valid: true, why: "Transforma la causa directa." },
     { id: "n2", text: n("n2").objective, valid: true, why: "Transforma la causa indirecta." },
     { id: "n3", text: n("n3").objective, valid: false, why: "Es un fin: transforma un efecto del problema." },
-    { id: "d2", text: n("d2").objective, valid: false, why: "Nace de una causa falsa: no está en el problema diagnosticado." },
     { id: "act", text: "Contratar el diseño y la construcción de la obra", valid: false, why: "Es una actividad, no un objetivo." },
     { id: "prod", text: `Entregar ${a?.product.toLowerCase() ?? "la obra"}`, valid: false, why: "Es un producto: el objetivo describe el cambio en la situación, no lo que se entrega." },
   ].sort((a, b) => random(g.seed, "oe" + a.id) - random(g.seed, "oe" + b.id));
@@ -225,14 +225,21 @@ export function referenceValuation(g: GameState): ValuationChoice[] {
       quantity: measurement(g, c).quantity,
     }));
 }
-/** Methods offered for an impact: the fitting ones plus plausible distractors, 5–7 cards, seeded order. */
+/**
+ * Methods offered for an impact: always 5 cards (the maximum per question), seeded order.
+ * The best fitting methods always appear; difficulty changes how many of the 5 are close alternatives
+ * (guided 2, professional 3, expert 4) instead of adding more cards.
+ */
+const fitOrder = { optima: 0, valida: 1, parcial: 2, inadecuada: 3 } as const;
 export function methodOptions(g: GameState, card: ImpactCard) {
-  const fitting = valuationMethods.filter((m) => methodFitFor(card, m.id) !== "inadecuada"),
-    others = valuationMethods
-      .filter((m) => methodFitFor(card, m.id) === "inadecuada")
-      .sort((a, b) => random(g.seed, card.id + a.id) - random(g.seed, card.id + b.id)),
-    size = g.difficulty === "guiado" ? 5 : g.difficulty === "profesional" ? 6 : 7;
-  return [...fitting, ...others]
-    .slice(0, Math.max(size, fitting.length))
+  const seeded = (a: { id: string }, b: { id: string }) => random(g.seed, card.id + a.id) - random(g.seed, card.id + b.id);
+  const fitting = valuationMethods
+      .filter((m) => methodFitFor(card, m.id) !== "inadecuada")
+      .sort((a, b) => fitOrder[methodFitFor(card, a.id)] - fitOrder[methodFitFor(card, b.id)] || seeded(a, b)),
+    others = valuationMethods.filter((m) => methodFitFor(card, m.id) === "inadecuada").sort(seeded),
+    close = g.difficulty === "guiado" ? 2 : g.difficulty === "profesional" ? 3 : 4,
+    picked = fitting.slice(0, close);
+  return [...picked, ...others, ...fitting.slice(close)]
+    .slice(0, 5)
     .sort((a, b) => random(g.seed, "mo" + card.id + a.id) - random(g.seed, "mo" + card.id + b.id));
 }
