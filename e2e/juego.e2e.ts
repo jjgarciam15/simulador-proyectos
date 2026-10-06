@@ -1,0 +1,66 @@
+import { test, expect, type Page } from "@playwright/test";
+
+/** Every test starts from an empty QA save slot and fails on any page or console error. */
+async function fresh(page: Page) {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (m) => m.type() === "error" && !m.text().includes("Failed to load resource") && errors.push(m.text()));
+  await page.goto("/?qa=1");
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  return errors;
+}
+async function startMission(page: Page) {
+  await page.getByRole("button", { name: /Comenzar reconstrucción/ }).click();
+  await page.getByRole("button", { name: /Entrar a la simulación/ }).click();
+  await page.getByRole("button", { name: /Recibir el encargo/ }).click();
+  await expect(page.locator(".page-heading .eyebrow")).toContainText("ETAPA 01");
+}
+
+test("una misión nueva arranca en Diagnóstico sin errores", async ({ page }) => {
+  const errors = await fresh(page);
+  await startMission(page);
+  await expect(page.locator(".phase-strip")).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("el Árbol del problema se construye con tarjetas y bloquea el avance hasta confirmarlo", async ({ page }) => {
+  const errors = await fresh(page);
+  await startMission(page);
+  await page.locator(".section-nav button", { hasText: /rbol del problema/ }).first().click();
+  const panel = page.locator("section.panel", { hasText: "Construye el Árbol del problema" });
+  const bank = panel.locator(".ptb-bank .ptb-card");
+  await expect(bank).toHaveCount(14);
+  await page.getByRole("button", { name: /Guardar y avanzar/ }).click();
+  await expect(page.getByRole("alert").first()).toContainText("Árbol del problema");
+  await page.keyboard.press("Escape");
+  // One card as the central problem, the rest out of the tree: valid structure, low score.
+  await bank.first().locator("select").selectOption("central");
+  while ((await bank.count()) > 0) await bank.first().locator("select").selectOption("fuera");
+  await panel.getByRole("button", { name: "Confirmar Árbol del problema" }).click();
+  await expect(panel.locator(".findings")).toContainText("Construcción del árbol");
+  expect(errors).toEqual([]);
+});
+
+test("el Centro de aprendizaje ofrece 5 opciones por ejercicio", async ({ page }) => {
+  const errors = await fresh(page);
+  await page.getByRole("button", { name: /^Aprender$/ }).first().click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  const groups = dialog.locator(".v22-experiment .v22-choice");
+  await expect(groups.first()).toBeVisible();
+  for (const g of await groups.all()) await expect(g.locator('input[type="radio"]')).toHaveCount(5);
+  expect(errors).toEqual([]);
+});
+
+test("ninguna pregunta visible de una etapa tiene más de 5 opciones", async ({ page }) => {
+  const errors = await fresh(page);
+  await startMission(page);
+  const counts = await page.evaluate(() => {
+    const names = new Map<string, number>();
+    for (const r of document.querySelectorAll<HTMLInputElement>('main input[type="radio"]')) names.set(r.name, (names.get(r.name) ?? 0) + 1);
+    return [...names.values()];
+  });
+  expect(counts.every((n) => n <= 5)).toBe(true);
+  expect(errors).toEqual([]);
+});

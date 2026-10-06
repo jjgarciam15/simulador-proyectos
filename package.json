@@ -10,6 +10,7 @@
     "test": "vitest run",
     "typecheck": "tsc -b",
     "lint": "eslint .",
+    "e2e": "playwright test",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "repo:check": "node scripts/check-repository.mjs",
     "portable": "pnpm build && node scripts/build-portable.mjs"
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.56.1",
     "@tailwindcss/vite": "^4.1.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
