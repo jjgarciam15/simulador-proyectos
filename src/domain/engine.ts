@@ -1,4 +1,5 @@
 import {validBudgetLines,budgetBasics,type BudgetLine} from './budgetLines';
+import {actionShapeError} from './actionShape';
 import {emptyDossier,causalQuality,chainQuality,type MgaDossier} from './mga';
 import type { GameState, Difficulty, Assumptions, Budget, Indicator, Activity, Outcome, Alternative } from './types';
 import { scenarioById } from '../data/scenarios';
@@ -92,8 +93,8 @@ function coreAct(original:GameState,action:Action,withComparison=true):GameState
  case 'policy':if(!s.instruments.some(p=>p.id===action.id))throw new Error('Instrumento inválido.');g.policy=action.id;g.failure=action.failure;g.acknowledged=[];record(g,'Decisión regulatoria',s.instruments.find(p=>p.id===action.id)!.name+' · '+action.failure);break;
  case 'mitigate':{const r=s.risks.find(r=>r.id===action.id);if(!r||g.mitigations.includes(r.id))throw new Error('Mitigación ya aplicada o inválida.');spend(g,r.cost);g.mitigations.push(r.id);record(g,'Mitigación: '+r.name,r.mitigation,r.cost);break;}
  case 'alignment':g.sdgs=[...new Set(action.sdgs.filter(id=>id>=1&&id<=17))];g.policyAligned=action.policy;record(g,'Alineación estratégica revisada','La contribución se deriva de productos e impactos, no de seleccionar casillas.');break;
- case 'indicators':if(action.value.some(i=>!i.name.trim()||!i.unit.trim()||!i.source.trim()||!i.owner.trim()||!Number.isFinite(i.baseline)||!Number.isFinite(i.target)))throw new Error('Completa nombre, unidad, fuente, responsable y valores del indicador.');g.indicators=action.value;record(g,'Indicadores definidos',action.value.length+' indicadores de seguimiento.');break;
- case 'activities':{const ids=action.value.map(a=>a.id);if(action.value.some((a,i)=>!a.name.trim()||!a.owner.trim()||!Number.isFinite(a.months)||a.months<1||!Number.isFinite(a.cost)||a.cost<0||(a.dependency&&!ids.slice(0,i).includes(a.dependency))))throw new Error('Las actividades requieren duración positiva y dependencias anteriores, sin ciclos.');g.activities=action.value;record(g,'Cronograma confirmado',action.value.length+' actividades con dependencias.');break;}
+ case 'indicators':{const txt=(v:unknown)=>typeof v==='string'&&v.trim().length>0;if(action.value.some(i=>!i||!txt(i.name)||!txt(i.unit)||!txt(i.source)||!txt(i.owner)||!Number.isFinite(i.baseline)||!Number.isFinite(i.target)))throw new Error('Completa nombre, unidad, fuente, responsable y valores del indicador.');g.indicators=action.value;record(g,'Indicadores definidos',action.value.length+' indicadores de seguimiento.');break;}
+ case 'activities':{const ids=action.value.map(a=>a.id);const txt=(v:unknown)=>typeof v==='string'&&v.trim().length>0;if(action.value.some((a,i)=>!a||!txt(a.name)||!txt(a.owner)||!Number.isFinite(a.months)||a.months<1||!Number.isFinite(a.cost)||a.cost<0||(a.dependency&&!ids.slice(0,i).includes(a.dependency))))throw new Error('Las actividades requieren duración positiva y dependencias anteriores, sin ciclos.');g.activities=action.value;record(g,'Cronograma confirmado',action.value.length+' actividades con dependencias.');break;}
  case 'justify':g.justification=action.text.slice(0,1200);break;
  case 'ack':if(!g.acknowledged.includes(action.id))g.acknowledged.push(action.id);break;
  case 'reopen':{if(action.phase>=g.phase||action.phase<0)throw new Error('Solo puedes reabrir una etapa anterior.');const fee=s.budget*.002;spend(g,fee);advanceTime(g,1);g.phase=action.phase;g.acknowledged=[];record(g,'Reformulación iniciada','Reabrir consume un mes y 0,2 % del presupuesto inicial.',fee,1);break;}
@@ -169,6 +170,7 @@ const v2Actions=['visit','chain','actorMap','sdgReasons','regulatory','planner',
 const v22Actions=['objectives','impacts','valuation','flow','economic','committee'];
 const dependencyFields:Record<string,keyof GameState>={nodes:'nodes',target:'target',objective:'objective',alternative:'alternative',budget:'budget',activities:'activities',indicators:'indicators',assumptions:'assumptions',policy:'policy',alignment:'sdgs',study:'studies',actor:'actorActions',mitigate:'mitigations',mga:'mga'};
 export function act(original:GameState,action:Action,withComparison=true):GameState{
+ {const bad=actionShapeError(action);if(bad)throw new Error(bad);}
  if(action.type==='stageTime'){/* Local analytics only: time spent per stage, never used for scoring. */if(!original.v2||!Number.isFinite(action.seconds)||action.seconds<=0||action.phase<0||action.phase>7)return original;const next=structuredClone(original);const t=next.v2!.stageSeconds??{};t[action.phase]=Math.round((t[action.phase]??0)+Math.min(action.seconds,3600));next.v2!.stageSeconds=t;return next;}
  if(original.v2?.challenge?.noCredit&&action.type==='finance'&&action.source==='credito')throw new Error('Este reto no permite contratar crédito. Revisa el alcance, el presupuesto o los requisitos de cofinanciación.');
  if(original.v2&&action.type==='budget'&&!validBudgetLines(action.lines??original.v2.budgetLines??[],action.value))throw new Error('Revisa cantidades, unidades y costos: el detalle no puede superar la asignación de su categoría.');
@@ -200,7 +202,7 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
    record(input,c.funded?'Compromiso respaldado':'Compromiso sin respaldo',`${c.actor.name}: ${c.allocated} de ${c.minimum} M en ${c.name}. ${c.funded?'Apoyo +8; legitimidad +3.':'Apoyo −10; legitimidad −12; mayor exposición social.'}`);
   }
  }
- let next=v22Actions.includes(action.type)?applyV22(input,action as ActionV22):v2Actions.includes(action.type)?applyV2(input,action as ActionV2):coreAct(input,action,withComparison);
+ const next=v22Actions.includes(action.type)?applyV22(input,action as ActionV22):v2Actions.includes(action.type)?applyV2(input,action as ActionV2):coreAct(input,action,withComparison);
  if(!next.v2)return next;
  if(action.type==='budget')next.v2.budgetLines=structuredClone(action.lines??original.v2?.budgetLines??[]);
  if(['budget','assumptions','alternative','policy'].includes(action.type)){const field=dependencyFields[action.type];if(JSON.stringify(original[field])===JSON.stringify(next[field]))next.acknowledged=[...original.acknowledged];}

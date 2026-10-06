@@ -5,7 +5,7 @@ import ResourceDeck from './components/ResourceDeck';
 import {announceExperience,decisionMoment} from './domain/experience';
 import MgaLab from './features/MgaLab';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowUpRight,Droplets,Route,Recycle,HeartPulse,Factory,Scale,ArrowRight,ArrowLeft,Wallet,Clock,Search,Landmark,Users,Star,ShieldAlert,Leaf,Menu,X,Home,BookOpen,History,Play,ChevronRight,AlertTriangle } from 'lucide-react';
+import { ArrowRight,ArrowLeft,Menu,X,Home,BookOpen,History,ChevronRight,AlertTriangle } from 'lucide-react';
 import type { GameState,Difficulty } from './domain/types';
 import { phases } from './domain/types';
 import { act,available,selected,riskLevel,forkDecision,type Action } from './domain/engine';
@@ -13,7 +13,7 @@ import { scenarios,scenarioById } from './data/scenarios';
 import { money } from './domain/finance';
 import { load,save,emptySave,type SaveData } from './domain/storage';
 import {useWebMCP} from './domain/webmcp';
-import { Button,Panel,Field,Next,Tip } from './components/ui';
+import { Button,Panel,Field,Next } from './components/ui';
 import {DraftProvider,StageGuide,SectionNavigator} from './components/workbench';
 import Diagnosis from './features/Diagnosis';
 import Formulation from './features/Formulation';
@@ -24,7 +24,7 @@ import { Decision,Execution,Results,Journal } from './features/Endgame';
 import NationHome from './features/NationHome';
 import {Advisor,MissionBriefing} from './components/Characters';
 import {missions} from './data/world';
-const icons=[Droplets,Route,Recycle,HeartPulse,Factory,Scale];
+
 const headings=['Entiende antes de intervenir.','Construye una respuesta posible.','Haz viable tu propuesta.','Pon a prueba tus supuestos.','Evalúa las reglas del juego.','Decide con lo que sabes.','Adapta, ejecuta y aprende.','Cada resultado cuenta una historia.'];
 const guidance=['Investigar consume recursos, pero puede evitar decisiones costosas. Conecta causas y efectos antes de proponer una solución.','Un objetivo expresa el cambio deseado. Compara lo que ganas y lo que sacrificas con cada alternativa.','Reservar mantenimiento reduce el dinero para construir, pero sostiene el servicio futuro. Revisa también dependencias.','Observa qué supuesto altera más el resultado. Una rentabilidad positiva no asegura resolver el problema.','Compara siempre con no intervenir. Una medida puede mejorar acceso y al mismo tiempo elevar barreras.','Revisa recursos, plazo y supuestos. Tu justificación permitirá discutir la decisión con la información que tenías.','No todos los eventos se pueden evitar. Valora el costo de adaptarte frente a continuar o abandonar.','Distingue calidad de razonamiento, desempeño y condiciones externas. Experimenta con otra estrategia.'];
 function initial(){const store=loadStore();activateStore(store);try{return {data:load(),store,error:''}}catch{return {data:structuredClone(emptySave),store,error:'No se pudo leer la partida guardada. Al guardar una partida nueva se intentará conservar una copia del almacenamiento ilegible.'}}}
@@ -40,7 +40,9 @@ export default function App(){const [boot]=useState(initial),[data,setData]=useS
  const editingProject=store.projects.find(p=>p.id===editing);
  const timeRef=useRef<{id:string;phase:number;start:number}|null>(null);
  function flushTime(){const t=timeRef.current;timeRef.current=null;if(!t)return;const seconds=(Date.now()-t.start)/1000;if(seconds<2)return;setData(d=>{if(!d.active||d.active.id!==t.id||d.active.outcome)return d;const next={...d,active:act(d.active,{type:'stageTime',phase:t.phase,seconds})};try{save(next)}catch{/* timing is optional */}return next})}
- useEffect(()=>{const a=data.active;if(view!=='game'||!a||historyGame||a.outcome)return;const begin=()=>{timeRef.current={id:a.id,phase:a.phase,start:Date.now()}};begin();const onVisibility=()=>{if(document.hidden)flushTime();else if(!timeRef.current)begin()};document.addEventListener('visibilitychange',onVisibility);return ()=>{document.removeEventListener('visibilitychange',onVisibility);flushTime()}},[view,data.active?.id,data.active?.phase,historyGame]);
+ useEffect(()=>{const a=data.active;if(view!=='game'||!a||historyGame||a.outcome)return;const begin=()=>{timeRef.current={id:a.id,phase:a.phase,start:Date.now()}};begin();const onVisibility=()=>{if(document.hidden)flushTime();else if(!timeRef.current)begin()};document.addEventListener('visibilitychange',onVisibility);return ()=>{document.removeEventListener('visibilitychange',onVisibility);flushTime()}// Restart the stage timer only when the mission, its stage or its closing changes, not on every action.
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[view,data.active?.id,data.active?.phase,!!data.active?.outcome,historyGame]);
  useEffect(()=>{const h=(e:Event)=>setLearn((e as CustomEvent<string>).detail||'vpn');window.addEventListener('proyecta:learn',h);return ()=>window.removeEventListener('proyecta:learn',h)},[]);
  const [pendingDrafts,setPendingDrafts]=useState(0),[briefing,setBriefing]=useState(false),[impact,setImpact]=useState<{id:number;items:string[]}|null>(null);
  useEffect(()=>{if(!impact)return;const timer=setTimeout(()=>setImpact(null),6500);return ()=>clearTimeout(timer)},[impact]);
@@ -66,7 +68,7 @@ export default function App(){const [boot]=useState(initial),[data,setData]=useS
  {resetOpen&&<Modal title="Restablecer partidas" onClose={()=>setResetOpen(false)}><ResetDialog onClose={()=>setResetOpen(false)}/></Modal>}{learn&&<Modal title="Centro de aprendizaje" onClose={()=>setLearn(null)} wide><LearningCenter key={learn} focus={learn}/></Modal>}
  {setup&&<Modal title="Tu siguiente decisión empieza aquí." onClose={()=>setSetup(null)}><div className="eyebrow">NUEVA SIMULACIÓN</div><Field label="Escenario y rol"><select value={setup} onChange={e=>setSetup(e.target.value)}>{scenarios.map(s=><option value={s.id} key={s.id}>{s.regulator?'Regulador':s.role==='publico'?'Público':'Privado'} · {s.title}</option>)}</select></Field><MissionProfileCard id={setup}/><DifficultyGuide value={difficulty} onChange={setDifficulty}/><ModeChoice value={mode} onChange={setMode}/><Field label="Código de condiciones iniciales" hint="Usa el mismo código para comparar estrategias."><input value={seed} maxLength={40} onChange={e=>setSeed(e.target.value)}/></Field>{data.active&&!data.active.outcome&&<p className="notice">La partida actual quedará en pausa y podrás retomarla desde el inicio.</p>}<Button onClick={()=>start(setup)}>Entrar a la simulación <ArrowRight size={17}/></Button></Modal>}
  </div>;
- const resources=[{label:'Saldo libre',value:'$ '+money(available(g)),Icon:Wallet},{label:'Tiempo restante',value:Math.max(0,s.deadline-g.month)+' meses',Icon:Clock},{label:'Información',value:g.quality+' /100',Icon:Search},{label:'Capacidad',value:Math.round(g.capacity)+' /100',Icon:Landmark},{label:'Apoyo',value:g.support+' /100',Icon:Users},{label:'Legitimidad',value:g.reputation+' /100',Icon:Star},{label:'Riesgo',value:Math.round(riskLevel(g))+' /100',Icon:ShieldAlert},{label:'Sostenibilidad',value:Math.round(g.sustainability)+' /100',Icon:Leaf}];
+
  return <div className="game-shell">{alerts}{impact&&<div className="impact-toast" role="status" key={impact.id}><span>CONSECUENCIAS DE TU DECISIÓN</span><div>{impact.items.map(item=><strong key={item}>{item}</strong>)}</div></div>}<header className="game-header"><button className="icon-btn mobile-menu" aria-label="Abrir etapas" onClick={()=>setMenu(!menu)}><Menu/></button><button className="game-brand" onClick={goHome}>P<span>PROYECTA</span></button><div className="game-title">{s.sector}<small>{s.regulator?'Regulador':s.role==='publico'?'Decisor público':'Decisor privado'} · {g.difficulty}</small></div><span className="game-code">{g.seed}</span><button className="icon-btn" aria-label="Volver al inicio" onClick={goHome}><Home size={19}/></button></header><ResourceDeck key={g.id} g={g}/>
  <aside className={'sidebar '+(menu?'open':'')}><div className="eyebrow">PLAN DE RECONSTRUCCIÓN</div><nav>{phases.map((phase,i)=><button className={(i===g.phase?'active ':'')+(i<g.phase?'done':'')} key={phase} disabled={i>(g.v2?g.maxPhase:g.phase)||!!g.snapshot||!!g.outcome||i===g.phase} onClick={()=>g.v2?send({type:'visit',phase:i}):setReopen(i)}><span>{i<g.phase?'✓':String(i+1).padStart(2,'0')}</span>{phase}{i===g.phase&&<ChevronRight size={16}/>}</button>)}</nav><div className="sidebar-bottom"><button onClick={()=>setJournal(true)}><History size={17}/>Bitácora <span>{g.journal.length}</span></button><button onClick={()=>setLearn('vpn')}><BookOpen size={17}/>Centro de aprendizaje</button>{!g.outcome&&<button className="abandon-link" onClick={()=>setAbandon(true)}>Cerrar / abandonar partida</button>}<small>Datos simulados · COP en millones</small><span className="save-indicator"><i/>{storageError?'Partida en memoria':'Guardado local'}</span></div></aside>
  <main className="game-main"><div className="page-heading"><div className="eyebrow">ETAPA {String(g.phase+1).padStart(2,'0')} DE 08 · {phases[g.phase].toUpperCase()}</div><h1>{headings[g.phase]}</h1><p>{missions[g.scenarioId].district}{g.scenarioId.startsWith('gen-')?'':' · Aurora'} <span>·</span> Mes {g.month}</p></div><div className="phase-strip">{phases.map((p,i)=><span key={p} title={p} className={i<=g.phase?'filled':''}/>)}</div><div className="mobile-advisor"><Advisor g={g}/></div><ChallengeStatus g={g}/><ProjectMap g={g} send={send}/><DilemmaPanel key={g.v2?.pendingDilemma??"none"} g={g} send={send}/><StageGuide g={g} pending={pendingDrafts}/><DraftProvider key={g.id+':'+g.phase+':'+(g.v2?.resetCount??0)} onChange={setPendingDrafts}><div className="phase-content"><details className="practice-drawer"><summary>Entrenar conceptos · práctica opcional</summary><><PracticeV2 key={g.id+g.phase} g={g} send={send}/></></details><SectionNavigator phase={g.phase}>{g.phase===0&&<Diagnosis g={g} send={send}/>} {g.phase===1&&<Formulation g={g} send={send}/>} {g.phase===2&&<Preparation g={g} send={send}/>} {g.phase===3&&<Evaluation g={g} send={send}/>} {g.phase===4&&<Regulation g={g} send={send}/>} {g.phase===5&&<Decision g={g} send={send}/>} {g.phase===6&&<Execution g={g} send={send}/>} {g.phase===7&&g.outcome&&<Results g={g} history={data.history} onRetry={()=>start(g.scenarioId,g.difficulty,g.seed,g.v2?.challenge)} onFork={()=>{try{storeGame(forkDecision(g));setHistoryGame(null);window.scrollTo(0,0)}catch(e){setError(String(e))}}}/> }{g.phase!==6&&<MgaLab g={g} send={send}/>}</SectionNavigator>{g.phase<5&&<Next onClick={()=>send({type:'next'})}/>}</div></DraftProvider><footer className="game-footer">Datos utilizados con fines académicos y de simulación.</footer></main>
@@ -77,9 +79,6 @@ export default function App(){const [boot]=useState(initial),[data,setData]=useS
  {abandon&&<Modal title="¿Cerrar esta estrategia?" onClose={()=>setAbandon(false)}><p>Se liberarán compromisos pendientes y se conservarán los gastos realizados. Recibirás una evaluación con las lecciones de esta trayectoria.</p><div className="actions"><Button secondary onClick={()=>setAbandon(false)}>Seguir jugando</Button><Button onClick={()=>{send({type:'abandon'});setAbandon(false)}}>Cerrar y evaluar</Button></div></Modal>}
  </div>;
 }
-
-
-
 
 
 

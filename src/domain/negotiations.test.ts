@@ -19,7 +19,7 @@ describe("Mesas de negociación", () => {
         expect(c.minimum).toBeGreaterThan(0);
       }
     }
-    let g = act(createGameV2("salud"), {
+    const g = act(createGameV2("salud"), {
       type: "negotiate",
       actorId: "actor0",
       choice: "escuchar",

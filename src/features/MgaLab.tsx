@@ -250,7 +250,7 @@ export default function MgaLab({
                   ],
                   [
                     "Producto",
-                    !!g.v2?.chain.some(c=>c.id==="service"&&c.level==="Productos")
+                    g.v2?.chain.some(c=>c.id==="service"&&c.level==="Productos")
                       ? selected(g)?.product
                       : "Revisar clasificación del producto",
                     "Producto",

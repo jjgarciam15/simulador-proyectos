@@ -119,8 +119,9 @@ function ResourceDetails({
   const dialog = useRef<HTMLDialogElement>(null),
     Icon = icons[resource.id];
   useEffect(() => {
-    dialog.current?.showModal();
-    return () => dialog.current?.close();
+    const node = dialog.current;
+    node?.showModal();
+    return () => node?.close();
   }, []);
   return (
     <dialog

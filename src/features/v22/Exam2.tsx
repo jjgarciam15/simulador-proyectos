@@ -56,7 +56,6 @@ export default function Exam2({ onExit }: { onExit: () => void }) {
     [checked, setChecked] = useState<Record<number, boolean>>({}),
     [done, setDone] = useState(false);
   const A = examCase("A"),
-    B = examCase("B"),
     ref = examReference(),
     set = (patch: Partial<ExamAnswers>) => setA({ ...a, ...patch }),
     answers = { ...a, flow: toRows(draft) },

@@ -8,7 +8,6 @@ import {
   chainReview,
   sdgReview,
   sdgReasonScore,
-  type ChainPlacement,
   type ChainLevel,
 } from "../domain/projectV2";
 import { Panel, Button, Field } from "../components/ui";

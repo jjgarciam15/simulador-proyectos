@@ -1,13 +1,11 @@
 import { projectReport } from "./recognition";
 import { forkDecision } from "./engine";
 import { challenges, challengeProgress } from "./challenges";
-import type { GameState } from "./types";
 import { describe, it, expect } from "vitest";
 import { createGameV2, act } from "./engine";
 import { decode } from "./storage";
-import { chainBank, chainV2Score, chainLevels } from "./projectV2";
+import { chainV2Score, chainLevels } from "./projectV2";
 import { scenarios, scenarioById } from "../data/scenarios";
-import { budgetFor, defaultActivities, projectCost, available } from "./engine";
 import { questionsV2 } from "./questionsV2";
 import { validateMission } from "./missions";
 import { scoreV2 } from "./scoringV2";
