@@ -1,3 +1,4 @@
+import { ConceptLinks } from "./v22/common";
 import { useState } from "react";
 import type { GameState } from "../domain/types";
 import type { Action } from "../domain/engine";
@@ -40,7 +41,7 @@ export default function RegulatoryPuzzle({
     result = confirmed ? puzzleResult(g) : null,
     detail = difficultyRules[g.difficulty].feedback;
   return (
-    <Panel title="Laboratorio regulatorio" kicker="ANALIZA · DIAGNOSTICA · RECONSTRUYE">
+    <Panel title="Laboratorio regulatorio" kicker="ANALIZA · DIAGNOSTICA · RECONSTRUYE"><ConceptLinks ids={["regulacion", "externalidad", "captura"]} />
       <p>
         Regular no siempre es correcto. Primero estima qué tan grave es la falla; después compara el valor neto de cada
         instrumento, incluido no intervenir. Por último reconstruye la cadena causal completa de tu decisión.

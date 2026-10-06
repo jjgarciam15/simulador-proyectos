@@ -1,3 +1,4 @@
+import { ConceptLinks } from "./v22/common";
 import { useState } from "react";
 import type { GameState } from "../domain/types";
 import type { Action } from "../domain/engine";
@@ -46,7 +47,7 @@ export function ChainBuilder({
       title="Construye la cadena de valor"
       kicker="SELECCIONA · CLASIFICA · CONECTA"
     >
-      <p>
+<ConceptLinks ids={["cadena-valor", "producto-resultado"]} />      <p>
         El banco mezcla tarjetas correctas, parcialmente relacionadas y
         distractores. Arrastra cada tarjeta útil a su nivel (o usa el selector),
         deja fuera las que no explican tu intervención y conecta cómo cada
@@ -216,7 +217,7 @@ export function ActorBuilder({
     [positions, setPositions] = useState(g.v2!.actorMap);
   useDraftGuard(different(positions, g.v2!.actorMap));
   return (
-    <Panel title="Ubica poder e interés" kicker="MAPA DE ACTORES">
+    <Panel title="Ubica poder e interés" kicker="MAPA DE ACTORES"><ConceptLinks ids={["actores"]} />
       <p>
         Usa las fichas de actores para decidir qué significa cada posición. Alto
         corresponde a 60 o más en la escala de referencia. Después elige una
@@ -272,7 +273,7 @@ export function SDGBuilder({
   const [reasons, setReasons] = useState(g.v2!.sdgReasons);
   useDraftGuard(different(reasons, g.v2!.sdgReasons));
   return (
-    <Panel title="Sustenta los ODS elegidos">
+    <Panel title="Sustenta los ODS elegidos"><ConceptLinks ids={["ods"]} />
       <p>
         Primero confirma la selección en ODS y alineación. Después relaciona
         cada objetivo con una evidencia y reconoce las tensiones; escoger más no

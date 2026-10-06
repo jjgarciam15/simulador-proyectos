@@ -29,6 +29,7 @@ export default function Comparator({ g, send }: { g: GameState; send: (a: Action
   return (
     <Panel title="Comparar alternativas antes de decidir" kicker="COMPARADOR Y MATRIZ DE DECISIÓN">
       <ModuleIntro
+        concepts={["costo-oportunidad", "vpn"]}
         what="Todas las alternativas evaluadas con el mismo horizonte, tasas y RPC. Los beneficios de las otras alternativas proyectan tu valoración."
         why="Elegir una alternativa implica renunciar a las demás: ese es el costo de oportunidad de la decisión."
         decide="Si mantienes tu alternativa o vuelves a Formulación para cambiarla (tu trabajo se conserva)."

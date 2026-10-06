@@ -6,7 +6,7 @@ import { committeeQuestions, committeeScore } from "../../domain/committee";
 import { helpPolicy } from "../../domain/help";
 import { Panel, Button } from "../../components/ui";
 import { useDraftGuard, different } from "../../components/workbench";
-import { Deferred, Status } from "./common";
+import { ConceptLinks, Deferred, Status } from "./common";
 
 /** Comité evaluador: defend the project with evidence. Questions are derived from the game. */
 export default function Committee({ g, send }: { g: GameState; send: (a: Action) => void }) {
@@ -18,7 +18,7 @@ export default function Committee({ g, send }: { g: GameState; send: (a: Action)
   if (!qs.length) return null;
   const confirmed = Object.keys(saved).length === qs.length;
   return (
-    <Panel title="Defiende tu proyecto ante el comité evaluador" kicker="COMITÉ EVALUADOR">
+    <Panel title="Defiende tu proyecto ante el comité evaluador" kicker="COMITÉ EVALUADOR"><ConceptLinks ids={["evaluacion-exante", "costo-hundido"]} />
       <p className="v22-committee-lead">
         <Users size={18} aria-hidden /> El comité revisó tu expediente. Sus preguntas salen de tus decisiones: alternativa, flujos, valoración y ODS. La defensa
         aporta una parte pequeña de la nota.

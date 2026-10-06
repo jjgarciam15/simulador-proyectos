@@ -97,6 +97,7 @@ export default function ValuationLab({ g, send }: { g: GameState; send: (a: Acti
   return (
     <Panel title="Valoración económica de impactos" kicker="MEDIR ≠ VALORAR">
       <ModuleIntro
+        concepts={["valoracion", "reveladas", "declaradas"]}
         what="Algunos impactos tienen precio de mercado, otros tienen mercados relacionados y otros no tienen mercado."
         why="Para comparar beneficios y costos en el flujo económico, los impactos deben expresarse en pesos de forma defendible."
         decide="Para cada impacto: cuánto cambia (medición), con qué método valorarlo y cuánto invertir en el estudio."
