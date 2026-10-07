@@ -1,5 +1,23 @@
 # Cambios
 
+## 2.9.0 · Actores con perfil sorteado en cada partida (7 de octubre de 2026)
+
+- **Perfil aleatorio:** en las nueve misiones y en los proyectos propios, cada partida nueva sortea el poder, el interés y la posición de cada actor.
+  - El mismo código de partida repite el perfil.
+  - El mapa poder × interés se califica con el perfil de esa partida, así que hay que leer las fichas cada vez.
+  - Los valores son claramente altos (66–95) o bajos (15–52), nunca ambiguos cerca del umbral de 60.
+  - Siempre hay al menos un actor clave (alto poder y alto interés) y, entre los actores no gubernamentales, al menos uno en contra y uno a favor.
+- **El gobierno es neutral:** autoridades, organismos, alcaldías, ministerios, catastro y otras instituciones públicas mantienen siempre posición 0, y tus decisiones no la mueven.
+- **Mejor integración de los actores en el simulador:**
+  - **La posición cambia con tus decisiones.** Consultar, negociar, involucrar e informar la mejoran; ignorar la empeora. En la mesa, escuchar y llegar a un acuerdo la mejoran; un acuerdo rechazado o cerrar sin acuerdo la empeoran. La ficha muestra la posición actual y la inicial, y cada botón indica cuánto la mueve.
+  - **Ignorar a un actor en contra cuesta más apoyo,** y consultarlo, negociar con él o involucrarlo da más.
+  - **En la mesa de acuerdos,** un actor muy en contra (−50 o menos) solo acepta un acuerdo si antes lo escuchas; el estudio social ya no basta. Cerrar sin acuerdo con un actor en contra cuesta más apoyo.
+  - **En la ejecución,** los actores poderosos en contra aumentan la probabilidad de conflictos sociales, y el aviso nombra al actor que encabeza el reclamo. Los eventos sociales positivos no cambian.
+  - **El panel de actores** muestra la posición con icono, palabra y valor; los puntos de la matriz se colorean según la posición, y una leyenda indica el nivel de oposición organizada.
+  - **Coherencia y Ex post:** cuentan como actores clave también los poderosos que empiezan en contra, y «Aciertos y errores» señala si invertiste con actores poderosos en contra.
+- **Compatibilidad:** las partidas guardadas antes de 2.9 conservan los perfiles de referencia y su comportamiento anterior. Un perfil guardado inválido se descarta.
+- **Crear proyecto** explica que los valores registrados de los actores quedan como referencia y que en cada partida se sortean.
+
 ## 2.8.0 · Retroalimentación sobre cada elemento, al pasar el mouse (7 de octubre de 2026)
 
 - **La retroalimentación ya no va en una lista aparte.** Al confirmar un módulo, cada tarjeta, opción o fila se marca en su propio lugar:

@@ -347,7 +347,7 @@ export function phaseAvailability(p: NormalizedProject): PhaseAvailability[] {
     withValue = valued.filter((i) => num(i.annualValue));
   return [
     { label: "Problema", status: p.problem && p.causes.length >= 2 && p.problemEffects.length >= 2 ? "si" : "no", reason: "Árbol del problema con causas y efectos del proyecto." },
-    { label: "Actores", status: p.actors.length >= 2 ? (p.actors.some((a) => num(a.power)) ? "si" : "parcial") : "no", reason: p.actors.some((a) => num(a.power)) ? "Poder y posición registrados." : "Sin poder ni posición: se usan valores de referencia." },
+    { label: "Actores", status: p.actors.length >= 2 ? (p.actors.some((a) => num(a.power)) ? "si" : "parcial") : "no", reason: p.actors.some((a) => num(a.power)) ? "Poder y posición registrados como referencia; en cada partida se sortean." : "Sin poder ni posición: en cada partida se sortean." },
     { label: "Alternativas", status: p.alternatives.length >= 2 ? "si" : "no", reason: `${p.alternatives.length} alternativa(s).` },
     { label: "Impactos", status: p.impacts.length ? "si" : "parcial", reason: p.impacts.length ? `${p.impacts.length} efecto(s) e impacto(s).` : "Solo producto y efecto del problema." },
     { label: "Presupuesto", status: "si", reason: "Planificador presupuestal con la inversión de la alternativa." },

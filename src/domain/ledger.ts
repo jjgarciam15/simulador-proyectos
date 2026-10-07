@@ -1,3 +1,4 @@
+import { gameActors } from "./actors";
 import type { GameState } from "./types";
 import { scenarioById } from "../data/scenarios";
 import { chainReview, sdgReview } from "./projectV2";
@@ -27,11 +28,16 @@ export function outcomeLedger(g: GameState): LedgerItem[] {
   }
   const missing = s.nodes.filter((n) => n.valid && n.id !== "n0" && !plan.nodes.includes(n.id));
   for (const n of missing) add("Diagnóstico", "Diagnóstico y Árbol del problema", false, `Faltó «${n.label}» en el Árbol del problema.`);
-  const actorsOk = s.actors.filter((a) => {
+  const actors = gameActors(plan),
+    actorsOk = actors.filter((a) => {
     const p = plan.v2?.actorMap[a.id];
     return p?.power === (a.power >= 60 ? "alto" : "bajo") && p?.interest === (a.interest >= 60 ? "alto" : "bajo");
   }).length;
-  add("Diagnóstico", "Diagnóstico y Árbol del problema", actorsOk === s.actors.length, `Ubicaste correctamente ${actorsOk} de ${s.actors.length} actores en la matriz poder × interés.`);
+  add("Diagnóstico", "Diagnóstico y Árbol del problema", actorsOk === actors.length, `Ubicaste correctamente ${actorsOk} de ${actors.length} actores en la matriz poder × interés.`);
+  if (plan.actorProfiles) {
+    const against = actors.filter((a) => !a.government && a.stance < -10 && a.power >= 60);
+    add("Diagnóstico", "Diagnóstico y Árbol del problema", against.length === 0, against.length ? `Invertiste con ${against.length} actor(es) poderoso(s) en contra: ${against.map((a) => a.name).join(", ")}.` : "Ningún actor poderoso quedó en contra del proyecto al invertir.");
+  }
   const a = s.alternatives.find((x) => x.id === plan.alternative);
   add("Formulación", "Alternativa y objetivos", plan.objective === "n0", plan.objective === "n0" ? "El objetivo central corresponde al problema central." : "El objetivo central no corresponde al problema central.");
   if (a) {

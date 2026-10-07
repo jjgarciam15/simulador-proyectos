@@ -1532,3 +1532,13 @@ tr.current-attempt td {
 .fb-key.alerta{color:var(--warning,#8f5b00);background:var(--warning-soft,#fff2d3)}
 .fb-key.grave{color:var(--danger,#b3261e);background:var(--danger-soft,#fce8e6)}
 .fb-details{margin:6px 0 10px}.fb-details>summary{cursor:pointer;font-weight:600}
+
+/* Actores con perfil sorteado (2.9): posición con icono, palabra y valor */
+.stance{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-weight:700;font-size:12px;white-space:nowrap}
+.stance.favour{color:var(--success,#1f7a4d);background:var(--success-soft,#e0f3e8)}
+.stance.against{color:var(--danger,#b3261e);background:var(--danger-soft,#fce8e6)}
+.stance.neutral{color:#3f4f49;background:#e6ebe8}
+.actor-dot.favour{background:var(--success,#1f7a4d)}
+.actor-dot.against{background:var(--danger,#b3261e);box-shadow:0 0 0 5px #b3261e1f}
+.actor-dot.neutral{background:#5d6b66}
+.actor-legend{display:flex;flex-wrap:wrap;gap:6px;align-items:center}

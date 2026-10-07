@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { GameState } from "../domain/types";
 import { available, type Action } from "../domain/engine";
-import { scenarioById } from "../data/scenarios";
 import {
   actorCommitment,
   negotiationChoices,
@@ -11,6 +10,8 @@ import {
 } from "../domain/negotiations";
 import { Panel, Field, Button } from "../components/ui";
 import { money } from "../domain/finance";
+import { gameActors } from "../domain/actors";
+import { StanceBadge } from "./ActorPanel";
 
 export function NegotiationCommitments({ g }: { g: GameState }) {
   const rows = negotiationCommitments(g);
@@ -41,8 +42,8 @@ export default function NegotiationDesk({
   g: GameState;
   send: (a: Action) => void;
 }) {
-  const s = scenarioById(g.scenarioId),
-    [actorId, setActorId] = useState(s.actors[0].id),
+  const actors = gameActors(g),
+    [actorId, setActorId] = useState(actors[0].id),
     [choice, setChoice] = useState<NegotiationChoice | null>(null),
     record = g.v2?.negotiations?.[actorId],
     condition = actorCommitment(g, actorId),
@@ -67,7 +68,7 @@ export default function NegotiationDesk({
             setChoice(null);
           }}
         >
-          {s.actors.map((a) => (
+          {actors.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name}
             </option>
@@ -79,6 +80,13 @@ export default function NegotiationDesk({
         Aporta {condition.actor.contribution.toLowerCase()}. Rondas usadas:{" "}
         {record?.rounds.length ?? 0}/3.
       </p>
+      {g.actorProfiles && (
+        <p>
+          Posición actual: <StanceBadge actor={condition.actor} />
+          {!condition.actor.government && condition.actor.stance <= -50 && " Está muy en contra: solo acepta un acuerdo si antes lo escuchas en esta mesa."}
+          {!condition.actor.government && " Un acuerdo mejora su posición; cerrar sin acuerdo la empeora y cuesta más apoyo si ya está en contra."}
+        </p>
+      )}
       {(record?.consulted || g.studies.includes("social") || closed) && (
         <p>
           Condición identificada: reservar al menos {money(condition.minimum)}{" "}

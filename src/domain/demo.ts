@@ -5,6 +5,7 @@ import { directSDGs } from "../data/relationships";
 import { chainBank, chainLevels } from "./projectV2";
 import { pendingDilemma } from "./dilemmas";
 import { referenceTree } from "./problemTree";
+import { gameActors } from "./actors";
 import { impactCards, referenceValuation, generalObjectiveOptions, specificObjectiveOptions } from "./valuation";
 import { missionFlowCase } from "./missionFlow";
 import { referenceRows, referenceEconomic, referenceBenefits } from "./flows";
@@ -62,7 +63,7 @@ export function referenceChain(g: GameState) {
 /** Power and interest of each actor as the scenario defines them (threshold 60). */
 export function referenceActorMap(g: GameState) {
   return Object.fromEntries(
-    scenarioById(g.scenarioId).actors.map((a) => [a.id, { power: a.power >= 60 ? ("alto" as const) : ("bajo" as const), interest: a.interest >= 60 ? ("alto" as const) : ("bajo" as const) }]),
+    gameActors(g).map((a) => [a.id, { power: a.power >= 60 ? ("alto" as const) : ("bajo" as const), interest: a.interest >= 60 ? ("alto" as const) : ("bajo" as const) }]),
   );
 }
 
@@ -76,9 +77,12 @@ export function presentationGame(scenarioId = "agua"): GameState {
   g = act(g, { type: "tree", placements: referenceTree(g) }, false);
   g = act(g, { type: "mga", section: "links", value: { ...g.mga!, links: [{ from: "n2", to: "n1" }, { from: "n1", to: "n0" }, { from: "n0", to: "n3" }, { from: "n3", to: "n4" }] } }, false);
   g = act(g, { type: "actorMap", value: referenceActorMap(g) }, false);
-  const key = s.actors.filter((a) => a.power >= 60 && a.interest >= 60);
-  for (const a of key.length ? key : s.actors.slice(0, 2)) g = attempt(g, { type: "actor", id: a.id, choice: "consultar" });
-  const negotiator = (key[0] ?? s.actors[0]).id;
+  // Every key actor (high power with high interest, or against the project) is consulted; the main one is heard and signs an agreement.
+  const actors = gameActors(g),
+    key = actors.filter((a) => a.power >= 60 && (a.interest >= 60 || (!a.government && a.position < 0)));
+  for (const a of key.length ? key : actors.slice(0, 2)) g = attempt(g, { type: "actor", id: a.id, choice: "involucrar" });
+  const negotiator = (key[0] ?? actors[0]).id;
+  g = attempt(g, { type: "negotiate", actorId: negotiator, choice: "escuchar" } as Action);
   g = attempt(g, { type: "negotiate", actorId: negotiator, choice: "acuerdo" } as Action);
   g = act(g, { type: "target", value: s.affected }, false);
   g = practice(g);

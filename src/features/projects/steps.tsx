@@ -175,6 +175,10 @@ export function ActorsStep({ ctx }: { ctx: BuilderCtx }) {
       <h4>
         Actores <LearnLink concept="actores" />
       </h4>
+      <p className="muted">
+        En cada partida el simulador sortea el poder, el interés y la posición de los actores para que el mapa se analice de nuevo. Los valores que registres
+        quedan como referencia del proyecto. Las instituciones de gobierno (autoridades, alcaldías, ministerios, organismos…) mantienen siempre una posición neutral.
+      </p>
       <div className="table-wrap">
         <table className="pb-table">
           <thead>

@@ -14,9 +14,9 @@ import {
 } from "../domain/projectV2";
 import { Panel, Button, Field } from "../components/ui";
 import { useDraftGuard, different } from "../components/workbench";
-import { scenarioById } from "../data/scenarios";
 import { difficultyRules } from "../data/balance";
 import { helpPolicy } from "../domain/help";
+import { gameActors } from "../domain/actors";
 import { fb, FeedbackLegend, type FeedbackLevel } from "../components/feedback";
 
 export function ChainBuilder({
@@ -243,14 +243,14 @@ export function ActorBuilder({
   g: GameState;
   send: (a: Action) => void;
 }) {
-  const s = scenarioById(g.scenarioId),
+  const actors = gameActors(g),
     [positions, setPositions] = useState(g.v2!.actorMap);
   useDraftGuard(different(positions, g.v2!.actorMap));
   const detail = difficultyRules[g.difficulty].feedback,
     confirmedMap = g.v2!.actorMap,
     marks = Object.keys(confirmedMap).length > 0 && helpPolicy(g).immediate && detail !== "score";
   /** Color and hover text of each position while it stays as it was confirmed. */
-  function actorFeedback(a: (typeof s.actors)[number], key: "power" | "interest"): { level: FeedbackLevel; text: string } | null {
+  function actorFeedback(a: (typeof actors)[number], key: "power" | "interest"): { level: FeedbackLevel; text: string } | null {
     const was = confirmedMap[a.id]?.[key],
       is = positions[a.id]?.[key];
     if (!marks || !was || was !== is) return null;
@@ -259,16 +259,17 @@ export function ActorBuilder({
       explain = detail === "full" ? ` Según su ficha, su ${what} es ${expected} (alto = 60 o más en la escala de referencia).` : "";
     return was === expected ? { level: "ok", text: `Bien ubicado.${explain}` } : { level: "grave", text: `No coincide con la ficha del actor.${explain}` };
   }
-  const actorLevels = s.actors.flatMap((a) => (["power", "interest"] as const).map((k) => actorFeedback(a, k)?.level)).filter((x): x is FeedbackLevel => !!x),
+  const actorLevels = actors.flatMap((a) => (["power", "interest"] as const).map((k) => actorFeedback(a, k)?.level)).filter((x): x is FeedbackLevel => !!x),
     actorCount = (k: FeedbackLevel) => actorLevels.filter((x) => x === k).length;
   return (
     <Panel title="Ubica poder e interés" kicker="MAPA DE ACTORES"><ConceptLinks ids={["actores"]} />
       <p>
-        Usa las fichas de actores para decidir qué significa cada posición. Alto
-        corresponde a 60 o más en la escala de referencia. Después elige una
+        Usa las fichas de actores (en «Nadie ejecuta un proyecto a solas») para
+        decidir qué significa cada posición: los perfiles se sortean en cada
+        partida. Alto corresponde a 60 o más en la escala de referencia. Después elige una
         estrategia de relación: ubicar un actor no sustituye consultarlo.
       </p>
-      {s.actors.map((a) => (
+      {actors.map((a) => (
         <div className="v2-row" key={a.id}>
           <h4>{a.name}</h4>
           <p>

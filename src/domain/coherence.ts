@@ -1,3 +1,4 @@
+import { gameActors } from "./actors";
 import type { GameState } from "./types";
 import { scenarioById } from "../data/scenarios";
 import { adjustmentRules as A } from "../data/balance";
@@ -32,7 +33,7 @@ export function coherenceMatrix(g: GameState): CoherenceLink[] {
     diagnosisOk = g.failure === s.failure || (g.policy === "none" && g.failure === "Ninguna falla suficiente" && rec.includes("none")),
     regulation = g.failure ? clamp(50 * Number(diagnosisOk) + 50 * Number(rec.includes(g.policy))) : 0;
   const sdg = sdgReasonScore(g);
-  const keyActors = s.actors.filter((x) => x.power >= 60 && x.interest >= 60),
+  const keyActors = gameActors(g).filter((x) => x.power >= 60 && (x.interest >= 60 || (!!g.actorProfiles && !x.government && x.position < 0))),
     engaged = keyActors.filter((x) => ["consultar", "involucrar", "negociar"].includes(g.actorActions[x.id]) || g.v2?.negotiations?.[x.id]).length,
     actors = keyActors.length ? (100 * engaged) / keyActors.length : 100;
   return [
@@ -42,7 +43,7 @@ export function coherenceMatrix(g: GameState): CoherenceLink[] {
     { pair: "Presupuesto ↔ evaluación", value: budgetEval, reason: evaluated ? "La evaluación ex ante se confirmó con el presupuesto vigente." : "El presupuesto cambió y la evaluación no se volvió a confirmar." },
     { pair: "Problema ↔ regulación", value: regulation, reason: !g.failure ? "Sin diagnóstico regulatorio." : `${diagnosisOk ? "Diagnóstico coherente" : "Diagnóstico distinto de la falla observada"}; instrumento ${rec.includes(g.policy) ? "proporcional a la evidencia" : "desproporcionado frente a la severidad real"}.` },
     { pair: "Proyecto ↔ ODS", value: sdg, reason: `Pertinencia y evidencia de los ODS seleccionados: ${sdg.toFixed(0)}/100.` },
-    { pair: "Actores ↔ estrategia", value: actors, reason: keyActors.length ? `${engaged} de ${keyActors.length} actores de alto poder e interés recibieron consulta, involucramiento o negociación.` : "No hay actores de alto poder e interés." },
+    { pair: "Actores ↔ estrategia", value: actors, reason: keyActors.length ? `${engaged} de ${keyActors.length} actores clave (alto poder con alto interés${g.actorProfiles ? " o en contra del proyecto" : ""}) recibieron consulta, involucramiento o negociación.` : "No hay actores de alto poder e interés." },
   ];
 }
 export function transversalCoherence(g: GameState) {

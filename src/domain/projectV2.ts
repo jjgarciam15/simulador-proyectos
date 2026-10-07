@@ -1,3 +1,4 @@
+import { gameActors } from "./actors";
 import type { GameState } from "./types";
 import { scenarioById } from "../data/scenarios";
 import { dependencyRules, difficultyRules } from "../data/balance";
@@ -261,10 +262,10 @@ export function chainV2Score(g: GameState) {
   );
 }
 export function actorMapScore(g: GameState) {
-  const s = scenarioById(g.scenarioId);
+  const actors = gameActors(g);
   return (
     (100 *
-      s.actors.reduce((n, a) => {
+      actors.reduce((n, a) => {
         const p = g.v2?.actorMap[a.id];
         return (
           n +
@@ -272,7 +273,7 @@ export function actorMapScore(g: GameState) {
           Number(p?.interest === (a.interest >= 60 ? "alto" : "bajo"))
         );
       }, 0)) /
-    (s.actors.length * 2)
+    (actors.length * 2)
   );
 }
 export function sdgReasonScore(g: GameState) {
