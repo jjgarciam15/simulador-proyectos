@@ -105,7 +105,7 @@ Apoyos: **Centro de aprendizaje** (menú lateral o «Cómo jugar»), tutorial in
 
 | Modo | Retroalimentación | Pistas | Indicador de coherencia |
 |---|---|---|---|
-| Aprendizaje | Inmediata en cada herramienta | Ilimitadas (pistas guiadas en dificultad guiado) | Con detalle |
+| Aprendizaje | Inmediata sobre cada elemento: verde (✓) correcto, ámbar (!) a revisar, rojo (✕) error; al pasar el mouse, enfocar o tocar se ve el porqué | Ilimitadas (pistas guiadas en dificultad guiado) | Con detalle |
 | Evaluación | Diferida: se ve la nota al final | Una por pregunta | Solo nivel |
 
 La dificultad cambia lo que conoces y tu exposición al riesgo, no la realidad subyacente: guiado (100 % del efectivo, explicaciones), intermedio (92 %), experto (85 %, menos ayudas).

@@ -9,12 +9,15 @@ import {
   chainReview,
   sdgReview,
   sdgReasonScore,
+  actorMapScore,
   type ChainLevel,
 } from "../domain/projectV2";
 import { Panel, Button, Field } from "../components/ui";
 import { useDraftGuard, different } from "../components/workbench";
 import { scenarioById } from "../data/scenarios";
 import { difficultyRules } from "../data/balance";
+import { helpPolicy } from "../domain/help";
+import { fb, FeedbackLegend, type FeedbackLevel } from "../components/feedback";
 
 export function ChainBuilder({
   g,
@@ -31,7 +34,28 @@ export function ChainBuilder({
   const bank = chainBank(g),
     label = (id: string) => bank.find((b) => b.id === id)?.label ?? id,
     detail = difficultyRules[g.difficulty].feedback,
-    review = chainReview(g);
+    review = chainReview(g),
+    confirmed = g.v2!.chain,
+    marks = confirmed.length > 0 && helpPolicy(g).immediate && detail !== "score";
+  /** Color and hover text of each bank card while it stays as it was confirmed (also for cards left out). */
+  function feedbackOf(id: string): { level: FeedbackLevel; text: string } | null {
+    const c = bank.find((b) => b.id === id),
+      before = confirmed.find((p) => p.id === id),
+      now = cards.find((p) => p.id === id);
+    if (!marks || !c || before?.level !== now?.level) return null;
+    const why = detail === "full" ? ` ${c.why}` : "";
+    if (!before)
+      return c.valid
+        ? { level: "alerta", text: `No la usaste, pero pertenece a la cadena${detail === "full" ? ` (${c.level})` : ""}.${why}` }
+        : { level: "ok", text: `Bien descartada.${why}` };
+    const r = review.find((x) => x.id === id)!;
+    if (r.status === "correcta") return { level: "ok", text: `Bien ubicada en ${r.placed}.${why}` };
+    if (r.status === "parcial") return { level: "alerta", text: `Parcialmente relacionada: aporta poco a la cadena.${why}` };
+    if (r.status === "mal clasificada") return { level: "grave", text: `Mal clasificada${detail === "full" ? `: va en ${r.expected}` : ""}.${why}` };
+    return { level: "grave", text: `Distractor: no explica tu intervención.${why}` };
+  }
+  const levels = bank.map((c) => feedbackOf(c.id)?.level).filter((x): x is FeedbackLevel => !!x),
+    count = (k: FeedbackLevel) => levels.filter((x) => x === k).length;
   useDraftGuard(
     different(cards, g.v2!.chain) || different(links, g.v2!.connections),
   );
@@ -55,10 +79,12 @@ export function ChainBuilder({
       </p>
       <div className="chain-bank">
         {bank.map((c) => {
-          const placed = cards.find((p) => p.id === c.id);
+          const placed = cards.find((p) => p.id === c.id),
+            f = feedbackOf(c.id);
           return (
             <article
               key={c.id}
+              {...fb(f?.level, f?.text ?? "")}
               draggable
               onDragStart={(e) => e.dataTransfer.setData("text/plain", c.id)}
               className={placed ? "placed" : ""}
@@ -101,7 +127,7 @@ export function ChainBuilder({
             {cards
               .filter((c) => c.level === level)
               .map((c) => (
-                <p key={c.id}>
+                <p key={c.id} tabIndex={feedbackOf(c.id) ? 0 : undefined} {...fb(feedbackOf(c.id)?.level, feedbackOf(c.id)?.text ?? "")}>
                   {label(c.id)}{" "}
                   <button
                     className="text-btn"
@@ -175,11 +201,14 @@ export function ChainBuilder({
             evalúan niveles cubiertos, clasificación de cada tarjeta y
             relaciones entre niveles consecutivos.
           </p>
+          {marks && <FeedbackLegend counts={{ ok: count("ok"), alerta: count("alerta"), grave: count("grave") }} />}
           {detail === "score" ? (
             <p className="muted">
               En modo difícil no se indica qué tarjetas fallan.
             </p>
           ) : (
+            <details className="fb-details">
+              <summary>Ver la retroalimentación en lista</summary>
             <ul className="findings">
               {review
                 .filter((r) => r.status !== "correcta")
@@ -200,6 +229,7 @@ export function ChainBuilder({
                 </li>
               )}
             </ul>
+            </details>
           )}
         </div>
       )}
@@ -216,6 +246,21 @@ export function ActorBuilder({
   const s = scenarioById(g.scenarioId),
     [positions, setPositions] = useState(g.v2!.actorMap);
   useDraftGuard(different(positions, g.v2!.actorMap));
+  const detail = difficultyRules[g.difficulty].feedback,
+    confirmedMap = g.v2!.actorMap,
+    marks = Object.keys(confirmedMap).length > 0 && helpPolicy(g).immediate && detail !== "score";
+  /** Color and hover text of each position while it stays as it was confirmed. */
+  function actorFeedback(a: (typeof s.actors)[number], key: "power" | "interest"): { level: FeedbackLevel; text: string } | null {
+    const was = confirmedMap[a.id]?.[key],
+      is = positions[a.id]?.[key];
+    if (!marks || !was || was !== is) return null;
+    const expected = (key === "power" ? a.power : a.interest) >= 60 ? "alto" : "bajo",
+      what = key === "power" ? "poder" : "interés",
+      explain = detail === "full" ? ` Según su ficha, su ${what} es ${expected} (alto = 60 o más en la escala de referencia).` : "";
+    return was === expected ? { level: "ok", text: `Bien ubicado.${explain}` } : { level: "grave", text: `No coincide con la ficha del actor.${explain}` };
+  }
+  const actorLevels = s.actors.flatMap((a) => (["power", "interest"] as const).map((k) => actorFeedback(a, k)?.level)).filter((x): x is FeedbackLevel => !!x),
+    actorCount = (k: FeedbackLevel) => actorLevels.filter((x) => x === k).length;
   return (
     <Panel title="Ubica poder e interés" kicker="MAPA DE ACTORES"><ConceptLinks ids={["actores"]} />
       <p>
@@ -232,8 +277,8 @@ export function ActorBuilder({
           </p>
           <div className="two-col">
             {(["power", "interest"] as const).map((key) => (
+              <div key={key} {...fb(actorFeedback(a, key)?.level, actorFeedback(a, key)?.text ?? "")}>
               <Field
-                key={key}
                 label={(key === "power" ? "Poder" : "Interés") + " · " + a.name}
               >
                 <select
@@ -253,6 +298,7 @@ export function ActorBuilder({
                   <option value="bajo">Bajo</option>
                 </select>
               </Field>
+              </div>
             ))}
           </div>
         </div>
@@ -260,6 +306,14 @@ export function ActorBuilder({
       <Button onClick={() => send({ type: "actorMap", value: positions })}>
         Confirmar matriz de actores
       </Button>
+      {marks && (
+        <div role="status" className="chain-feedback">
+          <p>
+            <strong>Matriz de actores: {Math.round(actorMapScore(g))}/100.</strong>
+          </p>
+          <FeedbackLegend counts={{ ok: actorCount("ok"), alerta: actorCount("alerta"), grave: actorCount("grave") }} />
+        </div>
+      )}
     </Panel>
   );
 }
@@ -285,8 +339,12 @@ export function SDGBuilder({
           evidence: "",
           text: "",
         };
+        const was = g.v2!.sdgReasons[id],
+          detail = difficultyRules[g.difficulty].feedback,
+          row = was && !different(r, was) && helpPolicy(g).immediate && detail !== "score" ? sdgReview(g).rows.find((x) => x.id === id) : undefined,
+          level: FeedbackLevel | undefined = row && (row.status === "bien sustentado" ? "ok" : row.status === "sin relación" ? "grave" : "alerta");
         return (
-          <div key={id} className="v2-row">
+          <div key={id} className="v2-row" {...fb(level, row ? `${row.status.charAt(0).toUpperCase() + row.status.slice(1)}.${detail === "full" ? ` ${row.why}` : ""}` : "")}>
             <h4>ODS {id}</h4>
             <Field label={"Relación del ODS " + id}>
               <select
@@ -361,7 +419,18 @@ export function SDGBuilder({
               {r.excess > 0 && `${r.excess} ODS sin relación con el proyecto restan puntos. `}
               {r.omitted.length > 0 && `Hay ${r.omitted.length} ODS relacionados que no seleccionaste.`}
             </p>
+            {detail !== "score" && helpPolicy(g).immediate && (
+              <FeedbackLegend
+                counts={{
+                  ok: r.rows.filter((x) => x.status === "bien sustentado").length,
+                  alerta: r.rows.filter((x) => x.status === "pertinente, mal sustentado").length,
+                  grave: r.rows.filter((x) => x.status === "sin relación").length,
+                }}
+              />
+            )}
             {detail !== "score" && (
+              <details className="fb-details">
+                <summary>Ver la retroalimentación en lista</summary>
               <ul className="findings">
                 {r.rows.map((row) => (
                   <li key={row.id} className={"finding " + (row.status === "bien sustentado" ? "ok" : row.status === "sin relación" ? "grave" : "alerta")}>
@@ -370,6 +439,7 @@ export function SDGBuilder({
                   </li>
                 ))}
               </ul>
+              </details>
             )}
           </div>
         );

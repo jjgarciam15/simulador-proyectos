@@ -54,7 +54,16 @@ test("el Árbol del problema se construye con tarjetas y bloquea el avance hasta
     await panel.getByRole("button", { name: "No pertenece al árbol" }).press("Enter");
   }
   await panel.getByRole("button", { name: "Confirmar Árbol del problema" }).click();
-  await expect(panel.locator(".findings")).toContainText("Construcción del árbol");
+  await expect(panel.locator(".findings").first()).toContainText("Construcción del árbol");
+  // Feedback on each card: green/red marks, and hovering a card shows why.
+  await expect(panel.locator(".ptb-card[data-fb]")).toHaveCount(14);
+  const wrong = panel.locator('.ptb-card[data-fb="grave"]').first();
+  await wrong.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await wrong.hover();
+  await expect(page.locator("#fb-tooltip")).toContainText(/Error: Tarjeta válida descartada|Error:/);
+  await expect(wrong).toHaveAttribute("aria-describedby", "fb-tooltip");
+  await page.mouse.move(5, 500);
+  await expect(page.locator("#fb-tooltip")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 

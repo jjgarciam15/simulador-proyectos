@@ -1,5 +1,17 @@
 # Cambios
 
+## 2.8.0 · Retroalimentación sobre cada elemento, al pasar el mouse (7 de octubre de 2026)
+
+- **La retroalimentación ya no va en una lista aparte.** Al confirmar un módulo, cada tarjeta, opción o fila se marca en su propio lugar:
+  - Verde con ✓ si es correcta, ámbar con ! si está parcialmente bien y rojo con ✕ si es incorrecta.
+  - Al pasar el mouse, enfocarla con el teclado o tocarla en el celular aparece el porqué: qué está bien o mal, dónde va y la explicación.
+  - Así se encuentran los errores directamente en el árbol o en el módulo.
+- **Módulos con este sistema:** Árbol del problema, mapa de actores (poder e interés), objetivos, cadena de valor (incluidas las tarjetas bien descartadas o que faltó usar), efectos e impactos, valoración económica (método y medición), laboratorio regulatorio (cada eslabón), ODS y comité evaluador.
+- Cada módulo muestra la nota, una leyenda con cuántos elementos hay de cada color y, plegada, la lista completa para quien la prefiera.
+- Solo se marcan los elementos que siguen como se confirmaron: si mueves algo, pierde el color hasta que vuelvas a confirmar.
+- Respeta la dificultad: en modo difícil solo se ve la nota, y en el modo evaluación la retroalimentación sigue apareciendo al final.
+- Árbol: el nivel de cada tarjeta va en su propia línea, sin encimarse con el texto. Cuando el banco se vacía, el árbol usa todo el ancho.
+
 ## 2.7.0 · Árbol del problema jerárquico, solo arrastrando (7 de octubre de 2026)
 
 - **Árbol con la estructura de la pizarra:**

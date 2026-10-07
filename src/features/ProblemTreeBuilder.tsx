@@ -7,6 +7,7 @@ import { helpPolicy } from "../domain/help";
 import { useDraftGuard, different } from "../components/workbench";
 import { Button, Panel, Tip } from "../components/ui";
 import { ConceptLinks, Deferred, Status } from "./v22/common";
+import { fb, FeedbackLegend, type FeedbackLevel } from "../components/feedback";
 
 const levelName = Object.fromEntries(treeSlots.map((s) => [s.id, s.label])) as Record<string, string>;
 /** Drop targets: the bank, «No pertenece», the central problem, a new branch of causes or effects, or a placed card. */
@@ -169,9 +170,24 @@ export default function ProblemTreeBuilder({ g, send }: { g: GameState; send: (a
       : {}),
   });
 
+  /* ---------- Feedback on each card (after confirming): color + hover/focus/tap text ---------- */
+  const review = g.v2?.tree ? treeReview(g) : null,
+    marks = !!review && help.immediate && help.detail !== "score",
+    same = (id: string) => draft[id]?.side === saved[id]?.side && draft[id]?.parent === saved[id]?.parent;
+  const where = (c: (typeof cards)[number]) =>
+    levelName[c.slot].toLowerCase() + (c.parents && c.parents[0] !== CENTRAL ? `, colgando de «${label(c.parents[0])}»` : "");
+  function feedbackOf(id: string): { level: FeedbackLevel; text: string } | null {
+    const r = marks ? review!.rows.find((x) => x.card.id === id) : undefined;
+    if (!r || !draft[id] || !same(id)) return null;
+    const level: FeedbackLevel = r.credit >= 1 ? "ok" : r.credit > 0 ? "alerta" : "grave";
+    if (level === "ok") return { level, text: help.detail === "full" ? `Bien ubicada (${where(r.card)}). ${r.card.why}` : "Bien ubicada." };
+    const status = r.status.charAt(0).toUpperCase() + r.status.slice(1);
+    return { level, text: `${status}.${help.detail === "full" ? ` Va en ${where(r.card)}: ${r.card.why}` : ""}` };
+  }
   const card = (id: string): ReactNode => {
     const lv = placedLevel(draft, id),
-      inTree = !!draft[id];
+      inTree = !!draft[id],
+      f = feedbackOf(id);
     return (
       <div
         key={id}
@@ -181,6 +197,7 @@ export default function ProblemTreeBuilder({ g, send }: { g: GameState; send: (a
         tabIndex={0}
         aria-pressed={picked === id}
         aria-label={`${label(id)}${lv && lv !== "fuera" ? `, ${levelName[lv].toLowerCase()}` : ""}. ${picked && picked !== id && inTree ? "Enter: colgar aquí la tarjeta levantada." : "Enter: levantar para moverla."}`}
+        {...fb(f?.level, f?.text ?? "")}
         onPointerDown={(e) => onPointerDown(e, id)}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -223,7 +240,9 @@ export default function ProblemTreeBuilder({ g, send }: { g: GameState; send: (a
     causes = childrenOf(draft, CENTRAL, "cause"),
     effects = childrenOf(draft, CENTRAL, "effect"),
     complete = bank.length === 0 && !!central;
-  const review = g.v2?.tree ? treeReview(g) : null;
+  const levels = marks ? cards.map((c) => feedbackOf(c.id)?.level).filter((x): x is FeedbackLevel => !!x) : [],
+    count = (k: FeedbackLevel) => levels.filter((x) => x === k).length,
+    moved = marks && cards.some((c) => !same(c.id));
   return (
     <Panel title="Construye el Árbol del problema" kicker="02 / CONECTA LAS CAUSAS">
       {/* A new press always starts a fresh interaction (clears the «ignore the click after a drop» flag). */}
@@ -283,24 +302,30 @@ export default function ProblemTreeBuilder({ g, send }: { g: GameState; send: (a
       </div>
       {review &&
         (help.immediate ? (
-          <ul className="findings">
-            <Status level={review.score >= 90 ? "ok" : review.score >= 60 ? "alerta" : "grave"}>Construcción del árbol: {review.score}/100.</Status>
-            {help.detail !== "score" &&
-              review.rows
-                .filter((r) => r.credit < 1)
-                .map((r) => (
-                  <Status key={r.card.id} level={r.credit ? "alerta" : "grave"}>
-                    «{r.card.label}»: {r.status}.
-                    {help.detail === "full" && (
-                      <>
-                        {" "}
-                        Va en {levelName[r.card.slot].toLowerCase()}
-                        {r.card.parents && r.card.parents[0] !== CENTRAL ? `, colgando de «${label(r.card.parents[0])}»` : ""}: {r.card.why}
-                      </>
-                    )}
-                  </Status>
-                ))}
-          </ul>
+          <div className="ptb-review">
+            <ul className="findings">
+              <Status level={review.score >= 90 ? "ok" : review.score >= 60 ? "alerta" : "grave"}>Construcción del árbol: {review.score}/100.</Status>
+            </ul>
+            {marks && (
+              <>
+                <FeedbackLegend counts={{ ok: count("ok"), alerta: count("alerta"), grave: count("grave") }} />
+                {moved && <p className="muted">Las tarjetas que moviste después de confirmar quedan sin color hasta que vuelvas a confirmar el árbol.</p>}
+                <details className="fb-details">
+                  <summary>Ver la retroalimentación en lista</summary>
+                  <ul className="findings">
+                    {review.rows
+                      .filter((r) => r.credit < 1)
+                      .map((r) => (
+                        <Status key={r.card.id} level={r.credit ? "alerta" : "grave"}>
+                          «{r.card.label}»: {r.status}.{help.detail === "full" && <> Va en {where(r.card)}: {r.card.why}</>}
+                        </Status>
+                      ))}
+                    {review.rows.every((r) => r.credit >= 1) && <Status level="ok">Todas las tarjetas están bien ubicadas.</Status>}
+                  </ul>
+                </details>
+              </>
+            )}
+          </div>
         ) : (
           <Deferred />
         ))}
