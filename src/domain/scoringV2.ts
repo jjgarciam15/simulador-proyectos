@@ -137,7 +137,7 @@ export function scoreV2(
   }));
   const notes = [
     g.v2?.tree
-      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100), 25 % ubicación de actores y 15 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`
+      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100: nivel y de qué causa o efecto cuelga cada tarjeta), 25 % ubicación de actores y 15 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`
       : `Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`,
     `Alternativa: 50 % correspondencia del objetivo central y 50 % causas atendidas.`,
     `Preparación: 50 % cadena (${chainV2Score(g)}), 30 % presupuesto (${budget.toFixed(0)}) y 20 % indicadores (${indicators}). Presupuesto: suficiencia de asignación y mantenimiento, con descuento por reserva superior al 15 % del fondo base.`,
@@ -285,7 +285,7 @@ function scoreV3Parts(g: GameState, plan: GameState, v2: ScorePart[][], transver
   const dimensions = values.map((value, i) => ({ name: names[i], value: clamp(value), weight: raw[i] / total, parts: parts[i] }));
   const notes = [
     g.v2?.tree
-      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100), 25 % ubicación de actores y 15 % focalización válida${negotiationScore(g) === null ? "" : "; si negociaste, la negociación pesa 10 % y el resto conserva sus proporciones"}.`
+      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100: nivel y de qué causa o efecto cuelga cada tarjeta), 25 % ubicación de actores y 15 % focalización válida${negotiationScore(g) === null ? "" : "; si negociaste, la negociación pesa 10 % y el resto conserva sus proporciones"}.`
       : "Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida.",
     `Alternativa y objetivos: 60 % correspondencia de objetivo y causas; 40 % objetivos general y específicos (${objectives.toFixed(0)}/100).`,
     "Preparación: 50 % cadena de valor, 30 % presupuesto (suficiencia, mantenimiento y diagnóstico) y 20 % indicadores.",

@@ -189,7 +189,7 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
  }
  if(original.v2&&action.type==='next'){
   const missing22=v22Missing(original,original.phase);if(missing22)throw new Error(missing22);
-  if(original.phase===0&&!original.v2.tree)throw new Error('Construye y confirma el Árbol del problema: ubica cada tarjeta en un nivel o déjala fuera.');
+  if(original.phase===0&&!original.v2.tree)throw new Error('Construye y confirma el Árbol del problema: arrastra cada tarjeta a su lugar o a «No pertenece al árbol».');
   if(original.phase===2){const missing=budgetBasics(original.budget,original.v2.budgetLines??[]);if(missing.length)throw new Error('Construye los datos básicos del presupuesto antes de avanzar: '+missing.join('; ')+'. Usa «Presupuesto detallado» para agregar partidas con cantidad y costo unitario.');}
   if(original.phase===2&&(original.v2.chain.length<5||original.v2.connections.length<4))throw new Error('Construye cinco niveles y al menos cuatro conexiones en la cadena de valor.');
   if(original.phase===4&&(!original.v2.regulatory.reason||!original.sdgs.length||original.sdgs.some(id=>!original.v2!.sdgReasons[id])))throw new Error('Confirma el argumento regulatorio y sustenta los ODS seleccionados.');

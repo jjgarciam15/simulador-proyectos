@@ -35,8 +35,24 @@ test("el Árbol del problema se construye con tarjetas y bloquea el avance hasta
   await expect(page.getByRole("alert").first()).toContainText("Árbol del problema");
   await page.keyboard.press("Escape");
   // One card as the central problem, the rest out of the tree: valid structure, low score.
-  await bank.first().locator("select").selectOption("central");
-  while ((await bank.count()) > 0) await bank.first().locator("select").selectOption("fuera");
+  // Only dragging (no selector): the mouse drags a card to the central problem…
+  await expect(panel.locator("select")).toHaveCount(0);
+  await page.getByRole("button", { name: "Cerrar aviso" }).first().click();
+  await panel.locator(".ptb-central").evaluate((el) => el.scrollIntoView({ block: "center" }));
+  const from = (await bank.first().boundingBox())!,
+    to = (await panel.locator(".ptb-central").boundingBox())!;
+  await page.mouse.move(from.x + 20, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 40, from.y + from.height / 2 + 10, { steps: 3 });
+  await page.mouse.move(to.x + to.width / 2, to.y + Math.min(to.height, 40) / 2, { steps: 8 });
+  await page.mouse.up();
+  await expect(panel.locator(".ptb-central .ptb-card")).toHaveCount(1);
+  // …and the keyboard moves the rest out of the tree (Enter lifts the card, Enter on the destination drops it).
+  while ((await bank.count()) > 0) {
+    await bank.first().focus();
+    await page.keyboard.press("Enter");
+    await panel.getByRole("button", { name: "No pertenece al árbol" }).press("Enter");
+  }
   await panel.getByRole("button", { name: "Confirmar Árbol del problema" }).click();
   await expect(panel.locator(".findings")).toContainText("Construcción del árbol");
   expect(errors).toEqual([]);

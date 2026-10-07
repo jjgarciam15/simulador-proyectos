@@ -180,9 +180,12 @@ export default function Experience({ children }: { children: ReactNode }) {
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty("zoom", String(zoom));
+    // Viewport units are not scaled by CSS zoom: layouts that must fit the window divide by this factor.
+    root.style.setProperty("--ui-zoom", String(zoom));
     root.dataset.zoom = String(zoom);
     return () => {
       root.style.removeProperty("zoom");
+      root.style.removeProperty("--ui-zoom");
       delete root.dataset.zoom;
     };
   }, [zoom]);

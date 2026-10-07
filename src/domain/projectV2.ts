@@ -62,7 +62,8 @@ export interface V2State {
   >;
   planner: number;
   /** Árbol del problema built by the player: card id → level (or "fuera"). */
-  tree?: { placements: Record<string, import("./problemTree").TreeSlot> };
+  /** Hierarchical tree (2.7); games saved before keep the level-only format and are converted when read. */
+  tree?: { placements: Record<string, import("./problemTree").TreePlacement | import("./problemTree").TreeSlot> };
   /** Local analytics: seconds spent in each stage (not scored). */
   stageSeconds?: Record<number, number>;
   changes: { phase: number; action: string; month: number }[];

@@ -1,5 +1,26 @@
 # Cambios
 
+## 2.7.0 · Árbol del problema jerárquico, solo arrastrando (7 de octubre de 2026)
+
+- **Árbol con la estructura de la pizarra:**
+  - El problema central queda en el medio, las causas crecen hacia abajo y los efectos hacia arriba, unidos por líneas.
+  - Cada causa directa cuelga del problema central y cada causa indirecta cuelga de la causa que explica. Se puede anidar a cualquier profundidad (por ejemplo, una causa de una causa indirecta).
+  - Los efectos funcionan igual: cada efecto indirecto cuelga del efecto que lo produce.
+  - Así se ve qué efecto surge de cada causa.
+- **Sin selector «Ubicar en…»:**
+  - Con mouse, las tarjetas se arrastran directamente.
+  - En pantallas táctiles se arrastran desde el asa ⋮⋮, y también se pueden mover tocando la tarjeta y luego el destino.
+  - Con teclado, Enter levanta la tarjeta y Enter sobre el destino la suelta.
+  - La página se desplaza sola al llevar una tarjeta cerca del borde.
+  - Funciona con cualquier nivel de zoom y en móvil.
+- **Puntuación:**
+  - Una tarjeta suma completa solo si está en el nivel correcto y cuelga de la causa o el efecto correcto.
+  - El nivel correcto colgando de otra tarjeta suma la mitad.
+  - La revisión indica de qué tarjeta debía colgar cada una.
+  - Las nueve misiones definen de qué causa directa surge su causa indirecta adicional.
+- Las partidas guardadas con el árbol anterior (solo niveles) se convierten automáticamente sin perder la nota.
+- El motor rechaza árboles con más de un problema central, tarjetas que cuelgan del lado equivocado o ciclos.
+
 ## 2.6.0 · Modo presentación y desplazamiento más ágil (6 de octubre de 2026)
 
 - **Modo presentación** (botón en el inicio):
