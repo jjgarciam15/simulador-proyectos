@@ -1564,3 +1564,6 @@ tr.current-attempt td {
 .route-tools{display:flex;gap:2px;flex:0 0 auto}
 @container (max-width:640px){.route-builder{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:640px){.route-builder{grid-template-columns:minmax(0,1fr)}.territory-card dl{grid-template-columns:1fr}}
+
+/* Placeholder while a view loads on demand (3.1): inherits the text color of light and dark surfaces. */
+.lazy-loading{color:inherit;font-size:15px;padding:24px 4px;opacity:.9}

@@ -5,6 +5,8 @@ import { act, createGameV2, available } from "./engine";
 import { prepareV2 } from "../testSupport/gameFixture";
 import { sampleProject } from "../testSupport/projectFixture";
 import { createMission, emptyStore, startGeneratedGame, upsertProject } from "./project/store";
+import { parseProject } from "./project/schema";
+import { projectReport } from "./recognition";
 import type { GameState } from "./types";
 import {
   destinationQuestion,
@@ -179,5 +181,41 @@ describe("Ley 388 de 1997 · ordenamiento territorial", () => {
       expect(["urbano", "expansion", "rural"]).toContain(t.site.soil);
     }
     expect(encajeQuestions(g)).toHaveLength(5);
+  });
+  it("Crear proyecto: los datos territoriales del autor reemplazan el perfil de referencia y se validan", () => {
+    const p = sampleProject();
+    p.alternatives[0].territory = { soil: "proteccion", plots: 3, generator: "ninguno", site: "Ronda de quebrada que el plan conserva." };
+    p.regulation.determinant = "patrimonio";
+    const c = createMission(upsertProject(emptyStore(), p), p, { difficulty: "guiado", mode: "aprendizaje", duration: "completa" });
+    if (!c.ok) throw new Error(JSON.stringify(c.errors));
+    const g = startGeneratedGame(c.mission.id, "AUTOR-388"),
+      s = scenarioById(g.scenarioId),
+      own = projectTerritory(g, s.alternatives[0].id);
+    expect(own.site).toEqual({ soil: "proteccion", plots: 3, generator: "ninguno", site: "Ronda de quebrada que el plan conserva." });
+    expect(own.determinant).toBe("patrimonio");
+    expect(own.context).toMatch(/autor/);
+    // Alternatives without data keep the reference profile.
+    expect(projectTerritory(g, s.alternatives[1].id).context).toMatch(/referencia/);
+    // The schema drops invalid values instead of trusting them.
+    const parsed = parseProject({ ...p, alternatives: [{ ...p.alternatives[0], territory: { soil: "lunar", plots: -4, generator: "magia", site: 7 } }], regulation: { ...p.regulation, determinant: "otro" } });
+    expect(parsed.alternatives[0].territory).toEqual({ soil: null, plots: 0, generator: null, site: "" });
+    expect(parsed.regulation.determinant).toBeNull();
+  });
+  it("la historia final y el informe descargable explican el ordenamiento territorial", () => {
+    let g = solve(atRegulation("agua", 1, "INFORME-388"));
+    g = act(g, { type: "next" });
+    g = act(g, { type: "commit" });
+    for (let k = 0; k < 80 && !g.outcome; k++)
+      try {
+        g = act(g, g.pendingEvent ? { type: "respond", choice: "mitigar" } : { type: "advance" });
+      } catch {
+        g = act(g, { type: "abandon" });
+      }
+    const story = g.outcome!.assessment!.story;
+    expect(story).toMatch(/cumplieron la Ley 388/);
+    expect(story).not.toMatch(/En regulación: ordenamiento/);
+    const html = projectReport(g);
+    expect(html).toContain("Ordenamiento territorial (Ley 388 de 1997)");
+    expect(html).toContain("Encaje en el ordenamiento: 100/100");
   });
 });

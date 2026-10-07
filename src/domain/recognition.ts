@@ -190,7 +190,7 @@ export function projectReport(g:GameState){
  challenge?`<h2>Modo reto: ${escape(challenge.challenge.title)}</h2><p>${challenge.won?"Distinción: formulador bajo presión":"Reto no superado"}. Reconocimiento independiente de la nota.</p><ul>${challenge.goals.map(goal=>`<li>${escape(goal.label)}: ${escape(goal.value)} · ${goal.met?"Cumplido":"No cumplido"}</li>`).join('')}</ul>`:'',
  g.v2?.budgetLines?.length?`<h2>Presupuesto detallado aprobado</h2><p>El detalle está incluido en las asignaciones; no se suma de nuevo. Mantenimiento es anual, las demás partidas son reservas iniciales. No representa una contabilidad de facturas ejecutadas.</p><table><tr><th>Partida / categoría</th><th>Cantidad / unidad</th><th>Costo unitario M</th><th>Total M</th></tr>${g.v2.budgetLines.map(l=>`<tr><td>${escape(l.description)} / ${escape(l.category)}</td><td>${l.quantity} ${escape(l.unit)}</td><td>${money(l.unitCost)}</td><td>${money(lineTotal(l))}</td></tr>`).join('')}</table>`:'',
  learningReport(g),
- g.v2?`<h2>Argumentos ODS</h2><ul>${g.sdgs.map(id=>`<li>ODS ${id}: ${escape(g.v2?.sdgReasons[id]?.text??'Sin argumento')}</li>`).join('')}</ul><h2>Argumento regulatorio</h2><blockquote>${escape(g.v2.regulatory.reason)}</blockquote><h2>Prácticas V2</h2><ul>${Object.entries(g.v2.assessments).map(([id,r])=>`<li>${escape(id)}: ${r.choices.length} intentos, ${r.hints} pistas, ${r.score.toFixed(0)}/100.</li>`).join('')}</ul>`:'',
+ g.v2?`<h2>Argumentos ODS</h2><ul>${g.sdgs.map(id=>`<li>ODS ${id}: ${escape(g.v2?.sdgReasons[id]?.text??'Sin argumento')}</li>`).join('')}</ul><h2>Argumento regulatorio</h2><blockquote>${escape(g.v2.regulatory.reason)}</blockquote>${territoryReport(g)}<h2>Prácticas V2</h2><ul>${Object.entries(g.v2.assessments).map(([id,r])=>`<li>${escape(id)}: ${r.choices.length} intentos, ${r.hints} pistas, ${r.score.toFixed(0)}/100.</li>`).join('')}</ul>`:'',
  '<footer><small>Datos simulados · adaptación educativa MGA · informe local sin servicios externos.</small></footer></body></html>'
  ].join('');
 }
@@ -215,4 +215,15 @@ function v2Medals(g: GameState): Medal[] {
   if (sdgReasonScore(plan) >= 75 && plan.sdgs.length <= scenarioById(g.scenarioId).sdgs.length)
     out.push({ id: "sustainable", title: "Proyecto sostenible", evidence: "Seleccionaste y sustentaste ODS pertinentes (≥ 75) sin selección indiscriminada." });
   return out;
+}
+
+import { currentTerritory, encajeScore, plusvaliaScore, prediosScore, projectTerritory, territoryActive } from "./territory";
+import { generatorName, soilName } from "../data/ley388";
+/** Ley 388 de 1997 in the downloadable report: the site of the alternative and the three territorial puzzles. */
+function territoryReport(g: GameState) {
+  if (!territoryActive(g) || !g.alternative) return "";
+  const t = projectTerritory(g),
+    a = currentTerritory(g),
+    cons = (g.v2?.consequences ?? []).filter((c) => c.area === "territorio");
+  return `<h2>Ordenamiento territorial (Ley 388 de 1997)</h2><p>${escape(t.site.site)} · ${escape(soilName[t.site.soil])} · ${t.site.plots} predio(s) · ${escape(generatorName[t.site.generator])}. Datos territoriales simulados.</p><ul><li>Encaje en el ordenamiento: ${encajeScore(g, a?.encaje)}/100</li><li>Ruta de adquisición de predios: ${prediosScore(g, a?.predios)}/100</li><li>Participación en la plusvalía: ${plusvaliaScore(g, a?.plusvalia)}/100</li></ul>${cons.length ? `<ul>${cons.map((c) => `<li><strong>${escape(c.title)}.</strong> ${escape(c.detail)}</li>`).join("")}</ul>` : ""}`;
 }

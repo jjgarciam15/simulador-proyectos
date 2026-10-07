@@ -1,5 +1,23 @@
 # Cambios
 
+## 3.1.0 · Ley 388 en los proyectos propios y carga más liviana (7 de octubre de 2026)
+
+- **Crear proyecto con datos de la Ley 388.**
+  - Cada alternativa tiene un apartado opcional «Territorio (Ley 388 de 1997)»: clase de suelo, predios por adquirir, hecho generador de plusvalía y descripción del sitio, que no debe nombrar la clase de suelo porque el jugador la infiere.
+  - En Regulación se puede elegir el determinante que el proyecto debe respetar primero.
+  - En la partida, esos datos reemplazan el perfil de referencia, y la vista previa indica qué alternativas los tienen.
+  - Los valores inválidos se descartan al guardar.
+- **Comité evaluador:** pregunta qué exige el plan de ordenamiento para construir la alternativa en su sitio (5 opciones, derivadas de la partida).
+- **Historia final e informe descargable:**
+  - La historia separa la regulación económica del ordenamiento territorial.
+  - Antes, una partida con el territorio en regla podía leerse como un problema regulatorio.
+  - El informe incluye el sitio, las tres notas territoriales y sus consecuencias.
+- **Carga más liviana:**
+  - Las etapas del juego, el Centro de aprendizaje, el Examen 2 y Crear o importar proyecto se cargan cuando se abren.
+  - El paquete inicial bajó de 715 kB a 490 kB (162 kB comprimido) y desapareció la advertencia de tamaño.
+  - El menú de secciones se actualiza cuando termina de cargar una etapa.
+  - Funciona igual en la copia portátil.
+
 ## 3.0.0 · Regulación con la Ley 388 de 1997 (7 de octubre de 2026)
 
 - **Reforma de la etapa de Regulación.**

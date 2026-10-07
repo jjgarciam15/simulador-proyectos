@@ -8,6 +8,7 @@ import {
   type NormalizedProject,
   type ProjectSourceType,
   type RiskLevel,
+  type AlternativeTerritory,
 } from "./types";
 import { emptyProject } from "./project";
 
@@ -149,6 +150,16 @@ export function parseProject(input: unknown): NormalizedProject {
         environment: nOrNull(a.environment),
         tradeoff: str(a.tradeoff, 600),
         causeIds: ids(a.causeIds),
+        ...(isObj(a.territory)
+          ? {
+              territory: {
+                soil: oneOfOrNull(a.territory.soil, ["urbano", "expansion", "rural", "suburbano", "proteccion"]) as AlternativeTerritory["soil"],
+                plots: nOrNull(a.territory.plots) === null ? null : Math.max(0, Math.min(500, Math.round(nOrNull(a.territory.plots)!))),
+                generator: oneOfOrNull(a.territory.generator, ["ninguno", "expansion", "uso", "aprovechamiento", "obra"]) as AlternativeTerritory["generator"],
+                site: str(a.territory.site, 400),
+              },
+            }
+          : {}),
       }))
       .filter((a) => a.id),
     valueChain: {
@@ -201,6 +212,7 @@ export function parseProject(input: unknown): NormalizedProject {
       .filter((r) => r.id),
     regulation: {
       failure: oneOfOrNull(reg.failure, failures),
+      ...(reg.determinant !== undefined ? { determinant: oneOfOrNull(reg.determinant, ["ambiental", "alimentos", "patrimonio", "infraestructura"] as const) } : {}),
       externalities: str(reg.externalities, 600),
       existing: str(reg.existing, 600),
       tariffs: str(reg.tariffs, 600),

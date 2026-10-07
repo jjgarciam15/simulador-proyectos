@@ -159,6 +159,8 @@ export function regulatoryLabScore(g: GameState) {
 
 export interface Consequence {
   kind: "inmediata" | "diferida" | "sistémica";
+  /** Territorial consequences (Ley 388 de 1997) are reported apart from economic regulation. */
+  area?: "territorio";
   title: string;
   detail: string;
   month: number;

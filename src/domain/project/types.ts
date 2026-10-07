@@ -99,6 +99,16 @@ export interface ProjectAlternative {
   tradeoff: string;
   /** Causes the alternative addresses. */
   causeIds: string[];
+  /** Ley 388 de 1997: where the alternative is built (optional; without it the game uses a reference profile). */
+  territory?: AlternativeTerritory;
+}
+export interface AlternativeTerritory {
+  soil: import("../../data/ley388").Soil | null;
+  /** Plots to acquire. */
+  plots: number | null;
+  generator: import("../../data/ley388").Generator | null;
+  /** Short description of the site (the player infers the class of soil from it). */
+  site: string;
 }
 export interface ValueChain {
   inputs: string[];
@@ -175,6 +185,8 @@ export type FailureType =
   | "Ninguna falla suficiente";
 export interface ProjectRegulation {
   failure: FailureType | null;
+  /** Ley 388 de 1997, art. 10: the determinant the project must respect first (optional). */
+  determinant?: import("../../data/ley388").Determinant | null;
   externalities: string;
   existing: string;
   tariffs: string;
