@@ -1,6 +1,6 @@
 {
-  "name": "proyecta",
-  "version": "3.1.0",
+  "name": "ludo",
+  "version": "4.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -40,7 +40,7 @@
     "vite": "^6.3.0",
     "vitest": "^3.2.0"
   },
-  "description": "Simulador educativo de formulación MGA, evaluación económica y reconstrucción de Aurora",
+  "description": "Simulador educativo de formulación MGA, evaluación económica y reconstrucción del Reino de Liones",
   "license": "UNLICENSED",
   "packageManager": "pnpm@11.19.0",
   "engines": {

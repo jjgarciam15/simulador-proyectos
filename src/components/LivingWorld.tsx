@@ -16,9 +16,9 @@ export function TerritoryMap({
   const [focus, setFocus] = useState("agua");
   const mission = missions[focus];
   return (
-    <section className="territory-map" aria-label="Mapa de misiones de Aurora">
+    <section className="territory-map" aria-label="Mapa de misiones del Reino de Liones">
       <div className="map-canvas">
-        <img src={assets.nation} alt="Maqueta ilustrada de Aurora" />
+        <img src={assets.nation} alt="Maqueta ilustrada del Reino de Liones" />
         <div className="map-grid" />
         {scenarios.map((s, i) => (
           <button
@@ -74,7 +74,7 @@ export function ReconstructionScene({
     <div className={"reconstruction-scene scene-step-" + step}>
       <img
         src={assets.nation}
-        alt="Ilustración ambiental de Aurora; el avance real se indica en la barra de ejecución"
+        alt="Ilustración ambiental del Reino de Liones; el avance real se indica en la barra de ejecución"
       />
       <div className="scene-weather" aria-hidden="true">
         <i />
@@ -90,7 +90,7 @@ export function ReconstructionScene({
               "El terreno espera tu proyecto",
               "La reconstrucción toma forma",
               "Preparando la puesta en servicio",
-              "Un nuevo capítulo para Aurora",
+              "Un nuevo capítulo para el Reino de Liones",
             ][step]
           }
         </strong>

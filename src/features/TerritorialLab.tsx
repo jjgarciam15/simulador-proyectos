@@ -297,7 +297,7 @@ export default function TerritorialLab({ g, send }: { g: GameState; send: (a: Ac
         </Button>
         {saved?.plusvalia && (help.immediate ? <ScoreLine score={plusvaliaScore(g, saved.plusvalia)} label="Participación en la plusvalía" /> : <Deferred />)}
         <Tip title="Datos simulados">
-          Aurora es un territorio ficticio: los sitios, predios y precios son simulados para aprender la mecánica de la Ley 388 de 1997. Las reglas (clases de suelo,
+          El Reino de Liones es un territorio ficticio: los sitios, predios y precios son simulados para aprender la mecánica de la Ley 388 de 1997. Las reglas (clases de suelo,
           ruta de adquisición, tasa del 30 % al 50 %, exigibilidad y destino) son las de la ley.
         </Tip>
       </Panel>

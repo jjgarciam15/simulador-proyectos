@@ -262,8 +262,8 @@ function ReviewStep({ ctx, goTo, onGenerate }: { ctx: BuilderCtx; goTo: (s: Buil
         >
           <Play size={16} /> CREAR PARTIDA INTERACTIVA
         </Button>
-        <Button secondary onClick={() => download(fileSafe(p.title) + ".proyecta.json", exportProject(p), "application/json")}>
-          <Download size={15} /> Exportar proyecto (.proyecta.json)
+        <Button secondary onClick={() => download(fileSafe(p.title) + ".ludo.json", exportProject(p), "application/json")}>
+          <Download size={15} /> Exportar proyecto (.ludo.json)
         </Button>
       </div>
       {!review.ready && <p className="muted">Corrige los errores marcados con ✕ para convertir el proyecto en simulación. Las advertencias no impiden continuar.</p>}

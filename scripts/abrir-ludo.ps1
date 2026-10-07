@@ -29,13 +29,13 @@ try {
             throw 'No se pudieron instalar las dependencias. Ejecuta  pnpm install  en esta carpeta y revisa el mensaje.'
         }
     }
-    function Test-Proyecta {
+    function Test-Ludo {
         try {
             $page = Invoke-WebRequest -Uri $appUrl -UseBasicParsing -TimeoutSec 2
-            return $page.Content -match '<title>PROYECTA'
+            return $page.Content -match '<title>LUDO'
         } catch { return $false }
     }
-    if (-not (Test-Proyecta)) {
+    if (-not (Test-Ludo)) {
         $nodeCommand = Get-Command node.exe -ErrorAction SilentlyContinue
         $nodePath = if ($nodeCommand) { $nodeCommand.Source } else {
             Join-Path $env:USERPROFILE '.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe'
@@ -48,7 +48,7 @@ try {
         $server = Start-Process -FilePath $nodePath -ArgumentList @('"' + $vitePath + '"', '--host', '127.0.0.1', '--port', '5173', '--strictPort') -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput (Join-Path $logDirectory 'servidor.log') -RedirectStandardError (Join-Path $logDirectory 'servidor-error.log') -PassThru
         $ready = $false
         for ($attempt = 0; $attempt -lt 40; $attempt++) {
-            if (Test-Proyecta) { $ready = $true; break }
+            if (Test-Ludo) { $ready = $true; break }
             if ($server.HasExited) { break }
             Start-Sleep -Milliseconds 250
         }
@@ -69,7 +69,7 @@ try {
             Start-Process $appUrl
         }
     }
-    Write-Output "PROYECTA listo en $appUrl"
+    Write-Output "Ludo listo en $appUrl"
 } catch {
     Write-Host $_.Exception.Message -ForegroundColor Red
     exit 1

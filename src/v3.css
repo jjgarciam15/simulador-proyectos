@@ -36,11 +36,11 @@
 }
 .dilemma-choices button:hover,
 .dilemma-choices button:focus-visible {
-  border-color: #367566;
+  border-color: #332685;
 }
 .dilemma-choices button.chosen {
-  border-color: #367566;
-  box-shadow: 0 0 0 2px #36756633;
+  border-color: #332685;
+  box-shadow: 0 0 0 2px #33268533;
   background: #f1f7f3;
 }
 .warning {
@@ -64,7 +64,7 @@
   animation: v3-enter 0.25s ease-out;
 }
 .finding.ok {
-  border-left-color: #367566;
+  border-left-color: #332685;
 }
 .finding.alerta {
   border-left-color: #bd8426;
@@ -95,7 +95,7 @@
   outline: 2px dashed transparent;
 }
 .chain-route > div.drop-over {
-  outline-color: #367566;
+  outline-color: #332685;
   background: #e5f0ea;
 }
 .puzzle-chain {
@@ -105,7 +105,7 @@
 }
 .puzzle-chain li::marker {
   font-weight: 700;
-  color: #367566;
+  color: #332685;
 }
 .chosen-row td {
   background: #eaf3ee;
@@ -169,7 +169,7 @@
   padding: 10px 12px;
   margin: 8px 0;
   border-radius: 10px;
-  border-left: 4px solid #367566;
+  border-left: 4px solid #332685;
   background: #f4f7f2;
 }
 .consequence.diferida {
@@ -229,7 +229,7 @@
     grid-template-columns: 1fr;
   }
 }
-/* Side panel uses the dark Aurora palette. */
+/* Side panel uses the dark Liones palette. */
 .context-panel .alt-detail dt,
 .context-panel .live-vars small {
   color: #88a78e;
@@ -246,7 +246,7 @@
   margin-bottom: 6px;
 }
 .context-panel .live-vars div {
-  background: #21484a;
+  background: #1f1754;
 }
 .context-panel .info-item {
   border-top-color: #36554b;
@@ -287,7 +287,7 @@
   margin-top: 8px;
   padding: 6px 8px;
   border-radius: 8px;
-  background: #21484a;
+  background: #1f1754;
 }
 .v22-level.alta strong {
   color: #7cc4a0;

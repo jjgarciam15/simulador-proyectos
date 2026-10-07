@@ -14,7 +14,7 @@ export function checkImportFile(file: FileFacts, head: Uint8Array): { kind: Impo
   const name = file.name.toLowerCase();
   if (/\.(xlsm|xlsb|xltm|xls|xla|xlam)$/.test(name)) throw new Error("Formato no admitido: los libros con macros o en formato antiguo no se importan. Guarda el archivo como .xlsx sin macros.");
   const kind: ImportKind | null = name.endsWith(".pdf") ? "pdf" : name.endsWith(".xlsx") ? "xlsx" : null;
-  if (!kind) throw new Error("Solo se pueden importar archivos .pdf, .xlsx o .proyecta.json (exportado desde PROYECTA).");
+  if (!kind) throw new Error("Solo se pueden importar archivos .pdf, .xlsx o .ludo.json (exportado desde Ludo; también .proyecta.json de versiones anteriores).");
   const mimes = {
     pdf: ["application/pdf", "application/x-pdf", ""],
     xlsx: ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/octet-stream", "application/zip", ""],

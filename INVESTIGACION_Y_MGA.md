@@ -1,16 +1,16 @@
-# PROYECTA: investigación y fortalecimiento MGA
+# Ludo: investigación y fortalecimiento MGA
 
 Revisión: 11 de septiembre de 2026. Se consultaron documentación y páginas oficiales; no se realizó una evaluación experimental de aprendizaje ni una prueba extensa de los juegos externos.
 
 ## Referentes y decisiones de diseño
 
-| Referente | Hallazgo documentado | Aplicación en PROYECTA |
+| Referente | Hallazgo documentado | Aplicación en Ludo |
 | --- | --- | --- |
 | [Cities: Skylines II — economía y producción](https://www.paradoxinteractive.com/games/cities-skylines-ii/features/economy-production) | Presenta una economía formada por flujos entre hogares, empresas y servicios. | Hacer explícita la ruta desde actividades financiadas hasta servicios y resultados. Se conserva la separación entre caja y beneficio social. |
-| [Frostpunk — 11 bit studios](https://11bitstudios.com/games/frostpunk/) | Sitúa al jugador al frente de una sociedad que debe sobrevivir bajo restricciones. | El Consejo de Aurora plantea preguntas sobre necesidades y decisiones. Los retos conceptuales no conceden recursos por acertar ni convierten la formación en acumulación de premios. |
+| [Frostpunk — 11 bit studios](https://11bitstudios.com/games/frostpunk/) | Sitúa al jugador al frente de una sociedad que debe sobrevivir bajo restricciones. | El Consejo del Reino de Liones plantea preguntas sobre necesidades y decisiones. Los retos conceptuales no conceden recursos por acertar ni convierten la formación en acumulación de premios. |
 | [En-ROADS — Climate Interactive](https://www.climateinteractive.org/en-roads/) y su [guía de dinámicas](https://docs.climateinteractive.org/projects/en-roads/en/latest/guide/background.html) | Permite explorar escenarios; su guía propone reflexionar sobre cuándo y cuánto cambian los resultados. | Registrar una predicción antes de experimentar con sensibilidad y contrastarla al terminar. La reflexión se guarda sin calificar automáticamente el texto. |
 
-Estas aplicaciones son decisiones propias de diseño educativo. No implican equivalencia entre los modelos, aval de sus autores ni evidencia de eficacia pedagógica para PROYECTA.
+Estas aplicaciones son decisiones propias de diseño educativo. No implican equivalencia entre los modelos, aval de sus autores ni evidencia de eficacia pedagógica para Ludo.
 
 ## Base conceptual
 
@@ -39,7 +39,7 @@ Las partidas de contenido 1 y 2 conservan su fórmula y sus requisitos anteriore
 
 ## Ruta sugerida para probarlo
 
-Abre `ABRIR_PROYECTA.cmd` y comienza una misión nueva:
+Abre `ABRIR_LUDO.cmd` y comienza una misión nueva:
 
 - Diagnóstico: selecciona nodos en el Árbol del problema y abre la última herramienta, **Laboratorio MGA**. Conecta cuatro relaciones y confirma.
 - Formulación: elige objetivo y alternativa; comprueba qué causa atiende la propuesta.

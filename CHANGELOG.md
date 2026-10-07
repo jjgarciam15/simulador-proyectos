@@ -1,5 +1,26 @@
 # Cambios
 
+## 4.0.0 · Ludo · Reino de Liones (7 de octubre de 2026)
+
+- **Nuevo nombre.**
+  - El simulador se llama **Ludo**, antes PROYECTA.
+  - El territorio que se reconstruye es el **Reino de Liones**, antes Aurora.
+  - El cambio cubre la interfaz, los textos de las misiones, el informe final («Informe Ludo»), los documentos, el paquete portátil (`LUDO-<versión>-portable.zip`, `ABRIR_LUDO.cmd`) y los identificadores de los proyectos de ejemplo (`LIONES-AGUA-01`, `LIONES-SALUD-01`).
+- **Emblema propio.**
+  - Escudo carmesí con corona dorada y un dado: el juego y el reino en un mismo símbolo.
+  - Aparece en el encabezado del inicio, en la barra de la partida, en la portada y como icono de la pestaña (`favicon.svg`).
+- **Diseño real.**
+  - Paleta de noche índigo, estandartes carmesí y oro.
+  - Logotipo «LUDO» en letra con serifa dorada.
+  - Botones principales dorados con un brillo lento, que se desactiva si el sistema pide reducir el movimiento.
+  - Tarjetas con filo dorado y una retícula heráldica de fondo.
+  - Barra de la partida con línea dorada y franja de fases carmesí→oro.
+  - El contraste de los textos se mantiene en nivel AA.
+- **Compatibilidad.**
+  - Las partidas, los proyectos y las preferencias guardados siguen en las mismas claves del navegador, así que nada se pierde al actualizar.
+  - Los proyectos se exportan ahora como `.ludo.json` y se siguen importando los `.proyecta.json` de versiones anteriores, porque el formato interno es el mismo.
+  - La plantilla de Excel se descarga como `plantilla-proyecto-ludo.xlsx`.
+
 ## 3.1.0 · Ley 388 en los proyectos propios y carga más liviana (7 de octubre de 2026)
 
 - **Crear proyecto con datos de la Ley 388.**

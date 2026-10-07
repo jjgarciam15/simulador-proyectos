@@ -258,7 +258,7 @@ export function parseProject(input: unknown): NormalizedProject {
   return project;
 }
 
-/** Portable format (.proyecta.json): data only, versioned. */
+/** Portable format (.ludo.json; older exports .proyecta.json): data only, versioned. The format id stays "proyecta-project" so older files keep importing. */
 export const portableFormat = "proyecta-project";
 export function exportProject(p: NormalizedProject) {
   return JSON.stringify({ format: portableFormat, schemaVersion: projectSchemaVersion, exportedAt: new Date().toISOString(), project: p }, null, 2);
@@ -271,6 +271,6 @@ export function importPortable(text: string, maxBytes = 2_000_000): NormalizedPr
   } catch {
     throw new Error("El archivo no es un JSON válido.");
   }
-  if (!isObj(data) || data.format !== portableFormat) throw new Error("El archivo no es un proyecto de PROYECTA.");
+  if (!isObj(data) || data.format !== portableFormat) throw new Error("El archivo no es un proyecto de Ludo.");
   return parseProject(data.project);
 }

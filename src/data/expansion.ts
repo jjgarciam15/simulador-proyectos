@@ -7,7 +7,7 @@ export const expansion: Spec[] = [
     title: "Luz después del apagón",
     sector: "Energía comunitaria",
     role: "publico",
-    territory: "Aurora",
+    territory: "Reino de Liones",
     brief:
       "Las noches sin energía interrumpen talleres y cadenas de frío. Las comunidades necesitan un suministro confiable sin agotar el combustible disponible.",
     population: 98000,
@@ -98,7 +98,7 @@ export const expansion: Spec[] = [
     title: "La próxima cosecha",
     sector: "Seguridad alimentaria",
     role: "privado",
-    territory: "Aurora",
+    territory: "Reino de Liones",
     brief:
       "Una cooperativa quiere recuperar tierras y abastecer mercados. El suelo degradado y las pérdidas después de la cosecha amenazan el ingreso de las familias.",
     population: 76000,
@@ -189,7 +189,7 @@ export const expansion: Spec[] = [
     title: "Un lugar para volver",
     sector: "Vivienda y hábitat",
     role: "publico",
-    territory: "Aurora",
+    territory: "Reino de Liones",
     brief:
       "Miles de familias viven en refugios temporales. Construir viviendas lejos del empleo puede crear nuevos problemas de transporte y acceso a servicios.",
     population: 115000,

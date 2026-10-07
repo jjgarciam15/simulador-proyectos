@@ -29,7 +29,7 @@ describe('Invariantes y persistencia',()=>{
  it('regulación conserva participaciones y registra costos y ODS causales',()=>{const g=prepare();expect(welfare(g,'targeted').shares.reduce((a,b)=>a+b,0)).toBeCloseTo(100);expect(welfare(g,'strict').admin).toBeGreaterThan(0);expect(welfare(g,'none').total).not.toBe(welfare(g,'strict').total);expect(sdgImpact({...g,performance:0},6)).toBe(0);expect(sdgImpact(g,17)).toBe(0)});
 });
 
-describe('Expansión de Aurora',()=>{
+describe('Expansión del Reino de Liones',()=>{
  it('ofrece nueve proyectos completos y eventos identificables',()=>{expect(scenarios).toHaveLength(9);for(const s of scenarios){expect(s.alternatives).toHaveLength(4);expect(s.events).toHaveLength(8);expect(new Set(s.events.map(e=>e.id)).size).toBe(8);}});
  it('consultar respuestas no modifica la partida y produce consecuencias diferentes',()=>{const g=act(prepare('energia'),{type:'commit'});g.pendingEvent={...scenarios.find(s=>s.id==='energia')!.events.find(e=>e.id==='convoy')!};const original=JSON.stringify(g);const a=act(g,{type:'respond',choice:'continuar'},false),b=act(g,{type:'respond',choice:'redimensionar'},false);expect(JSON.stringify(g)).toBe(original);expect(a.extraCost).toBeGreaterThan(b.extraCost);expect(a.performance).toBeGreaterThan(b.performance);expect(a.pendingEvent).toBeNull();});
  it('conserva partidas anteriores sin introducirles los eventos nuevos',()=>{const g=prepareV2('agua');g.contentVersion=1;expect(decode(JSON.stringify({version:1,active:g,history:[]})).active!.contentVersion).toBe(1);const done=complete(g);expect(done.eventIds.some(id=>['convoy','brigada','repuestos','asamblea'].includes(id))).toBe(false);});

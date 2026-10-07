@@ -1,7 +1,7 @@
 .resource-deck {
   gap: 5px;
   padding: 7px 15px;
-  background: linear-gradient(105deg, #17373c, #102b35);
+  background: linear-gradient(105deg, #171043, #130d38);
   border-bottom: 1px solid #627759;
 }
 .resource-tile {
@@ -50,7 +50,7 @@
 .resource-meter {
   height: 3px;
   display: block;
-  background: #0b252dd9;
+  background: #0f0b2dd9;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -68,7 +68,7 @@
   padding: 2px 5px;
   border-radius: 4px;
   background: #d2b66f;
-  color: #112d36 !important;
+  color: #130d3a !important;
   font-size: 10px !important;
   box-shadow: 0 2px 7px #0003;
   animation: resource-delta-in 0.4s ease-out;
@@ -304,8 +304,8 @@
     width: 12px;
   }
 }
-html[data-aurora-motion="reduced"] .resource-flow,
-html[data-aurora-motion="reduced"] .resource-building {
+html[data-liones-motion="reduced"] .resource-flow,
+html[data-liones-motion="reduced"] .resource-building {
   animation: none;
 }
 @media (prefers-reduced-motion: reduce) {

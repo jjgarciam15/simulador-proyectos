@@ -1,0 +1,200 @@
+/*
+ * Ludo · Reino de Liones (4.0): royal identity on top of the base theme.
+ * Indigo night, crimson banners and gold. Text keeps AA contrast; motion respects prefers-reduced-motion.
+ */
+:root {
+  --royal-night: #120d33;
+  --royal-indigo: #1b1347;
+  --royal-violet: #3b2a8f;
+  --royal-crimson: #b3263a;
+  --royal-gold: #f2c14e;
+  --royal-gold-deep: #b8862a;
+  --royal-parchment: #fff7e2;
+}
+
+/* ---------- Brand ---------- */
+.brand,
+.game-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.crest {
+  flex: 0 0 auto;
+  filter: drop-shadow(0 3px 6px #0006);
+}
+.wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+.wordmark b {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  color: #f6cf6a;
+  text-shadow:
+    0 1px 0 #fff2c4,
+    0 2px 10px #f2c14e55;
+}
+.wordmark small {
+  margin-top: 6px;
+  font-size: 9px;
+  letter-spacing: 2.2px;
+  color: #d9cff7;
+}
+.liones-home .brand > span {
+  border: 0;
+  padding: 0;
+}
+.game-brand .wordmark b {
+  font-size: 21px;
+  letter-spacing: 4px;
+}
+
+/* ---------- Landing: night sky, crimson and gold glows, heraldic lattice ---------- */
+body:has(.liones-home) {
+  background: var(--royal-night);
+}
+.liones-home {
+  color: #ece8fb;
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(180deg, #1b1347 0%, #120d33 60%, #0d0926 100%);
+}
+/* Decorative layer: crimson and gold glows over a heraldic lattice (it never sits behind text as a solid color). */
+.liones-home::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 520px at 12% -8%, #b3263a55, transparent 62%),
+    radial-gradient(760px 480px at 92% 4%, #f2c14e30, transparent 60%),
+    repeating-linear-gradient(45deg, #ffffff06 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(-45deg, #ffffff06 0 1px, transparent 1px 28px);
+}
+.liones-home .home-header {
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, #f2c14e99, #b3263a99, transparent) 1;
+}
+.liones-home .pill {
+  border-color: #f2c14e80;
+  color: #ffe6a6;
+  background: #f2c14e14;
+}
+.liones-home .home-nav button:hover {
+  color: #ffe6a6;
+}
+/* Gold call to action with a slow shine. */
+.liones-home .btn:not(.secondary),
+.liones-home .home-cta,
+.mission-briefing .btn:not(.secondary) {
+  background: linear-gradient(180deg, #ffd978, #f2c14e 55%, #d9a23a);
+  border-color: #f7d27a;
+  color: #2a1606;
+  box-shadow: 0 6px 22px #f2c14e40, inset 0 1px 0 #fff6;
+  position: relative;
+  overflow: hidden;
+}
+.liones-home .btn:not(.secondary)::after,
+.mission-briefing .btn:not(.secondary)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, #ffffff70 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: royal-shine 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes royal-shine {
+  0%,
+  60% {
+    transform: translateX(-120%);
+  }
+  85%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+/* Home action cards: banners with a gold edge. */
+.liones-home .home-actions > button,
+.liones-home .home-action {
+  border-color: #4a3d8f;
+  background: linear-gradient(160deg, #241a5c, #170f3d);
+  box-shadow: inset 0 3px 0 #f2c14e;
+  transition:
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+.liones-home .home-actions > button:hover,
+.liones-home .home-action:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 3px 0 #f2c14e,
+    0 14px 30px #00000055,
+    0 0 0 1px #f2c14e66;
+}
+.liones-home h1 em,
+.liones-home .hero-copy em {
+  color: #f2c14e;
+  text-shadow: 0 0 28px #f2c14e40;
+}
+
+/* ---------- In the game ---------- */
+.game-header {
+  background: linear-gradient(90deg, #120d33, #1f1656 55%, #3a1430);
+  box-shadow: inset 0 -2px 0 #f2c14e;
+}
+.result-hero {
+  background:
+    radial-gradient(600px 300px at 90% 0%, #f2c14e26, transparent 60%),
+    linear-gradient(160deg, #1f1656, #120d33);
+}
+.score-circle {
+  border-color: #f2c14e;
+  box-shadow: 0 0 0 6px #f2c14e1f;
+}
+.phase-strip .filled {
+  background: linear-gradient(90deg, #b3263a, #f2c14e);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liones-home .btn:not(.secondary)::after,
+  .mission-briefing .btn:not(.secondary)::after {
+    animation: none;
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  .wordmark b {
+    font-size: 24px;
+    letter-spacing: 4px;
+  }
+  .wordmark small {
+    display: none;
+  }
+}
+
+/* Hero crest and gold-edged mission icons */
+.hero-crest {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.hero-crest > span {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: #ffe6a6;
+  text-shadow: 0 1px 8px #0008;
+}
+.liones-home .mission-icon {
+  border: 1px solid #f2c14e;
+  background: radial-gradient(circle at 30% 25%, #3b2a8f, #1b1347);
+  color: #ffe6a6;
+  box-shadow: 0 0 0 3px #f2c14e1f, 0 6px 16px #0006;
+}

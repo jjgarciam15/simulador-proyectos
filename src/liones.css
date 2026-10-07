@@ -1,60 +1,60 @@
-/* Aurora: a reconstruction command center. Illustration assets are original raster art. */
+/* Reino de Liones: a reconstruction command center. Illustration assets are original raster art. */
 :root {
-  --aurora-dark: #0e242a;
-  --aurora-surface: #16323a;
-  --aurora-border: #345057;
-  --aurora-amber: #f1b365;
-  --aurora-mist: #a1b9b7;
+  --liones-dark: #0f0b2d;
+  --liones-surface: #160f41;
+  --liones-border: #312a61;
+  --liones-amber: #f1b365;
+  --liones-mist: #a1b9b7;
 }
-body:has(.aurora-home) {
-  background: var(--aurora-dark);
+body:has(.liones-home) {
+  background: var(--liones-dark);
 }
-.aurora-home {
+.liones-home {
   max-width: none;
   padding: 0;
   color: #dce8e1;
-  background: radial-gradient(ellipse at 70% 10%, #1d3b3f, #0e242a 60%);
+  background: radial-gradient(ellipse at 70% 10%, #1b1448, #0f0b2d 60%);
 }
-.aurora-home .home-header {
+.liones-home .home-header {
   max-width: 1512px;
   margin: auto;
   padding: 0 5%;
   height: 90px;
-  border-bottom: 1px solid #365056;
+  border-bottom: 1px solid #332c60;
 }
-.aurora-home .brand {
+.liones-home .brand {
   color: #f1d4a4;
 }
-.aurora-home .brand > span {
-  border-color: #5d7974;
+.liones-home .brand > span {
+  border-color: #585284;
   font-size: 22px;
   letter-spacing: 2px;
 }
-.aurora-home .brand small {
+.liones-home .brand small {
   color: #93aaa5;
   font-size: 9px;
 }
-.aurora-home .home-nav {
+.liones-home .home-nav {
   color: #b3c5bb;
 }
-.aurora-home .pill {
-  border-color: #3e5858;
+.liones-home .pill {
+  border-color: #3b3561;
   color: #91aca5;
   font-size: 10px;
 }
-.aurora-home .btn,
+.liones-home .btn,
 .game-shell .btn {
   background: #e7ad64;
   border-color: #e7ad64;
-  color: #162b2b;
+  color: #151031;
 }
-.aurora-home .btn:hover:not(:disabled),
+.liones-home .btn:hover:not(:disabled),
 .game-shell .btn:hover:not(:disabled) {
   background: #f4c482;
   border-color: #f4c482;
 }
-.aurora-home .btn.secondary {
-  background: #193d3cab;
+.liones-home .btn.secondary {
+  background: #171046ab;
   color: #d3e3d5;
   border-color: #607b6d;
 }
@@ -63,10 +63,10 @@ body:has(.aurora-home) {
   color: #376b56;
   border-color: #acc2b1;
 }
-.aurora-home .text-btn {
+.liones-home .text-btn {
   color: #adc2ad;
 }
-.aurora-home .nation-home {
+.liones-home .nation-home {
   max-width: 1512px;
   margin: auto;
   padding: 28px 3.5% 0;
@@ -74,10 +74,10 @@ body:has(.aurora-home) {
 .nation-hero {
   position: relative;
   min-height: 545px;
-  border: 1px solid #365655;
+  border: 1px solid #332c60;
   border-radius: 14px;
   overflow: hidden;
-  background: #173239;
+  background: #160f41;
   isolation: isolate;
 }
 .nation-art {
@@ -96,13 +96,13 @@ body:has(.aurora-home) {
   background:
     linear-gradient(
       90deg,
-      #142e34 0%,
-      #142e34f2 24%,
-      #142e34c9 36%,
-      #142e3433 60%,
-      #142e3400 85%
+      #140e3a 0%,
+      #140e3af2 24%,
+      #140e3ac9 36%,
+      #140e3a33 60%,
+      #140e3a00 85%
     ),
-    linear-gradient(0deg, #102c32e0, transparent 35%);
+    linear-gradient(0deg, #120d35e0, transparent 35%);
   z-index: -1;
 }
 .nation-story {
@@ -117,7 +117,7 @@ body:has(.aurora-home) {
   gap: 8px;
   letter-spacing: 1.7px;
 }
-.aurora-home .nation-story h1 {
+.liones-home .nation-story h1 {
   font-size: clamp(36px, 3.7vw, 57px);
   line-height: 1.12;
   letter-spacing: -2px;
@@ -166,7 +166,7 @@ body:has(.aurora-home) {
   padding: 18px 20px;
   border: 1px solid #76948766;
   border-radius: 8px;
-  background: #122d32d9;
+  background: #130d37d9;
   backdrop-filter: blur(15px);
 }
 .hero-status > span {
@@ -194,7 +194,7 @@ body:has(.aurora-home) {
 }
 .nation-progress {
   height: 4px;
-  background: #314d49;
+  background: #2e2856;
   border-radius: 2px;
   overflow: hidden;
 }
@@ -211,7 +211,7 @@ body:has(.aurora-home) {
   gap: 15px;
   padding: 24px 5px;
   color: #8ea99b;
-  border-bottom: 1px solid #2d4849;
+  border-bottom: 1px solid #2b2551;
   font-size: 12px;
 }
 .nation-ribbon > span {
@@ -249,15 +249,15 @@ body:has(.aurora-home) {
   color: #839e92;
   font-size: 12px;
 }
-.aurora-home .scenario-filter {
+.liones-home .scenario-filter {
   gap: 27px;
   margin-bottom: 24px;
 }
-.aurora-home .scenario-filter button {
+.liones-home .scenario-filter button {
   font-size: 13px;
   color: #829e92;
 }
-.aurora-home .scenario-filter .active {
+.liones-home .scenario-filter .active {
   color: #e5bb7c;
   border-color: #d6a366;
 }
@@ -267,9 +267,9 @@ body:has(.aurora-home) {
   gap: 20px;
 }
 .mission-card {
-  border: 1px solid #36524e;
+  border: 1px solid #332d5b;
   border-radius: 10px;
-  background: linear-gradient(135deg, #1d3a3e, #142f34);
+  background: linear-gradient(135deg, #1b1447, #140e3a);
   padding: 24px;
   text-align: left;
   display: flex;
@@ -284,7 +284,7 @@ body:has(.aurora-home) {
 .mission-card:hover {
   transform: translateY(-5px);
   border-color: #b69b68;
-  box-shadow: 0 15px 25px #081b2450;
+  box-shadow: 0 15px 25px #0c082450;
 }
 .mission-card-top {
   display: flex;
@@ -300,7 +300,7 @@ body:has(.aurora-home) {
 .mission-status {
   font-size: 8px;
   letter-spacing: 1px;
-  border: 1px solid #3b5851;
+  border: 1px solid #383261;
   padding: 5px 7px;
   border-radius: 3px;
   color: #9bb49d;
@@ -317,7 +317,7 @@ body:has(.aurora-home) {
   color: #a4c3b5;
   margin: 27px 0 22px;
   border: 1px solid #547169;
-  background: #2b494642;
+  background: #29225242;
   border-radius: 10px;
   width: 63px;
   height: 63px;
@@ -334,7 +334,7 @@ body:has(.aurora-home) {
 }
 .mission-3 .mission-icon {
   color: #99cbd9;
-  border-color: #4e757b;
+  border-color: #4a4089;
 }
 .mission-4 .mission-icon {
   color: #d9aa87;
@@ -369,7 +369,7 @@ body:has(.aurora-home) {
   gap: 30px;
   margin-top: auto;
   padding-top: 18px;
-  border-top: 1px solid #35524b;
+  border-top: 1px solid #322c5b;
 }
 .mission-resources > span {
   font-size: 10px;
@@ -398,9 +398,9 @@ body:has(.aurora-home) {
   margin: 44px 6px 0;
   padding: 20px 36px 0;
   overflow: hidden;
-  border: 1px solid #38534d;
+  border: 1px solid #352f5c;
   border-radius: 10px;
-  background: linear-gradient(120deg, #233d3c, #122e34);
+  background: linear-gradient(120deg, #211c44, #130d39);
 }
 .crew-intro > img {
   height: 195px;
@@ -439,46 +439,46 @@ body:has(.aurora-home) {
   margin: 30px auto 0;
   line-height: 1.6;
 }
-.aurora-home footer {
+.liones-home footer {
   max-width: 1400px;
   margin: auto;
   color: #709181;
   font-size: 11px;
-  border-top: 1px solid #294741;
+  border-top: 1px solid #272050;
   padding: 30px 3.5%;
   margin-top: 30px;
 }
-.aurora-home .reading,
-.aurora-home > main:not(.nation-home) {
+.liones-home .reading,
+.liones-home > main:not(.nation-home) {
   max-width: 1100px;
   margin: auto;
   padding: 40px 28px;
 }
-.aurora-home .reading .panel {
+.liones-home .reading .panel {
   color: var(--ink);
 }
-.aurora-home .history-list > button {
-  background: #17363b;
-  border-color: #385951;
+.liones-home .history-list > button {
+  background: #161042;
+  border-color: #352e63;
   color: #d5e0cd;
 }
-.aurora-home .history-list p {
+.liones-home .history-list p {
   color: #9bb19f;
 }
-.aurora-home .history-list .eyebrow {
+.liones-home .history-list .eyebrow {
   color: #809d8a;
 }
-.aurora-home .lead {
+.liones-home .lead {
   color: #aac0ad;
 }
-.aurora-home .modal {
-  color: #18373b;
+.liones-home .modal {
+  color: #171043;
 }
-.aurora-home .modal .btn {
+.liones-home .modal .btn {
   background: #e8b26b;
   border-color: #e8b26b;
 }
-.aurora-home .modal .eyebrow {
+.liones-home .modal .eyebrow {
   margin-bottom: 20px;
 }
 .game-shell {
@@ -486,7 +486,7 @@ body:has(.aurora-home) {
   min-height: 100vh;
 }
 .game-header {
-  background: #102b31;
+  background: #120c35;
   border-bottom: 1px solid #496052;
 }
 .game-brand {
@@ -500,12 +500,12 @@ body:has(.aurora-home) {
   color: #89a68e;
 }
 .resource-bar {
-  background: #19363b;
-  border-color: #344e48;
+  background: #171143;
+  border-color: #312c56;
   color: #cad7c4;
 }
 .resource-bar > div {
-  border-color: #35504c;
+  border-color: #322c59;
 }
 .resource-bar strong {
   color: #e1d5b7;
@@ -517,7 +517,7 @@ body:has(.aurora-home) {
   color: #aabf9b;
 }
 .sidebar {
-  background: #122d32;
+  background: #130d37;
   border-color: #37534b;
   color: #a0b29f;
 }
@@ -555,7 +555,7 @@ body:has(.aurora-home) {
   color: #698e7b;
 }
 .context-panel {
-  background: #163238;
+  background: #150f3f;
   border-color: #3f5951;
   padding: 23px 16px;
 }
@@ -567,7 +567,7 @@ body:has(.aurora-home) {
 .context-panel > .panel {
   border-color: #36554b;
   color: #cbdac2;
-  background: #193a3c;
+  background: #171045;
 }
 .context-panel h3 {
   color: #d1dec5;
@@ -679,7 +679,7 @@ body:has(.aurora-home) {
   background: linear-gradient(120deg, #fffef7, #f2f2e1);
 }
 .advisor-card {
-  background: #123035;
+  background: #130d3a;
   border: 1px solid #3b5d51;
   border-radius: 9px;
   overflow: hidden;
@@ -704,7 +704,7 @@ body:has(.aurora-home) {
   height: 185px;
   position: relative;
   overflow: hidden;
-  background: #0b242d;
+  background: #0f0b2d;
 }
 .advisor-portrait > img {
   width: 100%;
@@ -717,7 +717,7 @@ body:has(.aurora-home) {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(0deg, #0d2b31, transparent 65%);
+  background: linear-gradient(0deg, #110c32, transparent 65%);
   pointer-events: none;
 }
 .advisor-portrait > div {
@@ -765,7 +765,7 @@ body:has(.aurora-home) {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  background: #1c3d3d;
+  background: #1a1445;
   border: 1px solid #3f5d4b;
   padding: 6px;
   border-radius: 5px;
@@ -800,7 +800,7 @@ body:has(.aurora-home) {
   justify-content: space-between;
   width: 100%;
   border: 1px solid #3c5847;
-  background: #213c37;
+  background: #1f1944;
   color: #bacaaa;
   border-radius: 4px;
   margin-top: 9px;
@@ -823,11 +823,11 @@ body:has(.aurora-home) {
   top: 153px;
   z-index: 80;
   padding: 13px 22px;
-  background: #183e3ff2;
+  background: #181146f2;
   border: 1px solid #91a578;
   border-radius: 8px;
   color: #d7e0bf;
-  box-shadow: 0 10px 30px #0a2a2f30;
+  box-shadow: 0 10px 30px #100b2e30;
   min-width: 260px;
   max-width: 80vw;
   backdrop-filter: blur(10px);
@@ -870,7 +870,7 @@ body:has(.aurora-home) {
   left: 0;
   right: 0;
   padding: 20px;
-  background: linear-gradient(transparent, #14353cec);
+  background: linear-gradient(transparent, #160f41ec);
   color: #e1dbbe;
   font-size: 10px;
   letter-spacing: 1.5px;
@@ -921,7 +921,7 @@ body:has(.aurora-home) {
   border-color: #c6a975;
 }
 .game-main .result-hero {
-  background: linear-gradient(135deg, #21483f, #102f35);
+  background: linear-gradient(135deg, #1f1752, #130d38);
   border-color: #6e8460;
 }
 .game-main .result-hero h2 {
@@ -1022,8 +1022,8 @@ body:has(.aurora-home) {
   }
   .nation-veil {
     background:
-      linear-gradient(90deg, #142e34f5, #142e34ba 45%, #142e3420),
-      linear-gradient(0deg, #102c32, transparent 70%);
+      linear-gradient(90deg, #140e3af5, #140e3aba 45%, #140e3a20),
+      linear-gradient(0deg, #120d35, transparent 70%);
   }
   .nation-story {
     padding-top: 50px;
@@ -1074,10 +1074,10 @@ body:has(.aurora-home) {
   }
 }
 @media (max-width: 700px) {
-  .aurora-home .home-header {
+  .liones-home .home-header {
     height: 78px;
   }
-  .aurora-home .nation-home {
+  .liones-home .nation-home {
     padding: 15px 14px 0;
   }
   .nation-hero {
@@ -1090,8 +1090,8 @@ body:has(.aurora-home) {
   }
   .nation-veil {
     background:
-      linear-gradient(90deg, #102d34ed, #102d34a1 65%, #102d3460),
-      linear-gradient(0deg, #102d34, transparent 80%);
+      linear-gradient(90deg, #130d37ed, #130d37a1 65%, #130d3760),
+      linear-gradient(0deg, #130d37, transparent 80%);
   }
   .nation-story {
     padding: 34px 23px 170px;
@@ -1101,7 +1101,7 @@ body:has(.aurora-home) {
     font-size: 8px;
     letter-spacing: 1.3px;
   }
-  .aurora-home .nation-story h1 {
+  .liones-home .nation-story h1 {
     font-size: clamp(33px, 6vw, 42px);
     letter-spacing: -1.4px;
     line-height: 1.13;
@@ -1186,11 +1186,11 @@ body:has(.aurora-home) {
   .mission-card > p {
     max-width: 500px;
   }
-  .aurora-home .scenario-filter {
+  .liones-home .scenario-filter {
     gap: 15px;
     overflow: auto;
   }
-  .aurora-home .scenario-filter button {
+  .liones-home .scenario-filter button {
     font-size: 11px;
     white-space: nowrap;
   }
@@ -1276,7 +1276,7 @@ body:has(.aurora-home) {
   border: 1px solid #436052;
   border-radius: 14px;
   overflow: hidden;
-  background: #132f34;
+  background: #130d3a;
   color: #d6e1cd;
 }
 .map-canvas {
@@ -1307,7 +1307,7 @@ body:has(.aurora-home) {
   border-radius: 50%;
   width: 38px;
   height: 38px;
-  background: #173c40;
+  background: #181146;
   color: #fff3cb;
   font-weight: 700;
   box-shadow: 0 4px 14px #0008;
@@ -1318,7 +1318,7 @@ body:has(.aurora-home) {
 .map-pin:hover,
 .map-pin.selected {
   background: #d4ac62;
-  color: #102c31;
+  color: #120c35;
   transform: translate(-50%, -50%) scale(1.2);
   z-index: 2;
 }
@@ -1332,7 +1332,7 @@ body:has(.aurora-home) {
   font-size: 10px;
   letter-spacing: 1px;
   color: #fff4d8;
-  background: #102d36c9;
+  background: #130d39c9;
   padding: 8px;
 }
 .map-dispatch {
@@ -1353,7 +1353,7 @@ body:has(.aurora-home) {
 .dispatch-button,
 .response-preview > button {
   background: #dab16c;
-  color: #183236;
+  color: #16103e;
   padding: 13px 20px;
   border: 0;
   border-radius: 6px;
@@ -1370,7 +1370,7 @@ body:has(.aurora-home) {
   position: relative;
   overflow: hidden;
   margin-bottom: 22px;
-  background: #153238;
+  background: #150f3e;
 }
 .reconstruction-scene > img {
   width: 100%;
@@ -1397,7 +1397,7 @@ body:has(.aurora-home) {
   justify-content: flex-end;
   padding: 22px;
   color: #fff9e9;
-  background: linear-gradient(transparent, #0b252eed);
+  background: linear-gradient(transparent, #100b2eed);
   animation: dispatch-in 0.4s ease-out;
 }
 .scene-caption strong {
@@ -1486,7 +1486,7 @@ progress {
 .mission-6,
 .mission-7,
 .mission-8 {
-  background: linear-gradient(145deg, #203d3a, #122c32);
+  background: linear-gradient(145deg, #1e1845, #130d37);
 }
 @keyframes cloud-drift {
   from {
@@ -1554,5 +1554,5 @@ progress {
     scroll-behavior: auto !important;
   }
 }
-.mga-links{display:grid;gap:10px;margin:18px 0}.mga-links>div{display:flex;align-items:center;gap:12px;padding:14px;background:#edf1e6;border:1px solid #ccd7c4;border-radius:8px;font-size:13px}.mga-links span{flex:1}.mga-links button{border:0;background:transparent;color:#835f30;font-size:12px}.mga-review{margin:24px 0;border:1px solid #cad6c4;border-radius:8px;overflow:hidden}.mga-review h4{background:#203e3d;color:#e2d5ab;padding:18px;margin:0}.mga-review details{padding:14px 18px;border-top:1px solid #d6dfce}.mga-review summary{cursor:pointer;font-size:14px}.mga-review summary span{color:#608d64}.mga-review p{font-size:13px;line-height:1.7}.mga-review small{color:#5c6d56}.mga-challenge{padding:22px;background:#f3eddc;border-left:4px solid #b49658;border-radius:8px;margin:24px 0}.mga-challenge>button{display:block;width:100%;text-align:left;background:#fffdf7;border:1px solid #d5cfb8;border-radius:6px;padding:13px;margin:8px 0;color:#27463e}.mga-challenge>button[aria-pressed=true]{border-color:#568773;background:#e2ede0}.mga-challenge small,.mga-source{font-size:12px;line-height:1.7;color:#5d6c58}.mga-source a{color:#37685c;text-decoration:underline}.panel .field textarea{min-height:100px}.mga-challenge p[role=status]{animation:dispatch-in .3s ease-out}
+.mga-links{display:grid;gap:10px;margin:18px 0}.mga-links>div{display:flex;align-items:center;gap:12px;padding:14px;background:#edf1e6;border:1px solid #ccd7c4;border-radius:8px;font-size:13px}.mga-links span{flex:1}.mga-links button{border:0;background:transparent;color:#835f30;font-size:12px}.mga-review{margin:24px 0;border:1px solid #cad6c4;border-radius:8px;overflow:hidden}.mga-review h4{background:#1e1846;color:#e2d5ab;padding:18px;margin:0}.mga-review details{padding:14px 18px;border-top:1px solid #d6dfce}.mga-review summary{cursor:pointer;font-size:14px}.mga-review summary span{color:#608d64}.mga-review p{font-size:13px;line-height:1.7}.mga-review small{color:#5c6d56}.mga-challenge{padding:22px;background:#f3eddc;border-left:4px solid #b49658;border-radius:8px;margin:24px 0}.mga-challenge>button{display:block;width:100%;text-align:left;background:#fffdf7;border:1px solid #d5cfb8;border-radius:6px;padding:13px;margin:8px 0;color:#27463e}.mga-challenge>button[aria-pressed=true]{border-color:#568773;background:#e2ede0}.mga-challenge small,.mga-source{font-size:12px;line-height:1.7;color:#5d6c58}.mga-source a{color:#342a75;text-decoration:underline}.panel .field textarea{min-height:100px}.mga-challenge p[role=status]{animation:dispatch-in .3s ease-out}
 @media(max-width:600px){.mga-links>div{flex-wrap:wrap}.mga-links span{min-width:35%}.mga-links button{margin-left:auto}.mga-challenge{padding:16px}}

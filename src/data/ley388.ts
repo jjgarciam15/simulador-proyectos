@@ -1,13 +1,13 @@
 /**
  * Ley 388 de 1997 (Ley de Desarrollo Territorial) de Colombia, as used by the simulator.
- * Content summarised from the compiled text (Régimen Legal de Bogotá / Función Pública). Aurora is a fictional
+ * Content summarised from the compiled text (Régimen Legal de Bogotá / Función Pública). The Kingdom of Liones is a fictional
  * territory: the simulator applies this legal framework to it for learning purposes; the territorial data of each
  * mission (soil, plots, plusvalía) are simulated, never real cadastral data.
  */
 export const ley388 = {
   title: "Ley 388 de 1997 · Ley de Desarrollo Territorial",
   reference: "Ley 388 del 18 de julio de 1997 (Diario Oficial 43.091). Modifica la Ley 9 de 1989 y la Ley 3 de 1991.",
-  note: "Texto vigente con modificaciones posteriores, entre otras de las Leyes 810 de 2003, 902 de 2004, 2079 de 2021 y 2294 de 2023. Aurora es un territorio ficticio: el simulador le aplica este marco con fines educativos y sus datos territoriales son simulados.",
+  note: "Texto vigente con modificaciones posteriores, entre otras de las Leyes 810 de 2003, 902 de 2004, 2079 de 2021 y 2294 de 2023. El Reino de Liones es un territorio ficticio: el simulador le aplica este marco con fines educativos y sus datos territoriales son simulados.",
   source: "https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=339",
 };
 

@@ -4,6 +4,7 @@ import { effectiveZoom, maxZoomFor, readZoom, stepZoom, zoomLabel, zoomMin, type
 import { assets } from "../data/world";
 import type { Cue, ExperienceMoment } from "../domain/experience";
 
+// Stored key kept from earlier versions so players keep their sound, animation and zoom preferences.
 const preferenceKey = "aurora-experience-v1";
 type Preferences = { sound: boolean; volume: number; cinema: boolean; zoom: ZoomSetting };
 function readPreferences(): Preferences {
@@ -24,7 +25,7 @@ function readPreferences(): Preferences {
 }
 
 /** Short, locally synthesized effects; no network, microphone, or audio files. */
-class AuroraAudio {
+class LionesAudio {
   context: AudioContext | null = null;
   master: GainNode | null = null;
   lastClick = 0;
@@ -102,7 +103,7 @@ class AuroraAudio {
 export default function Experience({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState(readPreferences),
     settings = useRef(preferences),
-    audio = useRef<AuroraAudio | null>(null),
+    audio = useRef<LionesAudio | null>(null),
     [moment, setMoment] = useState<(ExperienceMoment & { id: number }) | null>(
       null,
     ),
@@ -117,7 +118,7 @@ export default function Experience({ children }: { children: ReactNode }) {
     setZoom = (value: ZoomSetting) => setPreferences((p) => ({ ...p, zoom: value }));
   settings.current = preferences;
   useEffect(() => {
-    const synth = new AuroraAudio();
+    const synth = new LionesAudio();
     audio.current = synth;
     const onClick = (event: MouseEvent) => {
       const target = event.target;
@@ -147,11 +148,11 @@ export default function Experience({ children }: { children: ReactNode }) {
       } else synth.volume(settings.current.sound ? settings.current.volume : 0);
     };
     document.addEventListener("click", onClick, true);
-    window.addEventListener("aurora:experience", onMoment);
+    window.addEventListener("liones:experience", onMoment);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       document.removeEventListener("click", onClick, true);
-      window.removeEventListener("aurora:experience", onMoment);
+      window.removeEventListener("liones:experience", onMoment);
       document.removeEventListener("visibilitychange", visibility);
       synth.close();
     };
@@ -196,11 +197,11 @@ export default function Experience({ children }: { children: ReactNode }) {
     return () => query.removeEventListener("change", change);
   }, []);
   useEffect(() => {
-    document.documentElement.dataset.auroraMotion = reduced
+    document.documentElement.dataset.lionesMotion = reduced
       ? "reduced"
       : "full";
     return () => {
-      delete document.documentElement.dataset.auroraMotion;
+      delete document.documentElement.dataset.lionesMotion;
     };
   }, [reduced]);
   useEffect(() => {
@@ -284,14 +285,14 @@ export default function Experience({ children }: { children: ReactNode }) {
                 onChange={(e) => setZoom(Number(e.target.value))}
               />
             </label>
-            <strong>Ambiente de Aurora</strong>
+            <strong>Ambiente del Reino de Liones</strong>
             <button
               className="preview-effects"
               onClick={() => {
                 setMoment({
                   id: performance.now(),
                   cue: "chapter",
-                  title: "Aurora despierta",
+                  title: "Liones despierta",
                   detail: "Vista previa de efectos · tu partida no cambia.",
                 });
                 if (preferences.sound) audio.current?.play("chapter");
@@ -371,7 +372,7 @@ export default function Experience({ children }: { children: ReactNode }) {
             <span>
               {moment.phase !== undefined
                 ? `CAPÍTULO ${String(moment.phase + 1).padStart(2, "0")} / 08`
-                : "CONSEJO DE AURORA"}
+                : "CONSEJO DEL REINO DE LIONES"}
             </span>
             <strong>{moment.title}</strong>
             <p>{moment.detail}</p>

@@ -26,7 +26,7 @@ export function decisionMoment(
   if (!before.outcome && after.outcome)
     return {
       cue: "finish",
-      title: "Una huella en Aurora",
+      title: "Una huella en el Reino de Liones",
       detail:
         after.outcome.status === "completado"
           ? "La ejecución ha terminado. Es momento de comprender el resultado."
@@ -75,6 +75,6 @@ export function decisionMoment(
 export function announceExperience(moment: ExperienceMoment | null) {
   if (moment && typeof window !== "undefined")
     window.dispatchEvent(
-      new CustomEvent("aurora:experience", { detail: moment }),
+      new CustomEvent("liones:experience", { detail: moment }),
     );
 }

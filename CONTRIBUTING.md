@@ -1,4 +1,4 @@
-# Contribuir a PROYECTA
+# Contribuir a Ludo
 
 Usa Node 24 y la versión de pnpm fijada en `package.json`. Instala con `pnpm install --frozen-lockfile` y ejecuta `pnpm check` antes de proponer cambios. El proyecto todavía no tiene una licencia abierta concedida: consulta `docs/LICENCIA_Y_RECURSOS.md` antes de reutilizarlo.
 

@@ -722,20 +722,20 @@
   }
 }
 /* Contraste: textos dentro de paneles claros en la vista oscura de inicio */
-.aurora-home .panel .lead,
+.liones-home .panel .lead,
 .v22-concept .lead {
   color: var(--text-secondary);
 }
-.aurora-home .panel .help-steps p,
-.aurora-home .panel .muted {
+.liones-home .panel .help-steps p,
+.liones-home .panel .muted {
   color: var(--text-secondary);
 }
 .v22-chip {
   color: var(--primary-strong);
   background: var(--surface);
 }
-.aurora-home .panel .text-btn,
-.aurora-home .reading .panel .text-btn {
+.liones-home .panel .text-btn,
+.liones-home .reading .panel .text-btn {
   color: var(--primary);
 }
 .cell-warning {
