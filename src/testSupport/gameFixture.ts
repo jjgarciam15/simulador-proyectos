@@ -122,6 +122,9 @@ export function prepareV2(
       reason: "Comparar costos regulatorios con la evidencia disponible.",
     },
   });
+  if (g.v2?.territoryRules) for (const a of referenceTerritory(g)) g = act(g, a);
+  // A private developer pays its plusvalía participation here: it may need the credit it had not taken.
+  if (projectCost(g) > available(g) && !g.loans.some((l) => l.type === "credito")) g = act(g, { type: "finance", source: "credito" });
   g = next(g);
   if (g.v2?.v22 && g.phase === 5) g = act(g, { type: "committee", answers: referenceCommittee(g) });
   return g;
@@ -149,3 +152,4 @@ import { missionFlowCase } from "../domain/missionFlow";
 import { referenceRows, referenceEconomic, referenceBenefits } from "../domain/flows";
 import { referenceCommittee } from "../domain/committee";
 import { referenceTree } from "../domain/problemTree";
+import { referenceTerritory } from "../domain/territory";

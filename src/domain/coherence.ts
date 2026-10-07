@@ -1,3 +1,4 @@
+import { territoryActive, territoryComplete, territoryScore } from "./territory";
 import { gameActors } from "./actors";
 import type { GameState } from "./types";
 import { scenarioById } from "../data/scenarios";
@@ -44,6 +45,9 @@ export function coherenceMatrix(g: GameState): CoherenceLink[] {
     { pair: "Problema ↔ regulación", value: regulation, reason: !g.failure ? "Sin diagnóstico regulatorio." : `${diagnosisOk ? "Diagnóstico coherente" : "Diagnóstico distinto de la falla observada"}; instrumento ${rec.includes(g.policy) ? "proporcional a la evidencia" : "desproporcionado frente a la severidad real"}.` },
     { pair: "Proyecto ↔ ODS", value: sdg, reason: `Pertinencia y evidencia de los ODS seleccionados: ${sdg.toFixed(0)}/100.` },
     { pair: "Actores ↔ estrategia", value: actors, reason: keyActors.length ? `${engaged} de ${keyActors.length} actores clave (alto poder con alto interés${g.actorProfiles ? " o en contra del proyecto" : ""}) recibieron consulta, involucramiento o negociación.` : "No hay actores de alto poder e interés." },
+    ...(territoryActive(g)
+      ? [{ pair: "Proyecto ↔ territorio (Ley 388)", value: territoryScore(g), reason: territoryComplete(g) ? `Encaje en el plan, ruta predial y plusvalía de la alternativa: ${territoryScore(g)}/100.` : "Falta el análisis de ordenamiento territorial de la alternativa actual." }]
+      : []),
   ];
 }
 export function transversalCoherence(g: GameState) {

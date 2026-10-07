@@ -1,5 +1,39 @@
 # Cambios
 
+## 3.0.0 · Regulación con la Ley 388 de 1997 (7 de octubre de 2026)
+
+- **Reforma de la etapa de Regulación.**
+  - La regulación económica (falla de mercado, instrumento proporcional, cadena causal) se integra con el ordenamiento territorial de la Ley 388 de 1997.
+  - La etapa abre con «La Ley 388 de 1997 en tu proyecto»: ficha territorial de la alternativa (municipio, sitio, predios, promotor y motivo de utilidad pública) y un repaso de la ley en siete secciones, con artículos y cómo aparece cada una en el juego.
+- **Contenido de la ley**, verificado en el texto compilado:
+  - Principios (art. 2), tipos de plan según la población (art. 9) y determinantes (art. 10).
+  - Programa de ejecución (art. 18), planes parciales (art. 19), concertación y vigencias (arts. 24 a 28).
+  - Clases de suelo (arts. 30 a 35), cesiones, reparto de cargas y beneficios (arts. 37 a 39 y 45) y desarrollo prioritario (arts. 52 a 57).
+  - Motivos de utilidad pública (art. 58), enajenación voluntaria y expropiación (arts. 59 a 65).
+  - Participación en la plusvalía: hechos generadores, tasa del 30 % al 50 %, exigibilidad y destino (arts. 73 a 90).
+  - Se señalan las modificaciones posteriores relevantes (Leyes 2079 de 2021 y 2294 de 2023).
+- **Perfil territorial de cada proyecto:**
+  - Las 36 alternativas de las nueve misiones tienen sitio, clase de suelo, predios y hecho generador propios. Por ejemplo, la central térmica está en suelo de protección, la ciudadela en suelo de expansión y la ampliación vial necesita 60 predios.
+  - Los proyectos privados no pueden invocar utilidad pública.
+  - Los proyectos propios reciben un perfil de referencia.
+- **Tres puzzles nuevos** (todas las preguntas con 5 opciones, retroalimentación al pasar el mouse):
+  - **Encaje en el ordenamiento.** Efecto: plan parcial (2 meses) o relocalización (2 meses y 1 % del presupuesto) si se identifican a tiempo.
+  - **Ruta de adquisición de predios.** Efecto: costo de avalúos, ofertas y negociación.
+  - **Participación en la plusvalía.** Efecto: cofinanciación de proyectos públicos; pago previsto en privados.
+- **Consecuencias al invertir:**
+  - Licencia negada en suelo de protección: 6 meses y 3 % de sobrecosto.
+  - Sin plan parcial: 4 meses de retraso.
+  - Determinante ignorada: 2 meses de retraso.
+  - Adquisición impugnable: menos legitimidad y más riesgo de eventos.
+  - Plusvalía no prevista: sobrecosto y 2 meses de retraso.
+- **Nuevo evento de ejecución «Predios sin liberar»,** más probable con una ruta predial irregular y con muchos predios.
+- **Calificación:**
+  - La dimensión pasa a llamarse «Regulación, territorio y ODS»: 40 % regulación económica, 40 % ordenamiento territorial y 20 % ODS.
+  - Nueva relación de coherencia «Proyecto ↔ territorio (Ley 388)», ítems en «Aciertos y errores», dos ejercicios de práctica y tres conceptos en el Centro de aprendizaje: plan de ordenamiento y clases de suelo, adquisición de predios y plusvalía.
+- La etapa no avanza sin los tres puzzles, y cambiar de alternativa exige rehacerlos.
+- La partida de presentación los resuelve y el recorrido muestra la Ley 388.
+- Las partidas guardadas antes de 3.0 conservan sus reglas y su nota; el análisis comparativo reconoce el nombre anterior de la dimensión.
+
 ## 2.9.0 · Actores con perfil sorteado en cada partida (7 de octubre de 2026)
 
 - **Perfil aleatorio:** en las nueve misiones y en los proyectos propios, cada partida nueva sortea el poder, el interés y la posición de cada actor.

@@ -9,6 +9,7 @@ import { part, practiceScore, negotiationScore, scaleParts, sumParts } from "./s
 import { learningPenalty } from "./questionsV2";
 import { scoringWeightsV2 } from "../data/balance";
 import { regulatoryLabScore } from "./regulationLab";
+import { currentTerritory, encajeScore, plusvaliaScore, prediosScore, territoryActive, territoryScore } from "./territory";
 import { adjustments, coherenceMatrix, transversalCoherence } from "./coherence";
 import { budgetReview } from "./budgetReview";
 /** The plan as approved: budget-dependent reviews use it, while execution facts come from the final state. */
@@ -52,6 +53,26 @@ export function regulatoryScore(g: GameState) {
       Number(r.incentive === expected[0]) +
       Number(r.adverse === expected[1]))
   );
+}
+/**
+ * Regulación, territorio y ODS. From 3.0 the economic regulation shares the dimension with the territorial
+ * puzzles of the Ley 388 de 1997 (encaje, predios, plusvalía); older games keep 60 % regulation and 40 % ODS.
+ */
+export function regulationParts(g: GameState): ScorePart[] {
+  if (!territoryActive(g)) return [part("Regulación: diagnóstico y proporcionalidad", regulatoryScore(g), 0.6), part("ODS justificados", sdgReasonScore(g), 0.4)];
+  const t = currentTerritory(g);
+  return [
+    part("Regulación económica: diagnóstico y proporcionalidad", regulatoryScore(g), 0.4),
+    part("Ley 388: encaje en el ordenamiento", encajeScore(g, t?.encaje), 0.15),
+    part("Ley 388: ruta de adquisición de predios", prediosScore(g, t?.predios), 0.15),
+    part("Ley 388: participación en la plusvalía", plusvaliaScore(g, t?.plusvalia), 0.1),
+    part("ODS justificados", sdgReasonScore(g), 0.2),
+  ];
+}
+function regulationNote(g: GameState) {
+  return territoryActive(g)
+    ? `Regulación, territorio y ODS: 40 % regulación económica (${regulatoryScore(g)}); 40 % ordenamiento territorial con la Ley 388 de 1997 (${territoryScore(g)}/100: encaje en el plan, ruta predial y plusvalía); 20 % pertinencia y evidencia ODS (${sdgReasonScore(g).toFixed(0)}).`
+    : `Regulación: 60 % evidencia, falla, incentivo y efecto adverso (${regulatoryScore(g)}); 40 % pertinencia y evidencia ODS (${sdgReasonScore(g).toFixed(0)}).`;
 }
 export function scoreV2(
   g: GameState,
@@ -110,7 +131,7 @@ export function scoreV2(
   parts.push(
     [part("Cadena de valor", chainV2Score(g), 0.5), part("Presupuesto", budget, 0.3), part("Indicadores", indicators, 0.2)],
     [part("Revisión de la evaluación ex ante", 100 * Number(g.acknowledged.includes("evaluation")), 0.5), part("Valor esperado al invertir", expectedValue, 0.25), part("Información disponible al invertir", informationAtDecision, 0.25)],
-    [part("Regulación: diagnóstico y proporcionalidad", regulatoryScore(g), 0.6), part("ODS justificados", sdgReasonScore(g), 0.4)],
+    regulationParts(g),
     [part(observed[5].name, observed[5].value, 0.5), part(observed[3].name, observed[3].value, 0.5)],
     [part(observed[2].name, observed[2].value, 0.4), part(observed[6].name, observed[6].value, 0.3), part(observed[7].name, observed[7].value, 0.3)],
     [part(observed[1].name, observed[1].value, 1)],
@@ -123,7 +144,7 @@ export function scoreV2(
     "Alternativa y objetivos",
     "Cadena de valor y presupuesto",
     "Evaluación ex ante",
-    "Regulación y ODS",
+    "Regulación, territorio y ODS",
     "Compromisos y riesgo",
     "Ejecución y servicio",
     "Valor observado",
@@ -142,7 +163,7 @@ export function scoreV2(
     `Alternativa: 50 % correspondencia del objetivo central y 50 % causas atendidas.`,
     `Preparación: 50 % cadena (${chainV2Score(g)}), 30 % presupuesto (${budget.toFixed(0)}) y 20 % indicadores (${indicators}). Presupuesto: suficiencia de asignación y mantenimiento, con descuento por reserva superior al 15 % del fondo base.`,
     `Evaluación: 50 % revisión confirmada, 25 % valor esperado normalizado y 25 % información disponible al invertir. Los eventos posteriores no cambian esta dimensión.`,
-    `Regulación: 60 % evidencia, falla, incentivo y efecto adverso (${regulatoryScore(g)}); 40 % pertinencia y evidencia ODS (${sdgReasonScore(g).toFixed(0)}). Los textos no se califican automáticamente.`,
+    regulationNote(g),
     `Compromisos: disciplina financiera e información/riesgo, con igual peso.`,
     `Ejecución: 40 % cobertura/equidad, 30 % plazo y 30 % legitimidad.`,
     `Valor observado: beneficio social para rol público; creación de valor para privado, normalizado con la referencia de misión.`,
@@ -271,7 +292,7 @@ function scoreV3Parts(g: GameState, plan: GameState, v2: ScorePart[][], transver
     "Efectos, impactos y valoración",
     "Flujos, VPN y RPC",
     "Evaluación ex ante",
-    "Regulación y ODS",
+    "Regulación, territorio y ODS",
     "Compromisos y riesgo",
     "Ejecución y servicio",
     "Valor observado",
@@ -296,7 +317,7 @@ function scoreV3Parts(g: GameState, plan: GameState, v2: ScorePart[][], transver
       ? `Flujos: 50 % flujo financiero (${flows.financial.toFixed(0)}) y 50 % flujo económico con RPC (${flows.economic.toFixed(0)}); cada error grave resta 12 puntos y cada alerta 5.`
       : `Flujos: flujo financiero (${flows.financial.toFixed(0)}); cada error grave resta 12 puntos y cada alerta 5.`,
     "Evaluación: 50 % revisión confirmada, 25 % valor esperado normalizado y 25 % información disponible al invertir.",
-    "Regulación: 60 % cadena causal y proporcionalidad; 40 % pertinencia y evidencia ODS.",
+    regulationNote(g),
     "Compromisos: disciplina financiera e información/riesgo, con igual peso.",
     "Ejecución: 40 % cobertura/equidad, 30 % plazo y 30 % legitimidad.",
     "Valor observado: beneficio social para rol público; creación de valor para privado.",

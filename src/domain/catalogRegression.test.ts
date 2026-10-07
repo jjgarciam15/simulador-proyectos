@@ -65,7 +65,14 @@ describe("Catálogo completo por dificultad", () => {
               continue;
             throw error;
           }
-          const done = execute(initial);
+          let done: GameState;
+          try {
+            done = execute(initial);
+          } catch (error) {
+            // A strategy can stop being affordable at the investment (e.g. a private developer that pays plusvalía).
+            if (error instanceof Error && /recursos/.test(error.message)) continue;
+            throw error;
+          }
           results.push(done);
           expect(done.outcome!.score).toBeGreaterThanOrEqual(0);
           expect(done.outcome!.score).toBeLessThanOrEqual(100);

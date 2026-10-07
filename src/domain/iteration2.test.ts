@@ -194,7 +194,8 @@ describe("Presupuesto, coherencia y resultado", () => {
   it("la matriz de coherencia explica cada relación y penaliza la cadena construida con otra alternativa", () => {
     let g = prepareV2("agua");
     const m = coherenceMatrix(g);
-    expect(m.length).toBe(7);
+    // Seven relations plus «Proyecto ↔ territorio (Ley 388)» in games with the territorial rules.
+    expect(m.length).toBe(8);
     expect(m.every((l) => l.reason.length > 10)).toBe(true);
     const before = transversalCoherence(g);
     g = toStage(g, 1);
@@ -229,7 +230,7 @@ describe("Presupuesto, coherencia y resultado", () => {
     const a = g.outcome!.assessment!;
     expect(a.dimensions).toHaveLength(13);
     expect(a.dimensions.reduce((n, d) => n + d.weight, 0)).toBeCloseTo(1);
-    expect(a.coherence!.length).toBe(7);
+    expect(a.coherence!.length).toBe(8);
     expect(a.story).toMatch(/cobertura/);
     expect(g.outcome!.score).toBe(
       Math.round(Math.min(100, Math.max(0, a.base - a.penalty + (a.bonus ?? 0))) * (["abandonado", "insolvencia"].includes(g.outcome!.status) ? 0.35 : 1)),

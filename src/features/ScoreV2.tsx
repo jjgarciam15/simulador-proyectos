@@ -17,6 +17,7 @@ const short: Record<string, string> = {
   "Cadena de valor y presupuesto": "Preparación",
   "Evaluación ex ante": "Evaluación",
   "Regulación y ODS": "Regulación/ODS",
+  "Regulación, territorio y ODS": "Regulación/territorio",
   "Compromisos y riesgo": "Riesgo",
   "Ejecución y servicio": "Ejecución",
   "Valor observado": "Valor",

@@ -1542,3 +1542,25 @@ tr.current-attempt td {
 .actor-dot.against{background:var(--danger,#b3261e);box-shadow:0 0 0 5px #b3261e1f}
 .actor-dot.neutral{background:#5d6b66}
 .actor-legend{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+
+/* Ordenamiento territorial · Ley 388 de 1997 (3.0) */
+.territory-card{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line,#d9e2dc);border-left:4px solid #5b7f6c;border-radius:8px;padding:14px 16px;margin:14px 0;background:#f6f9f5}
+.territory-card>svg{flex:0 0 auto;color:#4f7a63;margin-top:2px}
+.territory-card dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0}
+.territory-card dt{font-weight:700;font-size:13px;color:#3f4f49}
+.territory-card dd{margin:0;font-size:14px}
+.law-section{border:1px solid var(--line,#d9e2dc);border-radius:8px;padding:8px 12px;margin:6px 0;background:#fff}
+.law-section>summary{cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.law-section ul{margin:8px 0 6px;padding-left:20px}
+.law-section li{margin:4px 0;font-size:14px}
+.route-builder{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin:12px 0}
+.route-bank{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.route-bank .chip{text-align:left;line-height:1.35}
+.route-list{margin:8px 0;padding-left:0;list-style:none;counter-reset:paso;display:grid;gap:6px}
+.route-list>li{counter-increment:paso;display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line,#d9e2dc);border-radius:6px;padding:8px 10px;background:#fff;font-size:14px}
+.route-list>li::before{content:counter(paso);font-weight:700;color:#4f7a63;flex:0 0 auto}
+.route-list>li>span:first-of-type{flex:1}
+.route-list>li.muted::before{content:none}
+.route-tools{display:flex;gap:2px;flex:0 0 auto}
+@container (max-width:640px){.route-builder{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.route-builder{grid-template-columns:minmax(0,1fr)}.territory-card dl{grid-template-columns:1fr}}

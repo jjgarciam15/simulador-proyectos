@@ -222,7 +222,7 @@ describe("Construcción y evaluación V2", () => {
         g.outcome!.dimensions.reduce((n, d) => n + d.weight, 0),
       ).toBeCloseTo(1);
       expect(g.cash + g.spent).toBeCloseTo(
-        g.v2!.initialCash + g.loans.reduce((n, l) => n + l.principal, 0),
+        g.v2!.initialCash + (g.v2!.inflows ?? 0) + g.loans.reduce((n, l) => n + l.principal, 0),
       );
     });
 });

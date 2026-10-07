@@ -9,7 +9,7 @@ const stages: { title: string; show: string }[] = [
   { title: "Formulación", show: "Árbol de objetivos (general y específicos), alternativa elegida frente a las otras con el comparador, y cómo cada alternativa atiende las causas del problema." },
   { title: "Preparación", show: "Cadena de valor armada por niveles, presupuesto con datos básicos y partidas detalladas, cronograma, indicadores de producto y resultado, y clasificación de efectos e impactos." },
   { title: "Evaluación", show: "Valoración económica de impactos con su método, flujo financiero, flujo económico con RPC del DNP, sensibilidad con análisis de riesgo Monte Carlo, distribución y evaluación ex ante." },
-  { title: "Regulación", show: "Laboratorio regulatorio: severidad de la falla, instrumento proporcional, cadena causal completa y ODS justificados con su tipo de relación y evidencia." },
+  { title: "Regulación", show: "Ley 388 de 1997 aplicada al proyecto (encaje en el plan de ordenamiento, ruta de adquisición de predios y plusvalía que cofinancia la obra), laboratorio regulatorio con instrumento proporcional y cadena causal, y ODS justificados." },
   { title: "Decisión", show: "Riesgos mitigados, comité evaluador con preguntas derivadas de la partida, comparación final y compromiso de la inversión." },
   { title: "Ejecución", show: "Eventos condicionales atendidos durante la obra, dilemas con consecuencias diferidas y la bitácora de decisiones." },
   { title: "Ex post", show: "Nota final con el desglose completo por actividad, aciertos y errores, historia del proyecto, comparación con lo esperado y recomendaciones." },

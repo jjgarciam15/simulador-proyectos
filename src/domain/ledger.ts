@@ -1,3 +1,4 @@
+import { currentTerritory, encajeScore, plusvaliaScore, prediosScore, territoryActive } from "./territory";
 import { gameActors } from "./actors";
 import type { GameState } from "./types";
 import { scenarioById } from "../data/scenarios";
@@ -21,7 +22,8 @@ export function outcomeLedger(g: GameState): LedgerItem[] {
   const plan = g.snapshot?.decisionState ?? g,
     s = scenarioById(g.scenarioId),
     items: LedgerItem[] = [],
-    add = (stage: string, dimension: string, ok: boolean, text: string) => items.push({ stage, dimension, ok, text });
+    add = (stage: string, dimension: string, ok: boolean, text: string) => items.push({ stage, dimension, ok, text }),
+    regulationDimension = territoryActive(plan) ? "Regulación, territorio y ODS" : "Regulación y ODS";
   for (const id of plan.nodes.filter((id) => id !== "n0")) {
     const n = s.nodes.find((n) => n.id === id);
     if (n) add("Diagnóstico", "Diagnóstico y Árbol del problema", n.valid, `${n.valid ? "Incluiste" : "Incluiste una causa falsa:"} «${n.label}» en el Árbol del problema.`);
@@ -51,14 +53,23 @@ export function outcomeLedger(g: GameState): LedgerItem[] {
   add("Evaluación", "Evaluación ex ante", plan.acknowledged.includes("evaluation") || !!g.snapshot, "Confirmaste la revisión de la evaluación ex ante con los supuestos vigentes.");
   if (plan.v2?.regulatory.chain)
     for (const r of puzzleResult(plan).rows)
-      add("Regulación", "Regulación y ODS", r.correct, `Eslabón «${r.slot}» de la cadena regulatoria ${r.correct ? "coherente" : "incoherente"}.`);
+      add("Regulación", regulationDimension, r.correct, `Eslabón «${r.slot}» de la cadena regulatoria ${r.correct ? "coherente" : "incoherente"}.`);
   if (plan.failure) {
     const proportional = recommendedPolicies(plan).includes(plan.policy);
-    add("Regulación", "Regulación y ODS", proportional, proportional ? "El instrumento fue proporcional a la severidad real de la falla." : "El instrumento no fue proporcional a la severidad real de la falla.");
+    add("Regulación", regulationDimension, proportional, proportional ? "El instrumento fue proporcional a la severidad real de la falla." : "El instrumento no fue proporcional a la severidad real de la falla.");
+  }
+  if (territoryActive(plan)) {
+    const t = currentTerritory(plan),
+      e = encajeScore(plan, t?.encaje),
+      r = prediosScore(plan, t?.predios),
+      v = plusvaliaScore(plan, t?.plusvalia);
+    add("Ordenamiento", regulationDimension, e >= 80, `Encaje de la alternativa en el plan de ordenamiento (Ley 388): ${e}/100.`);
+    add("Ordenamiento", regulationDimension, r >= 70, `Ruta de adquisición de predios: ${r}/100.`);
+    add("Ordenamiento", regulationDimension, v >= 75, `Participación en la plusvalía: ${v}/100.`);
   }
   const sdg = sdgReview(plan);
-  for (const r of sdg.rows) add("ODS", "Regulación y ODS", r.status === "bien sustentado", `ODS ${r.id}: ${r.status}.`);
-  if (sdg.omitted.length) add("ODS", "Regulación y ODS", false, `Omitiste ${sdg.omitted.length} ODS relacionados con el proyecto.`);
+  for (const r of sdg.rows) add("ODS", regulationDimension, r.status === "bien sustentado", `ODS ${r.id}: ${r.status}.`);
+  if (sdg.omitted.length) add("ODS", regulationDimension, false, `Omitiste ${sdg.omitted.length} ODS relacionados con el proyecto.`);
   for (const d of (g.v2?.dilemmas ?? []).filter((d) => d.choice)) {
     const t = dilemmaById(d.id),
       c = t?.choices.find((c) => c.id === d.choice);

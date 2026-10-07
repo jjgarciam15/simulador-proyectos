@@ -6,6 +6,7 @@ import { chainBank, chainLevels } from "./projectV2";
 import { pendingDilemma } from "./dilemmas";
 import { referenceTree } from "./problemTree";
 import { gameActors } from "./actors";
+import { referenceTerritory } from "./territory";
 import { impactCards, referenceValuation, generalObjectiveOptions, specificObjectiveOptions } from "./valuation";
 import { missionFlowCase } from "./missionFlow";
 import { referenceRows, referenceEconomic, referenceBenefits } from "./flows";
@@ -146,6 +147,8 @@ export function presentationGame(scenarioId = "agua"): GameState {
     type: "sdgReasons",
     value: Object.fromEntries(s.sdgs.map((id) => [id, direct.includes(id) ? { kind: "directa", evidence: "resultado", text: "El servicio del proyecto cambia directamente esta meta y se mide con el indicador de resultado." } : { kind: "indirecta", evidence: "impacto", text: "Contribuye a través de los impactos esperados del servicio, medidos en la evaluación ex post." }])),
   } as Action, false);
+  // Ordenamiento territorial (Ley 388 de 1997): encaje, ruta predial y plusvalía de la alternativa.
+  if (g.v2?.territoryRules) for (const a of referenceTerritory(g)) g = attempt(g, a);
   // Mitigating risks changes the ex ante evaluation: like a careful player, revisit it and confirm it again.
   for (const r of s.risks) if (available(g) - r.cost >= projectCost(g)) g = attempt(g, { type: "mitigate", id: r.id });
   if (g.v2?.reviews[3]?.length) g = next(act(g, { type: "visit", phase: 3 }, false));

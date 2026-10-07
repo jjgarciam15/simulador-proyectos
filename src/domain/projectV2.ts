@@ -18,6 +18,9 @@ export interface ChainPlacement {
 }
 export interface V2State {
   negotiationRules?:2;
+  /** Games from 3.0 on: territorial puzzles of the Ley 388 de 1997 in the Regulation stage. */
+  territoryRules?: 1;
+  territory?: import('./territory').TerritoryAnswers;
   budgetLines?:import('./budgetLines').BudgetLine[];
   challenge?:import('./challenges').Challenge;
   negotiations?:Record<string,import('./negotiations').NegotiationRecord>;
@@ -90,6 +93,7 @@ export interface V22State {
 export function newV2State(g: GameState): V2State {
   return {
     negotiationRules:2,
+    territoryRules: 1,
     version: 2,
     completed: [],
     reviews: {},

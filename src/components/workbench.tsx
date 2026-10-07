@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { currentTerritory, territoryActive } from "../domain/territory";
 import { CheckCircle2, Circle, Navigation, Save } from "lucide-react";
 import type { GameState } from "../domain/types";
 import { available, projectCost } from "../domain/engine";
@@ -91,6 +92,13 @@ export function StageGuide({ g, pending }: { g: GameState; pending: number }) {
         ];
       case 4:
         return [
+          ...(territoryActive(g)
+            ? [
+                { label: "Encaje en el ordenamiento (Ley 388)", done: !!currentTerritory(g)?.encaje },
+                { label: "Ruta de adquisición de predios", done: !!currentTerritory(g)?.predios },
+                { label: "Participación en la plusvalía", done: !!currentTerritory(g)?.plusvalia },
+              ]
+            : []),
           { label: "Confirmar diagnóstico e instrumento", done: !!g.failure },
           {
             label: "Explicar alineación estratégica",

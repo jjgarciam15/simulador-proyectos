@@ -108,6 +108,8 @@ export function applyV2(original: GameState, a: ActionV2) {
       g.policyAligned = false;
       v.sdgReasons = {};
       v.regulatory = { evidence: "", incentive: "", adverse: "", reason: "" };
+      // Money and time already spent on the territorial analysis stay; the answers are cleared.
+      if (v.territory) v.territory = { alternative: v.territory.alternative, applied: v.territory.applied };
     }
     g.acknowledged = [];
     v.resetCount = (v.resetCount ?? 0) + 1;
