@@ -355,6 +355,13 @@ export function phaseAvailability(p: NormalizedProject): PhaseAvailability[] {
     { label: "Valoración", status: withValue.length ? "si" : valued.length ? "parcial" : "no", reason: withValue.length ? "Impactos con valor anual." : valued.length ? "Impactos con tipo pero sin valor: se reparte el beneficio social." : "Sin impactos valorables." },
     { label: "RPC", status: num(p.economic.socialRate) || Object.keys(p.economic.rpc).length ? "si" : "parcial", reason: "Flujo económico con RPC del DNP; tasa social del proyecto o 9 %." },
     { label: "Regulación", status: p.regulation.failure ? "si" : "parcial", reason: p.regulation.failure ? `Falla: ${p.regulation.failure}.` : "Sin falla registrada: «No intervenir» es la referencia." },
+    {
+      label: "Territorio (Ley 388)",
+      status: p.alternatives.length && p.alternatives.every((a) => a.territory?.soil) ? "si" : "parcial",
+      reason: p.alternatives.every((a) => a.territory?.soil)
+        ? "Clase de suelo registrada en cada alternativa."
+        : "Las alternativas sin clase de suelo usan un perfil territorial de referencia.",
+    },
     { label: "ODS", status: p.sdgs.suggested.length ? "si" : "parcial", reason: p.sdgs.suggested.length ? `ODS esperados: ${p.sdgs.suggested.join(", ")}.` : "Sin ODS esperados." },
   ];
 }
@@ -466,6 +473,16 @@ export function generateMission(p: NormalizedProject, config: MissionConfig, mis
   ].slice(0, 6);
   if (num(p.financial.rate) || num(p.economic.socialRate))
     scenario.constraints = [...scenario.constraints, `Tasas del proyecto: financiera ${num(p.financial.rate) ? (p.financial.rate * 100).toFixed(1) : "12,0"} %, social ${num(p.economic.socialRate) ? (p.economic.socialRate * 100).toFixed(1) : "9,0"} %`];
+  // Ley 388 de 1997: what the author registered about each alternative's site (the rest comes from a reference profile).
+  if (alts.some((a) => a.territory?.soil) || p.regulation.determinant)
+    scenario.territoryData = {
+      determinant: p.regulation.determinant ?? undefined,
+      sites: alts.map((a) =>
+        a.territory?.soil
+          ? { soil: a.territory.soil, plots: num(a.territory.plots) ? a.territory.plots : undefined, generator: a.territory.generator ?? undefined, site: a.territory.site.trim() || undefined }
+          : null,
+      ),
+    };
   const missionErrors = validateMission(scenario);
   if (missionErrors.length) return { ok: false, errors: missionErrors };
 

@@ -8,6 +8,8 @@ import { criticalVariable, evaluate } from "./flows";
 import { missionFlowCase } from "./missionFlow";
 import { methodFitFor, valuationSummary } from "./valuation";
 import { random } from "./finance";
+import { projectTerritory, territoryActive } from "./territory";
+import { soilName, soilRequirement } from "../data/ley388";
 
 export interface CommitteeOption {
   id: string;
@@ -163,6 +165,23 @@ export function committeeQuestions(g: GameState): CommitteeQuestion[] {
         { id: "todos", text: "Porque todos los proyectos contribuyen a todos los ODS.", credit: 0, feedback: "Seleccionar sin relación causal no demuestra contribución." },
         { id: "imagen", text: "Porque mejora la imagen del proyecto ante los financiadores.", credit: 0, feedback: "La alineación se sustenta con evidencia, no con comunicación." },
         { id: "exige", text: "Porque el fondo que financia el proyecto exige mencionarlo.", credit: 0, feedback: "Un requisito formal no demuestra contribución: se necesita relación causal e indicador." },
+      ]),
+    });
+  }
+  // Ley 388 de 1997 (games from 3.0 on): the committee asks how the site of the alternative was handled.
+  if (territoryActive(g)) {
+    const site = projectTerritory(g).site,
+      others = (["urbano", "expansion", "rural", "suburbano", "proteccion"] as const).filter((x) => x !== site.soil),
+      pick = others.sort((a, b) => random(g.seed, "comite-suelo" + a) - random(g.seed, "comite-suelo" + b)).slice(0, 2);
+    qs.push({
+      id: "territorio",
+      concept: "Ordenamiento territorial",
+      question: `¿Qué exige el plan de ordenamiento para construir ${chosen.name} en el sitio elegido?`,
+      options: shuffle(g, "territorio", [
+        { id: "real", text: `Es ${soilName[site.soil].toLowerCase()}: ${soilRequirement[site.soil].toLowerCase()}.`, credit: 1, feedback: "Es lo que establece la Ley 388 de 1997 para esa clase de suelo." },
+        ...pick.map((x) => ({ id: "suelo-" + x, text: `Es ${soilName[x].toLowerCase()}: ${soilRequirement[x].toLowerCase()}.`, credit: 0, feedback: `El sitio de esta alternativa es ${soilName[site.soil].toLowerCase()}, no ${soilName[x].toLowerCase()}.` })),
+        { id: "automatica", text: "Nada: con el presupuesto aprobado la licencia es automática.", credit: 0, feedback: "El presupuesto no reemplaza la norma urbanística: la licencia verifica el uso permitido en el plan." },
+        { id: "desarrollo", text: "Nada: el plan de desarrollo del alcalde reemplaza al plan de ordenamiento.", credit: 0, feedback: "El plan de desarrollo programa inversiones; el plan de ordenamiento decide el uso del suelo (Ley 388, art. 9 y 18)." },
       ]),
     });
   }

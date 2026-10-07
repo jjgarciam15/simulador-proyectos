@@ -78,8 +78,28 @@ function generatedProfile(s: Scenario, altIndex: number): ProjectTerritory {
         : rank === s.alternatives.length - 1
           ? { soil: "urbano", plots: 0, generator: "ninguno", site: "Instalaciones existentes dentro del perímetro urbano." }
           : { soil: "rural", plots: 2, generator: "ninguno", site: "Dos predios fuera del perímetro urbano, en zona de usos agropecuarios." };
-  return { motive, determinant, context: "Perfil territorial de referencia generado por el simulador para tu proyecto (datos simulados).", site, generated: true };
+  // What the author registered in Crear proyecto takes precedence over the reference profile.
+  const own = s.territoryData?.sites[altIndex],
+    authored = !!own?.soil;
+  const finalSite: SiteProfile = authored
+    ? { soil: own!.soil!, plots: own!.plots ?? site.plots, generator: own!.generator ?? "ninguno", site: own!.site || siteBySoil[own!.soil!] }
+    : site;
+  return {
+    motive,
+    determinant: s.territoryData?.determinant ?? determinant,
+    context: authored ? "Perfil territorial registrado por el autor del proyecto en Crear proyecto." : "Perfil territorial de referencia generado por el simulador para tu proyecto (datos simulados).",
+    site: finalSite,
+    generated: true,
+  };
 }
+/** Neutral descriptions of a site by class of soil (they describe it without naming the class). */
+const siteBySoil: Record<Soil, string> = {
+  urbano: "Predios dentro del perímetro urbano, con vías y redes de servicios.",
+  expansion: "Terreno de borde que el plan habilitará para uso urbano en su vigencia, todavía sin redes.",
+  rural: "Predios fuera del perímetro urbano, en zona de usos agropecuarios.",
+  suburbano: "Predios sobre un corredor fuera del perímetro, donde se mezclan usos del campo y la ciudad con servicios propios.",
+  proteccion: "Ladera o ronda que el plan conserva por su valor ambiental o por amenaza no mitigable.",
+};
 export function projectTerritory(g: GameState, alternative = g.alternative): ProjectTerritory {
   const s = scenarioById(g.scenarioId),
     index = Math.max(0, s.alternatives.findIndex((a) => a.id === alternative)),

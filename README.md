@@ -140,7 +140,7 @@ Las partidas V2.2 usan **13 dimensiones**: Diagnóstico y Árbol del problema, A
 **Regulación con la Ley 388 de 1997 (desde 3.0):** la etapa de Regulación aplica a cada proyecto la Ley de Desarrollo Territorial de Colombia. Aurora es un territorio ficticio, así que el simulador le aplica este marco con fines educativos y sus sitios, predios y precios son simulados. Las reglas sí son las de la ley.
 
 - **Repaso de la ley:** objeto y principios; tipos de plan (POT, PBOT y EOT según la población); determinantes, adopción y vigencias; clases de suelo; gestión del suelo; adquisición por motivos de utilidad pública; participación en la plusvalía. Cada sección indica cómo aparece en el juego.
-- **Perfil territorial por alternativa:** cada alternativa de las nueve misiones tiene un sitio con su clase de suelo, sus predios por adquirir y su hecho generador de plusvalía. Los proyectos creados en Crear proyecto reciben un perfil de referencia.
+- **Perfil territorial por alternativa:** cada alternativa de las nueve misiones tiene un sitio con su clase de suelo, sus predios por adquirir y su hecho generador de plusvalía. En Crear proyecto, el autor puede registrar esos datos (y el determinante principal) para cada alternativa; las alternativas sin datos usan un perfil de referencia.
 - **Tres puzzles** con preguntas de 5 opciones y retroalimentación al pasar el mouse:
   1. **Encaje en el ordenamiento:** instrumento, clase de suelo, requisito antes de construir, determinante y programa de ejecución.
   2. **Ruta de adquisición de predios:** ordenar los pasos y responder cuándo procede la expropiación (o por qué un privado no puede pedirla).

@@ -303,7 +303,7 @@ function applyCommitConsequences(g: GameState) {
     g.performance = clamp(g.performance + (e.performance ?? 0), 0, 1.3);
     g.reputation = clamp(g.reputation + (e.reputation ?? 0));
     v.eventRisk = (v.eventRisk ?? 0) + (e.eventRisk ?? 0);
-    v.consequences = [...(v.consequences ?? []), { kind: "sistémica", title: e.title, detail: e.detail, month: g.month, phase: g.phase }];
+    v.consequences = [...(v.consequences ?? []), { kind: "sistémica", area: "territorio", title: e.title, detail: e.detail, month: g.month, phase: g.phase }];
     record(g, e.title, e.detail);
   }
 }

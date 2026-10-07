@@ -218,7 +218,11 @@ export function projectStory(
     parts.push("Parte del presupuesto quedó inmovilizado en reservas o partidas sobredimensionadas.");
   else parts.push("El presupuesto fue suficiente y equilibrado.");
   const cons = g.v2?.consequences ?? [];
-  const regulatory = cons.find((c) => c.kind === "sistémica" && c.title !== "Regulación proporcional");
+  const regulatory = cons.find((c) => c.kind === "sistémica" && c.area !== "territorio" && c.title !== "Regulación proporcional");
+  const territorial = cons.filter((c) => c.area === "territorio");
+  if (territorial.some((c) => c.title !== "Ordenamiento territorial en regla"))
+    parts.push(`En el territorio (Ley 388 de 1997): ${territorial.filter((c) => c.title !== "Ordenamiento territorial en regla").map((c) => c.title.charAt(0).toLowerCase() + c.title.slice(1)).join("; ")}.`);
+  else if (territorial.length) parts.push("El sitio, los predios y la plusvalía cumplieron la Ley 388 de 1997.");
   if (regulatory) parts.push(`En regulación: ${regulatory.title.charAt(0).toLowerCase() + regulatory.title.slice(1)}, con efectos sobre la implementación.`);
   else if (cons.some((c) => c.title === "Regulación proporcional")) parts.push("La estrategia regulatoria fue proporcional a la evidencia.");
   const delayed = cons.filter((c) => c.kind === "diferida");

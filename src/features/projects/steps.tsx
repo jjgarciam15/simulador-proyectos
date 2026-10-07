@@ -1,4 +1,6 @@
 import { useState, type DragEvent } from "react";
+import { determinantName, generatorName, soilName, type Determinant, type Generator, type Soil } from "../../data/ley388";
+import type { AlternativeTerritory } from "../../domain/project/types";
 import { ArrowDown, ArrowUp, MoveVertical, Plus, Trash2 } from "lucide-react";
 import { valuationMethods } from "../../data/valuationMethods";
 import { sdgs as sdgList } from "../../data/sdgs";
@@ -7,6 +9,7 @@ import type { BenefitKind, CostCategory, FailureType, ImpactTypeId, NormalizedPr
 import { looksLikeCause, looksLikeEffect, looksLikeSolution } from "../../domain/project/validation";
 import { fmtMoney } from "../../domain/format";
 import { EvidenceBadge, ExampleBox, IssuesFor, LearnLink, NumField, TextField, TextList, type BuilderCtx } from "./fields";
+const emptyTerritory: AlternativeTerritory = { soil: null, plots: null, generator: null, site: "" };
 
 const beneficiaries = ["Usuarios", "Consumidores", "Productores", "Gobierno", "Comunidad", "Trabajadores", "Población objetivo", "Terceros"];
 const impactTypes: { id: ImpactTypeId; label: string }[] = [
@@ -350,6 +353,57 @@ export function AlternativesStep({ ctx }: { ctx: BuilderCtx }) {
                 ))}
               </div>
               <IssuesFor issues={ctx.issues} path={path + ".causeIds"} />
+              <details className="pb-territory" open={!!a.territory?.soil}>
+                <summary>
+                  Territorio (Ley 388 de 1997) <LearnLink concept="ordenamiento" />
+                </summary>
+                <p className="muted">Opcional. Si lo dejas vacío, el juego usa un perfil territorial de referencia para esta alternativa.</p>
+                <div className="pb-grid">
+                  <label className="field pb-field">
+                    <span>Clase de suelo del sitio</span>
+                    <select
+                      value={a.territory?.soil ?? ""}
+                      onChange={(e) => ctx.edit([path + ".territory"], (d) => (d.alternatives[i].territory = { ...emptyTerritory, ...d.alternatives[i].territory, soil: (e.target.value || null) as Soil | null }))}
+                    >
+                      <option value="">No identificada</option>
+                      {(Object.keys(soilName) as Soil[]).map((k) => (
+                        <option key={k} value={k}>
+                          {soilName[k]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <NumField
+                    ctx={ctx}
+                    path={path + ".territory.plots"}
+                    label="Predios por adquirir"
+                    unit="predios"
+                    value={a.territory?.plots ?? null}
+                    set={(d, v) => (d.alternatives[i].territory = { ...emptyTerritory, ...d.alternatives[i].territory, plots: v })}
+                  />
+                  <label className="field pb-field">
+                    <span>Hecho generador de plusvalía</span>
+                    <select
+                      value={a.territory?.generator ?? ""}
+                      onChange={(e) => ctx.edit([path + ".territory"], (d) => (d.alternatives[i].territory = { ...emptyTerritory, ...d.alternatives[i].territory, generator: (e.target.value || null) as Generator | null }))}
+                    >
+                      <option value="">No identificado</option>
+                      {(Object.keys(generatorName) as Generator[]).map((k) => (
+                        <option key={k} value={k}>
+                          {generatorName[k]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <TextField
+                  ctx={ctx}
+                  path={path + ".territory.site"}
+                  label="Descripción del sitio (sin nombrar la clase de suelo: el jugador debe inferirla)"
+                  value={a.territory?.site ?? ""}
+                  set={(d, v) => (d.alternatives[i].territory = { ...emptyTerritory, ...d.alternatives[i].territory, site: v })}
+                />
+              </details>
             </fieldset>
           );
         })}
@@ -720,7 +774,7 @@ export function FinanceStep({ ctx }: { ctx: BuilderCtx }) {
 export function ContextStep({ ctx }: { ctx: BuilderCtx }) {
   const p = ctx.p,
     r = p.regulation;
-  const regText: { key: Exclude<keyof typeof r, "failure">; label: string }[] = [
+  const regText: { key: Exclude<keyof typeof r, "failure" | "determinant">; label: string }[] = [
     { key: "externalities", label: "Externalidades" },
     { key: "existing", label: "Regulación existente" },
     { key: "tariffs", label: "Tarifas" },
@@ -784,6 +838,17 @@ export function ContextStep({ ctx }: { ctx: BuilderCtx }) {
           <option value="">No identificada</option>
           {failures.map((f) => (
             <option key={f}>{f}</option>
+          ))}
+        </select>
+      </label>
+      <label className="field pb-field">
+        <span>Determinante de ordenamiento que el proyecto debe respetar primero (Ley 388, art. 10)</span>
+        <select value={r.determinant ?? ""} onChange={(e) => ctx.edit(["regulation.determinant"], (d) => (d.regulation.determinant = (e.target.value || null) as Determinant | null))}>
+          <option value="">No identificado (se infiere del sector)</option>
+          {(Object.keys(determinantName) as Determinant[]).map((k) => (
+            <option key={k} value={k}>
+              {determinantName[k]}
+            </option>
           ))}
         </select>
       </label>

@@ -168,30 +168,38 @@ export function SectionNavigator({
     // Ex post can be read section by section or as one long report.
     [showAll, setShowAll] = useState(false);
   useEffect(() => {
-    const elements = Array.from(
-      ref.current?.querySelectorAll<HTMLElement>(":scope > section.panel") ??
-        [],
-    );
-    const event =
-      elements.find((el) => el.classList.contains("event-panel")) ?? null;
-    const nextActive =
-      event && event !== eventRef.current
-        ? elements.indexOf(event)
-        : Math.max(0, Math.min(active, elements.length - 1));
-    eventRef.current = event;
-    if (nextActive !== active) setActive(nextActive);
-    const list = elements.map((el, i) => {
-      const id = "phase-" + phase + "-section-" + i;
-      el.id = id;
-      el.hidden = !showAll && i !== nextActive;
-      return {
-        id,
-        title: el.querySelector("h3")?.textContent ?? "Detalle " + (i + 1),
-      };
-    });
-    setSections((prev) =>
-      JSON.stringify(prev) === JSON.stringify(list) ? prev : list,
-    );
+    const compute = () => {
+      const elements = Array.from(
+        ref.current?.querySelectorAll<HTMLElement>(":scope > section.panel") ??
+          [],
+      );
+      const event =
+        elements.find((el) => el.classList.contains("event-panel")) ?? null;
+      const nextActive =
+        event && event !== eventRef.current
+          ? elements.indexOf(event)
+          : Math.max(0, Math.min(active, elements.length - 1));
+      eventRef.current = event;
+      if (nextActive !== active) setActive(nextActive);
+      const list = elements.map((el, i) => {
+        const id = "phase-" + phase + "-section-" + i;
+        el.id = id;
+        el.hidden = !showAll && i !== nextActive;
+        return {
+          id,
+          title: el.querySelector("h3")?.textContent ?? "Detalle " + (i + 1),
+        };
+      });
+      setSections((prev) =>
+        JSON.stringify(prev) === JSON.stringify(list) ? prev : list,
+      );
+    };
+    compute();
+    // Stages load on demand: recompute when their panels appear (or change) after the first render.
+    const root = ref.current,
+      observer = root ? new MutationObserver(compute) : null;
+    if (root) observer!.observe(root, { childList: true });
+    return () => observer?.disconnect();
   }, [children, phase, active, showAll]);
   useEffect(() => setShowAll(false), [phase]);
   /** Changes section instantly; only scrolls when the top of the sections is out of view. */

@@ -4,7 +4,8 @@ import {updateCampaign,campaignSummary} from './domain/recognition';
 import ResourceDeck from './components/ResourceDeck';
 import {announceExperience,decisionMoment} from './domain/experience';
 import MgaLab from './features/MgaLab';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type ComponentProps, type ComponentType, type ReactNode } from 'react';
+import type * as Endgame from './features/Endgame';
 import { ArrowRight,ArrowLeft,Menu,X,Home,BookOpen,History,ChevronRight,AlertTriangle,PanelLeftClose,PanelLeftOpen } from 'lucide-react';
 import type { GameState,Difficulty } from './domain/types';
 import { phases } from './domain/types';
@@ -15,12 +16,6 @@ import { load,save,emptySave,type SaveData } from './domain/storage';
 import {useWebMCP} from './domain/webmcp';
 import { Button,Panel,Field,Next } from './components/ui';
 import {DraftProvider,StageGuide,SectionNavigator} from './components/workbench';
-import Diagnosis from './features/Diagnosis';
-import Formulation from './features/Formulation';
-import Preparation from './features/Preparation';
-import Evaluation from './features/Evaluation';
-import Regulation from './features/Regulation';
-import { Decision,Execution,Results,Journal } from './features/Endgame';
 import NationHome from './features/NationHome';
 import {Advisor,MissionBriefing} from './components/Characters';
 import {missions} from './data/world';
@@ -68,7 +63,7 @@ export default function App(){const [boot]=useState(initial),[data,setData]=useS
  {view==='builder'&&editingProject&&<ProjectBuilder project={editingProject} savedAt={savedAt} onChange={p=>persistStore(upsertProject(store,p))} onExit={()=>setView('projects')} onGenerate={generate}/>}
  {view==='builder'&&!editingProject&&<main className="reading"><Panel title="Proyecto no disponible"><Button onClick={()=>setView('projects')}>Mis proyectos</Button></Panel></main>}{view==='help'&&<main className="reading"><button className="text-btn" onClick={goHome}><ArrowLeft size={16}/>Escenarios</button><h1>Aprende decidiendo.</h1><p className="lead">Construye una estrategia, observa sus consecuencias y vuelve a intentarlo.</p><HowToPlay/><Panel title="Tutorial interactivo · 3 minutos"><Tutorial/></Panel><Panel title="Centro de aprendizaje"><LearningCenter/></Panel><Panel title="Tu recorrido"><ol className="help-steps">{phases.map((p,i)=><li key={p}><strong>{p}</strong><p>{guidance[i]}</p></li>)}</ol></Panel><Panel title="Las reglas básicas"><p>Todos los montos se expresan en millones de COP (M). Contratar estudios, tratar con actores y mitigar riesgos consume recursos. Los controles exploratorios cambian la propuesta al confirmar.</p><p>Avanzar de etapa consume un mes de trabajo. Reabrir una etapa anterior cuesta un mes y 0,2 % del presupuesto inicial. Una inversión comprometida se adapta mediante decisiones de ejecución.</p><p>La semilla reproduce condiciones externas. Guarda el código y repite para comparar estrategias. La dificultad cambia lo que conoces y tu exposición, sin cambiar la realidad subyacente.</p><p>Para una sesión de 60–90 minutos: 15 de diagnóstico, 10 de formulación, 15 de preparación, 15 de evaluación, 10 de regulación y 15 de ejecución y discusión final.</p></Panel><Button onClick={()=>{setDifficulty('guiado');setSetup('agua')}}>Iniciar en modo guiado <ArrowRight size={17}/></Button></main>}
  {view==='history'&&<main><button className="text-btn" onClick={goHome}><ArrowLeft size={16}/>Escenarios</button><h1>Lo que aprendiste.</h1><p className="lead">Resultados de este navegador. Cada estrategia deja una historia distinta.</p>{!data.history.length?<Panel title="Todavía no hay resultados"><p>Completa o cierra una partida para encontrar aquí su evaluación.</p><Button onClick={goHome}>Elegir escenario</Button></Panel>:<div className="history-list">{[...data.history].reverse().map(game=><button key={game.id} onClick={()=>{setHistoryGame(game);setView('game')}}><div><span className="eyebrow">{game.seed} · {game.difficulty}</span><h3>{scenarioById(game.scenarioId).title}</h3><p>{selected(game)?.name} · {game.outcome?.status}</p></div><strong>{game.outcome?.score}<small>/100</small></strong><ChevronRight size={20}/></button>)}</div>}</main>}
- <footer><span>Datos utilizados con fines académicos y de simulación.</span><span>PROYECTA 3.0.0 · Guardado en este navegador</span></footer>
+ <footer><span>Datos utilizados con fines académicos y de simulación.</span><span>PROYECTA 3.1.0 · Guardado en este navegador</span></footer>
  {resetOpen&&<Modal title="Restablecer partidas" onClose={()=>setResetOpen(false)}><ResetDialog onClose={()=>setResetOpen(false)}/></Modal>}{learn&&<Modal title="Centro de aprendizaje" onClose={()=>setLearn(null)} wide><LearningCenter key={learn} focus={learn}/></Modal>}
  {setup&&<Modal title="Tu siguiente decisión empieza aquí." onClose={()=>setSetup(null)}><div className="eyebrow">NUEVA SIMULACIÓN</div><Field label="Escenario y rol"><select value={setup} onChange={e=>setSetup(e.target.value)}>{scenarios.map(s=><option value={s.id} key={s.id}>{s.regulator?'Regulador':s.role==='publico'?'Público':'Privado'} · {s.title}</option>)}</select></Field><MissionProfileCard id={setup}/><DifficultyGuide value={difficulty} onChange={setDifficulty}/><ModeChoice value={mode} onChange={setMode}/><Field label="Código de condiciones iniciales" hint="Usa el mismo código para comparar estrategias."><input value={seed} maxLength={40} onChange={e=>setSeed(e.target.value)}/></Field>{data.active&&!data.active.outcome&&<p className="notice">La partida actual quedará en pausa y podrás retomarla desde el inicio.</p>}<Button onClick={()=>start(setup)}>Entrar a la simulación <ArrowRight size={17}/></Button></Modal>}
  </div>;
@@ -95,13 +90,8 @@ import PresentationBar from './features/PresentationBar';
 import {presentationGame} from './domain/demo';
 import {DilemmaPanel,ConsequenceLog} from './features/Dilemmas';
 import DifficultyGuide from './features/DifficultyGuide';
-import LearningCenter from './features/v22/LearningCenter';
 import { HowToPlay, Tutorial } from './features/v22/HowToPlay';
 import { MissionProfileCard, ModeChoice } from './features/v22/SetupExtras';
-import Exam2 from './features/v22/Exam2';
-import ProjectsCenter from './features/projects/ProjectsCenter';
-import ProjectBuilder from './features/projects/ProjectBuilder';
-import ImportProject from './features/projects/ImportProject';
 import HomeActions from './features/projects/HomeActions';
 import {ResetDialog,ResetVerification} from './features/projects/ResetDialog';
 import {activateStore,createMission,deleteProject,loadStore,saveStore,startGeneratedGame,upsertProject,type ProjectStore} from './domain/project/store';
@@ -112,3 +102,25 @@ import type {MissionConfig,NormalizedProject} from './domain/project/types';
 const stagesKey='proyecta-stages-hidden-v1';
 function readStagesHidden(){try{return localStorage.getItem(stagesKey)==='1'}catch{return false}}
 function saveStagesHidden(v:boolean){try{localStorage.setItem(stagesKey,v?'1':'0')}catch{/* storage blocked: lasts for this session */}}
+
+/** Views that are not needed to start playing load on demand (smaller first download). */
+function lazyView<P extends object>(load: () => Promise<{ default: ComponentType<P> }>) {
+  const View = lazy(load);
+  return function LazyView(props: P) {
+    return <Suspense fallback={<p className="lazy-loading" role="status">Cargando…</p>}><View {...props} /></Suspense>;
+  };
+}
+const LearningCenter = lazyView(() => import('./features/v22/LearningCenter'));
+const Exam2 = lazyView(() => import('./features/v22/Exam2'));
+const ProjectsCenter = lazyView(() => import('./features/projects/ProjectsCenter'));
+const ProjectBuilder = lazyView(() => import('./features/projects/ProjectBuilder'));
+const ImportProject = lazyView(() => import('./features/projects/ImportProject'));
+const Diagnosis = lazyView(() => import('./features/Diagnosis'));
+const Formulation = lazyView(() => import('./features/Formulation'));
+const Preparation = lazyView(() => import('./features/Preparation'));
+const Evaluation = lazyView(() => import('./features/Evaluation'));
+const Regulation = lazyView(() => import('./features/Regulation'));
+const Decision = lazyView<ComponentProps<typeof Endgame.Decision>>(() => import('./features/Endgame').then((m) => ({ default: m.Decision })));
+const Execution = lazyView<ComponentProps<typeof Endgame.Execution>>(() => import('./features/Endgame').then((m) => ({ default: m.Execution })));
+const Results = lazyView<ComponentProps<typeof Endgame.Results>>(() => import('./features/Endgame').then((m) => ({ default: m.Results })));
+const Journal = lazyView<ComponentProps<typeof Endgame.Journal>>(() => import('./features/Endgame').then((m) => ({ default: m.Journal })));
