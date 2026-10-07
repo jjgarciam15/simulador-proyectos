@@ -1,6 +1,7 @@
 import type { Budget, GameState } from "./types";
 import { scenarioById } from "../data/scenarios";
 import { negotiationProfiles } from "../data/negotiationProfiles";
+import { gameActors } from "./actors";
 export interface NegotiationCondition {
   category: keyof Budget;
   name: string;
@@ -33,10 +34,11 @@ export const negotiationChoices: Record<NegotiationChoice, string> = {
 };
 export function actorCommitment(g: GameState, actorId: string) {
   const s = scenarioById(g.scenarioId),
-    index = s.actors.findIndex((a) => a.id === actorId);
+    actors = gameActors(g),
+    index = actors.findIndex((a) => a.id === actorId);
   if (index < 0) throw new Error("Actor desconocido.");
   const saved = g.v2?.negotiations?.[actorId]?.condition;
-  if (saved) return { ...saved, actor: s.actors[index] };
+  if (saved) return { ...saved, actor: actors[index] };
   const profile =
     g.v2?.negotiationRules === 2
       ? negotiationProfiles[s.id]?.[index]
@@ -47,7 +49,7 @@ export function actorCommitment(g: GameState, actorId: string) {
       name: profile.name,
       minimum: Math.round(s.budget * profile.fraction),
       evidence: profile.evidence,
-      actor: s.actors[index],
+      actor: actors[index],
     };
   const category: (keyof Budget)[] = [
     "social",
@@ -67,7 +69,7 @@ export function actorCommitment(g: GameState, actorId: string) {
     category: category[index % 4],
     name: names[index % 4],
     minimum: Math.round(s.budget * [0.012, 0.018, 0.015, 0.012][index % 4]),
-    actor: s.actors[index],
+    actor: actors[index],
   };
 }
 export function negotiationQuote(
@@ -111,15 +113,18 @@ export function negotiationQuote(
   if (choice === "acuerdo") {
     cost = s.budget * 0.004;
     months = 2;
-    if (prior.consulted || g.studies.includes("social")) {
+    // A strongly opposed actor only accepts after being heard at the table; evidence alone is not enough.
+    const hostile = !!g.actorProfiles && condition.actor.stance <= -50;
+    if (prior.consulted || (!hostile && g.studies.includes("social"))) {
       next.status = "acuerdo";
       support = 3;
       reputation = 2;
       detail = `Acuerdo condicionado a reservar ${condition.minimum} M en ${condition.name}. Se revisará al invertir.`;
     } else {
       support = -2;
-      detail =
-        "La oferta se rechazó por falta de diagnóstico compartido. Escucha al actor o incorpora evidencia social antes de insistir.";
+      detail = hostile
+        ? "La oferta se rechazó: este actor está muy en contra del proyecto y exige ser escuchado en la mesa antes de cualquier propuesta."
+        : "La oferta se rechazó por falta de diagnóstico compartido. Escucha al actor o incorpora evidencia social antes de insistir.";
     }
   }
   if (choice === "compensar") {
@@ -131,7 +136,8 @@ export function negotiationQuote(
       "El acompañamiento obtiene apoyo inmediato sin una obligación presupuestal posterior. Consume más caja; no elimina desacuerdos futuros.";
   }
   if (choice === "retirarse") {
-    support = -Math.round(condition.actor.power / 20);
+    // Walking away from an actor against the project costs more support.
+    support = -Math.round((condition.actor.power / 20) * (g.actorProfiles && condition.actor.stance < 0 ? 1 - condition.actor.stance / 100 : 1));
     next.status = "cerrado";
     detail =
       "La mesa cierra sin compromiso. Conservas caja y tiempo, pero disminuye el apoyo según el poder del actor.";

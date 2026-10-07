@@ -8,7 +8,7 @@ import { annuity, clamp, financialFlows, hhi, metrics, npv, random } from './fin
 
 export const defaults:Assumptions={demand:1,capex:1,opex:1,price:1,growth:.02,inflation:.04,discount:.10,socialDiscount:.09,life:15,residual:.10,nominal:false,delay:0};
 export function createGame(scenarioId:string,difficulty:Difficulty='guiado',seed='PROY-4831'):GameState {
- const s=scenarioById(scenarioId);return {mga:emptyDossier(),version:1,contentVersion:s.version,id:crypto.randomUUID(),scenarioId,seed,difficulty,phase:0,maxPhase:0,month:0,elapsed:0,cash:s.budget,committed:0,spent:0,quality:difficulty==='guiado'?40:difficulty==='profesional'?25:12,capacity:65,support:50,reputation:60,sustainability:50,studies:[],actorActions:{},nodes:['n0'],objective:'',target:s.affected,alternative:'',compared:[],budget:{operation:0,maintenance:0,environment:0,social:0,oversight:0,contingency:0},assumptions:{...defaults,life:s.regulator?10:15},loans:[],grantPending:0,grantReceived:false,policy:'none',failure:'',mitigations:[],sdgs:[],policyAligned:false,indicators:[],activities:[],journal:[],justification:'',truth:{demand:.8+random(seed,'demand')*.4,technical:.93+random(seed,'technical')*.22,environment:.8+random(seed,'environment')*.4},performance:1,extraCost:0,delay:0,pendingEvent:null,eventIds:[],snapshot:null,outcome:null,returnPhase:null,acknowledged:[]};
+ const s=scenarioById(scenarioId);return {mga:emptyDossier(),version:1,contentVersion:s.version,id:crypto.randomUUID(),scenarioId,seed,difficulty,phase:0,maxPhase:0,month:0,elapsed:0,cash:s.budget,committed:0,spent:0,quality:difficulty==='guiado'?40:difficulty==='profesional'?25:12,capacity:65,support:50,reputation:60,sustainability:50,studies:[],actorActions:{},nodes:['n0'],objective:'',target:s.affected,alternative:'',compared:[],budget:{operation:0,maintenance:0,environment:0,social:0,oversight:0,contingency:0},assumptions:{...defaults,life:s.regulator?10:15},loans:[],grantPending:0,grantReceived:false,policy:'none',failure:'',mitigations:[],sdgs:[],policyAligned:false,indicators:[],activities:[],journal:[],justification:'',truth:{demand:.8+random(seed,'demand')*.4,technical:.93+random(seed,'technical')*.22,environment:.8+random(seed,'environment')*.4},performance:1,extraCost:0,delay:0,pendingEvent:null,eventIds:[],snapshot:null,outcome:null,returnPhase:null,acknowledged:[],actorProfiles:rollActorProfiles(s,seed)};
 }
 export const available=(g:GameState)=>g.cash-g.committed;
 export const selected=(g:GameState)=>scenarioById(g.scenarioId).alternatives.find(a=>a.id===g.alternative);
@@ -51,7 +51,7 @@ export function model(g:GameState,a=selected(g),realized=false,overrides:Partial
  return {financial,social,rows,coverage,capex,opex,revenue,benefit,equity:npv(equityFlows,rate),breakEven:revenue>0?opex/revenue:null,minimumPrice:revenue>0?opex/revenue*x.price:null,maxOpex:revenue,maintenanceRatio};
 }
 export function welfare(g:GameState,policyId=g.policy){const s=scenarioById(g.scenarioId),p=s.instruments.find(p=>p.id===policyId)!;const price=80*(1+p.price),quantity=Math.max(0,Math.min((s.demandIntercept-price)/.6,(price-s.supplyIntercept)/.6));const consumer=Math.max(0,(s.demandIntercept-price)*quantity-.3*quantity**2),producer=Math.max(0,(price-s.supplyIntercept)*quantity-.3*quantity**2),external=quantity*s.externalCost*(1-p.externality),admin=p.admin/20,compliance=quantity*p.compliance*20,total=consumer+producer-external-admin-compliance;const shares=p.entry>0?s.market.map(v=>v*.85).concat(15):p.entry<0?[s.market[0]+s.market.at(-1)!,...s.market.slice(1,-1)]:s.market;const optimalQ=(s.demandIntercept-s.supplyIntercept-s.externalCost)/1.2;const optimum=(s.demandIntercept-s.supplyIntercept-s.externalCost)*optimalQ-.6*optimalQ*optimalQ;return {price,quantity,consumer,producer,external,admin,compliance,total,dwl:Math.max(0,optimum-total),shares,hhi:hhi(shares)}}
-export type Action=ActionV2 | ActionV22 | QuestionAction | NegotiationAction | { type: 'stageTime'; phase: number; seconds: number }
+export type Action=ActionV2 | ActionV22 | QuestionAction | NegotiationAction | TerritoryAction | { type: 'stageTime'; phase: number; seconds: number }
  |{type:'learn';id:string;choice:string;confidence:'seguro'|'duda'}
  |{type:'reflection';text:string}
  |{type:'mga';section:'links'|'chain'|'prediction';value:MgaDossier}
@@ -81,7 +81,7 @@ function coreAct(original:GameState,action:Action,withComparison=true):GameState
  switch(action.type){
  case 'mga':{const required={links:0,chain:2,prediction:3}[action.section];if(g.phase!==required)throw new Error('Reabre la etapa correspondiente para modificar el expediente.');const value=action.value;const dossier=g.mga??emptyDossier();if(action.section==='links'){if(value.links.length>8||new Set(value.links.map(l=>l.from+'>'+l.to)).size!==value.links.length||value.links.some(l=>l.from===l.to||!g.nodes.includes(l.from)||!g.nodes.includes(l.to)))throw new Error('Conecta nodos seleccionados, sin duplicados ni enlaces a sí mismos.');dossier.links=value.links;}if(action.section==='chain'){const c=value.chain;if(!s.nodes.some(n=>n.id===c.cause)||!s.nodes.some(n=>n.id===c.objective)||!['service','activity','population'].includes(c.product)||new Set(c.activities).size!==c.activities.length||c.activities.some(id=>!g.activities.some(a=>a.id===id)))throw new Error('Selecciona elementos existentes de la cadena de valor.');dossier.chain=c;}if(action.section==='prediction'){dossier.prediction=value.prediction.slice(0,1200);dossier.assumption=value.assumption.slice(0,1200);}g.mga=dossier;g.acknowledged=[];record(g,'Expediente MGA actualizado',action.section==='links'?'Relaciones causales registradas.':action.section==='chain'?'Vínculos de la cadena de valor registrados.':'Hipótesis y supuesto externo registrados, sin calificación del texto.');break;}
  case 'study':{if(g.phase!==0&&!(g.v2&&g.phase<=5))throw new Error('Los estudios se contratan en diagnóstico.');const study=s.studies.find(v=>v.id===action.id);if(!study||g.studies.includes(study.id))throw new Error('Estudio no disponible o ya realizado.');spend(g,study.cost);advanceTime(g,study.months);g.studies.push(study.id);g.quality=clamp(g.quality+study.quality);record(g,study.name,study.finding,study.cost,study.months);break;}
- case 'actor':{if(g.actorActions[action.id])throw new Error('Este actor ya recibió una intervención.');if(!s.actors.some(a=>a.id===action.id))throw new Error('Actor desconocido.');const choices:Record<string,[number,number,number,number]>={consultar:[.003,1,7,4],negociar:[.008,2,12,5],informar:[.001,0,3,1],involucrar:[.012,3,16,8],monitorear:[.0005,0,1,1],ignorar:[0,0,-8,-5]};const configured=choices[action.choice],actor=s.actors.find(a=>a.id===action.id)!;const c=configured?[...configured]:undefined;if(c&&g.v2){const multiplier=.5+actor.power/100;c[2]=Math.round(c[2]*multiplier);c[3]=Math.round(c[3]*(.5+actor.interest/100));}if(!c)throw new Error('Acción inválida.');spend(g,s.budget*c[0]);advanceTime(g,c[1]);g.support=clamp(g.support+c[2]);g.reputation=clamp(g.reputation+c[3]);g.actorActions[action.id]=action.choice;record(g,action.choice+' · '+s.actors.find(a=>a.id===action.id)!.name,'Apoyo '+(c[2]>=0?'+':'')+c[2]+'; legitimidad '+c[3],s.budget*c[0],c[1]);break;}
+ case 'actor':{if(g.actorActions[action.id])throw new Error('Este actor ya recibió una intervención.');if(!s.actors.some(a=>a.id===action.id))throw new Error('Actor desconocido.');const choices:Record<string,[number,number,number,number]>={consultar:[.003,1,7,4],negociar:[.008,2,12,5],informar:[.001,0,3,1],involucrar:[.012,3,16,8],monitorear:[.0005,0,1,1],ignorar:[0,0,-8,-5]};const configured=choices[action.choice],actor=gameActor(g,action.id)!;const c=configured?[...configured]:undefined;if(c&&g.v2){const multiplier=.5+actor.power/100;c[2]=Math.round(c[2]*multiplier);c[3]=Math.round(c[3]*(.5+actor.interest/100));if(g.actorProfiles&&!actor.government&&actor.stance<0){/* An opposed actor: ignoring it costs more, engaging it pays more. */if(action.choice==='ignorar')c[2]=Math.round(c[2]*(1-actor.stance/100));else if(['consultar','negociar','involucrar'].includes(action.choice))c[2]=Math.round(c[2]*(1-actor.stance/200));}}if(!c)throw new Error('Acción inválida.');spend(g,s.budget*c[0]);advanceTime(g,c[1]);g.support=clamp(g.support+c[2]);g.reputation=clamp(g.reputation+c[3]);g.actorActions[action.id]=action.choice;const moved=moveStance(g,action.id,action.choice);record(g,action.choice+' · '+actor.name,'Apoyo '+(c[2]>=0?'+':'')+c[2]+'; legitimidad '+c[3]+(moved?'; su posición '+(moved>0?'mejora ':'empeora ')+Math.abs(moved)+' puntos ('+stanceLabel(g.actorStance![action.id])+')':''),s.budget*c[0],c[1]);break;}
  case 'nodes':g.nodes=[...new Set(['n0',...action.ids.filter(id=>s.nodes.some(n=>n.id===id))])];record(g,'Árbol del problema actualizado','La coherencia se evaluará a partir de las relaciones causales.');break;
  case 'objective':if(!s.nodes.some(n=>n.id===action.id))throw new Error('Objetivo inválido.');g.objective=action.id;record(g,'Objetivo central definido',s.nodes.find(n=>n.id===action.id)!.objective);break;
  case 'target':if(!Number.isFinite(action.value)||action.value<s.affected*.25||action.value>s.affected)throw new Error('La focalización debe estar entre 25 % y 100 % de la población afectada.');g.target=Math.round(action.value);record(g,'Población objetivo definida',g.target+' personas priorizadas; los beneficiarios efectivos dependen de la alternativa.');break;
@@ -103,8 +103,8 @@ function coreAct(original:GameState,action:Action,withComparison=true):GameState
  case 'commit':{if(g.phase!==5||!selected(g))throw new Error('Completa las etapas antes de comprometer inversión.');if(g.target<s.affected*.7&&(g.grantPending||g.grantReceived))throw new Error('El alcance incumple la condición de cofinanciación.');const cost=projectCost(g);if(cost>available(g))throw new Error('La inversión supera los recursos disponibles.');if(!g.indicators.length||g.activities.length<2)throw new Error('Completa indicadores y cronograma.');const allocation=g.activities.reduce((n,a)=>n+a.cost,0);if(allocation>technicalBudget(g)+.01)throw new Error('Las actividades asignan más dinero que la inversión técnica. Revisa su presupuesto.');if(action.text!==undefined)g.justification=action.text.slice(0,1200);const m=model(g);const decisionState=structuredClone(g);g.snapshot={alternative:g.alternative,assumptions:structuredClone(g.assumptions),budget:structuredClone(g.budget),policy:g.policy,causes:[...g.nodes],objective:g.objective,target:g.target,available:available(g),month:g.month,quality:g.quality,support:g.support,coherence:coherence(g),expectedFinancial:m.financial.npv,expectedSocial:m.social.npv,loans:structuredClone(g.loans),mitigations:[...g.mitigations],sdgs:[...g.sdgs],policyAligned:g.policyAligned,activities:structuredClone(g.activities),indicators:structuredClone(g.indicators),decisionState};g.committed=cost;record(g,'Inversión comprometida',selected(g)!.name+' · Se congeló la evaluación ex ante.');g.journal.at(-1)!.justification=g.justification;g.phase=6;g.maxPhase=6;break;}
  case 'advance':{if(g.phase!==6)throw new Error('La ejecución aún no inicia.');const a=selected(g)!;if(!g.eventIds.includes('technical-reveal')){g.eventIds.push('technical-reveal');const delta=g.truth.technical-estimate(g,'technical');if(delta>.005){g.pendingEvent={id:'technical-reveal',name:'El diseño definitivo precisa los costos',description:'La revisión de ingeniería revela costos que no estaban completamente identificados al decidir.',category:'technical',probability:1,cost:delta,delay:0,benefit:0,study:'tecnico'};record(g,'Revelación de información técnica',g.pendingEvent.description);break;}}
  const planned=Math.max(a.months,schedule(g.activities).duration)+g.assumptions.delay;const step=Math.min(3,Math.max(1,planned+g.delay-g.elapsed));const remaining=Math.max(1,planned+g.delay-g.elapsed);const protectedReserve=g.budget.operation+g.budget.maintenance+g.budget.contingency;const release=Math.max(0,g.committed-protectedReserve)*Math.min(1,step/remaining);g.committed-=release;g.cash-=release;g.spent+=release;g.elapsed+=step;advanceTime(g,step);record(g,'Ejecución · mes '+g.elapsed,'Desembolso de actividades programadas; las reservas siguen protegidas.',release,step);
- const period=Math.floor(g.elapsed/3),event=s.events.find(e=>(e.minVersion??1)<=g.contentVersion&&!g.eventIds.includes(e.id)&&(!e.conditions||matches(g,e.conditions))&&random(g.seed,'event:'+period+':'+e.id)<e.probability*(g.v2?difficultyRules[g.difficulty].event*(1+(g.v2.eventRisk??0)):g.difficulty==='experto'?1.25:.8)*(1.3-g.quality*.006)*eventModifier(g,e)*(e.category==='social'?1.4-g.support/100:1)*(e.category==='environment'?g.truth.environment:1)*(g.mitigations.some(id=>s.risks.find(r=>r.id===id)?.study===e.study)?.5:1));
- if(event){g.pendingEvent={...event};g.eventIds.push(event.id);record(g,'Evento: '+event.name,event.description);}else if(g.elapsed>=planned+g.delay)finish(g,g.month>s.deadline?'incumplimiento':'completado',withComparison);break;}
+ const period=Math.floor(g.elapsed/3),landP=g.eventIds.includes('predios')?0:landEventProbability(g),land=landP>0&&random(g.seed,'predios:'+period)<landP*(1+(g.v2?.eventRisk??0))?landEvent(g):null,event=land??s.events.find(e=>(e.minVersion??1)<=g.contentVersion&&!g.eventIds.includes(e.id)&&(!e.conditions||matches(g,e.conditions))&&random(g.seed,'event:'+period+':'+e.id)<e.probability*(g.v2?difficultyRules[g.difficulty].event*(1+(g.v2.eventRisk??0)):g.difficulty==='experto'?1.25:.8)*(1.3-g.quality*.006)*eventModifier(g,e)*(e.category==='social'?(1.4-g.support/100)*(e.benefit<0?1+.6*opposition(g):1):1)*(e.category==='environment'?g.truth.environment:1)*(g.mitigations.some(id=>s.risks.find(r=>r.id===id)?.study===e.study)?.5:1));
+ if(event){const lead=event.category==='social'&&event.benefit<0&&g.actorProfiles?leadingOpponent(g):undefined;g.pendingEvent={...event,...(lead?{description:lead.name+' (en contra del proyecto, poder '+lead.power+'/100) encabeza el reclamo. '+event.description}:{})};g.eventIds.push(event.id);record(g,'Evento: '+event.name,g.pendingEvent.description);}else if(g.elapsed>=planned+g.delay)finish(g,g.month>s.deadline?'incumplimiento':'completado',withComparison);break;}
  case 'respond':{const e=g.pendingEvent;if(!e)throw new Error('No hay evento pendiente.');if(action.choice==='abandonar'){finish(g,'abandonado',withComparison);break;}const a=selected(g)!;const base=a.capex*(g.target/s.affected)*g.assumptions.capex;const severity=e.id==='technical-reveal'?1:g.difficulty==='experto'?1.25:1;let cost=base*e.cost*severity,delay=e.delay,benefit=e.benefit;
  if(action.choice==='mitigar'){cost*=.7;delay=Math.ceil(delay*.4);benefit*=.3;}
  if(action.choice==='redimensionar'){cost*=.15;benefit-=.10;g.support=clamp(g.support-6);}
@@ -148,7 +148,7 @@ function finish(g:GameState,status:Outcome['status'],withComparison=true){
 }
 /** Replay each candidate with the same seed and response policy, never with a new random draw. */
 function compareStrategies(g:GameState){const s=scenarioById(g.scenarioId),snapshot=g.snapshot!,base=snapshot.decisionState!;return s.alternatives.map(a=>{
- let counter=structuredClone(base);counter.alternative=a.id;const ratio=a.months/selected(base)!.months,costRatio=technicalBudget(counter,a)/Math.max(1,technicalBudget(base));counter.activities=base.activities.map(activity=>({...activity,months:Math.max(1,Math.round(activity.months*ratio)),cost:activity.cost*costRatio}));
+ let counter=structuredClone(base);counter.alternative=a.id;/* Same territorial answers, now applied to that alternative's site. */if(counter.v2?.territory)counter.v2.territory={...counter.v2.territory,alternative:a.id};const ratio=a.months/selected(base)!.months,costRatio=technicalBudget(counter,a)/Math.max(1,technicalBudget(base));counter.activities=base.activities.map(activity=>({...activity,months:Math.max(1,Math.round(activity.months*ratio)),cost:activity.cost*costRatio}));
  const expected=model(counter,a);const feasible=projectCost(counter)<=snapshot.available&&counter.month+Math.max(a.months,schedule(counter.activities).duration)+counter.assumptions.delay<=s.deadline;
  let realized=s.role==='publico'?model(counter,a,true).social.npv:model(counter,a,true).financial.npv;
  if(feasible){counter=act(counter,{type:'commit'},false);for(let i=0;i<100&&!counter.outcome;i++){
@@ -177,22 +177,32 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
  if(action.type==='answerV2'||action.type==='hintV2')return assessQuestion(original,action);
  if(action.type==='dilemma')return resolveDilemma(original,action.choice);
  if(original.v2?.pendingDilemma&&(action.type==='next'||action.type==='commit'))throw new Error('Resuelve el dilema pendiente antes de continuar: '+dilemmaById(original.v2.pendingDilemma)?.title+'.');
+ if(action.type==='territory'){
+  const error=territoryError(original,action);if(error)throw new Error(error);
+  const quote=territoryQuote(original,action),g=structuredClone(original),prev=currentTerritory(g)??{alternative:g.alternative};
+  if(quote.cost)spend(g,quote.cost);if(quote.months)advanceTime(g,quote.months);if(quote.cashIn){g.cash+=quote.cashIn;g.v2!.inflows=(g.v2!.inflows??0)+quote.cashIn;}
+  const applied={...prev.applied};if(action.puzzle!=='plusvalia'||quote.cashIn||quote.cost)applied[action.puzzle]=true;
+  g.v2!.territory={...prev,alternative:g.alternative,[action.puzzle]:action.answers,applied};
+  record(g,quote.title,quote.detail,quote.cost,quote.months);return g;
+ }
  if(action.type==='negotiate'){
   const quote=negotiationQuote(original,action.actorId,action.choice),g=structuredClone(original);
   spend(g,quote.cost);advanceTime(g,quote.months);g.support=clamp(g.support+quote.support);g.reputation=clamp(g.reputation+quote.reputation);
-  g.v2!.negotiations={...g.v2!.negotiations,[action.actorId]:quote.next};invalidateV2(g,'actor');g.acknowledged=[];
+  g.v2!.negotiations={...g.v2!.negotiations,[action.actorId]:quote.next};moveStance(g,action.actorId,action.choice==='acuerdo'&&quote.next.status!=='acuerdo'?'acuerdo rechazado':action.choice);invalidateV2(g,'actor');g.acknowledged=[];
   record(g,'Mesa de negociación · '+quote.condition.actor.name,quote.detail,quote.cost,quote.months);return g;
  }
  if(original.v2&&action.type==='commit'){
   if([0,1,2,3,4].some(p=>!original.v2!.completed.includes(p))||Object.values(original.v2.reviews).some(r=>r.length))throw new Error('Revisa y confirma las etapas pendientes antes de comprometer la inversión.');
   const missing22=v22Missing(original,5);if(missing22)throw new Error(missing22);
+  if(territoryActive(original)&&!territoryComplete(original))throw new Error('Cambiaste de alternativa: vuelve a Regulación y resuelve el ordenamiento territorial (Ley 388) de la nueva alternativa.');
  }
  if(original.v2&&action.type==='next'){
   const missing22=v22Missing(original,original.phase);if(missing22)throw new Error(missing22);
-  if(original.phase===0&&!original.v2.tree)throw new Error('Construye y confirma el Árbol del problema: ubica cada tarjeta en un nivel o déjala fuera.');
+  if(original.phase===0&&!original.v2.tree)throw new Error('Construye y confirma el Árbol del problema: arrastra cada tarjeta a su lugar o a «No pertenece al árbol».');
   if(original.phase===2){const missing=budgetBasics(original.budget,original.v2.budgetLines??[]);if(missing.length)throw new Error('Construye los datos básicos del presupuesto antes de avanzar: '+missing.join('; ')+'. Usa «Presupuesto detallado» para agregar partidas con cantidad y costo unitario.');}
   if(original.phase===2&&(original.v2.chain.length<5||original.v2.connections.length<4))throw new Error('Construye cinco niveles y al menos cuatro conexiones en la cadena de valor.');
   if(original.phase===4&&(!original.v2.regulatory.reason||!original.sdgs.length||original.sdgs.some(id=>!original.v2!.sdgReasons[id])))throw new Error('Confirma el argumento regulatorio y sustenta los ODS seleccionados.');
+  if(original.phase===4&&territoryActive(original)&&!territoryComplete(original))throw new Error('Resuelve los tres puzzles de ordenamiento territorial (Ley 388 de 1997) para tu alternativa: encaje, predios y plusvalía.');
  }
  let input=original;
  if(original.v2&&action.type==='commit'){
@@ -225,6 +235,8 @@ export function act(original:GameState,action:Action,withComparison=true):GameSt
 
 import {assessQuestion,type QuestionAction} from './questionsV2';
 import {negotiationQuote,negotiationCommitments,type NegotiationAction} from './negotiations';
+import {currentTerritory,landEvent,landEventProbability,territorialConsequences,territoryActive,territoryComplete,territoryError,territoryQuote,type TerritoryAction} from './territory';
+import {gameActor,leadingOpponent,moveStance,opposition,rollActorProfiles,stanceLabel} from './actors';
 import {scoreV2} from './scoringV2';
 
 import { drawDilemma, dilemmaById, pendingDilemma, effectCash, applyStateEffects, describeEffects, fillText, matches } from "./dilemmas";
@@ -278,6 +290,21 @@ function applyCommitConsequences(g: GameState) {
   for (const c of applyRegulatoryConsequences(g)) {
     v.consequences = [...(v.consequences ?? []), c];
     record(g, c.title, c.detail);
+  }
+  // Ordenamiento territorial (Ley 388 de 1997): what an incomplete analysis costs when the plan meets the territory.
+  for (const e of territorialConsequences(g)) {
+    g.delay += e.delay ?? 0;
+    if (e.extraCost) {
+      const pay = Math.min(e.extraCost, Math.max(0, available(g)));
+      g.cash -= pay;
+      g.spent += pay;
+      g.extraCost += e.extraCost;
+    }
+    g.performance = clamp(g.performance + (e.performance ?? 0), 0, 1.3);
+    g.reputation = clamp(g.reputation + (e.reputation ?? 0));
+    v.eventRisk = (v.eventRisk ?? 0) + (e.eventRisk ?? 0);
+    v.consequences = [...(v.consequences ?? []), { kind: "sistémica", title: e.title, detail: e.detail, month: g.month, phase: g.phase }];
+    record(g, e.title, e.detail);
   }
 }
 

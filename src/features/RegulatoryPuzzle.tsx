@@ -14,6 +14,8 @@ import {
 } from "../domain/regulationLab";
 import { Panel, Button, Field } from "../components/ui";
 import { useDraftGuard, different } from "../components/workbench";
+import { helpPolicy } from "../domain/help";
+import { fb } from "../components/feedback";
 
 const pick = (chain: Record<string, string>, slot: string, prefix: string, allowed: string[], fallback: string) => {
   const id = chain[slot] ?? "";
@@ -98,7 +100,14 @@ export default function RegulatoryPuzzle({
       </p>
       <ol className="puzzle-chain">
         {puzzleSlots.map((slot) => (
-          <li key={slot}>
+          <li
+            key={slot}
+            {...(result && detail !== "score" && helpPolicy(g).immediate && chain[slot] === confirmed?.[slot]
+              ? result.rows.find((r) => r.slot === slot)?.correct
+                ? fb("ok", "Eslabón coherente con el instrumento que confirmaste y con el eslabón anterior.")
+                : fb("grave", "Revisa este eslabón: la tarjeta no es coherente con el instrumento que confirmaste. Después del primer eslabón roto, los siguientes valen la mitad.")
+              : {})}
+          >
             <Field label={slot}>
               <select
                 value={chain[slot] ?? ""}

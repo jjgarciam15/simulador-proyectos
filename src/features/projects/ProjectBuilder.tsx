@@ -169,7 +169,7 @@ function ReviewStep({ ctx, goTo, onGenerate }: { ctx: BuilderCtx; goTo: (s: Buil
           return (
             <li key={it.label} className={it.status}>
               <I size={16} aria-hidden />
-              <span className="pb-check-label">{it.status === "ok" ? "✓" : it.status === "error" ? "✕" : "!"} {it.label}</span>
+              <span className="pb-check-label"><span className="sr-only">{it.status === "ok" ? "Correcto: " : it.status === "error" ? "Error: " : "Revisar: "}</span>{it.label}</span>
               {it.messages.length > 0 && (
                 <>
                   <ul>
@@ -208,9 +208,9 @@ function ReviewStep({ ctx, goTo, onGenerate }: { ctx: BuilderCtx; goTo: (s: Buil
           <legend>Dificultad</legend>
           {(
             [
-              ["guiado", "Fácil"],
-              ["profesional", "Intermedio"],
-              ["experto", "Avanzado"],
+              ["guiado", "Guiado (fácil)"],
+              ["profesional", "Profesional (intermedio)"],
+              ["experto", "Experto (avanzado)"],
             ] as const
           ).map(([id, label]) => (
             <label key={id} className="checkline">
@@ -270,7 +270,7 @@ function ReviewStep({ ctx, goTo, onGenerate }: { ctx: BuilderCtx; goTo: (s: Buil
     </>
   );
 }
-const nf = (v: number | null | undefined, unit = "") => (v === null || v === undefined ? "No identificada" : unit === "M" ? fmtMoney(v) : unit === "%" ? `${Math.round(v * 1000) / 10} %` : `${v.toLocaleString("es-CO")}${unit ? " " + unit : ""}`);
+const nf = (v: number | null | undefined, unit = "") => (v === null || v === undefined ? "sin dato" : unit === "M" ? fmtMoney(v) : unit === "%" ? `${Math.round(v * 1000) / 10} %` : `${v.toLocaleString("es-CO")}${unit ? " " + unit : ""}`);
 export function Preview({ p }: { p: NormalizedProject }) {
   return (
     <div className="pb-preview">
@@ -323,11 +323,14 @@ export function Preview({ p }: { p: NormalizedProject }) {
       <section>
         <h5>Cadena de valor</h5>
         <p>
-          {(["inputs", "activities", "products", "outcomes", "impacts"] as const).map((k) => p.valueChain[k].join(", ") || "—").join(" → ")}
+          {(["inputs", "activities", "products", "outcomes", "impacts"] as const).some((k) => p.valueChain[k].some((x) => x.trim()))
+            ? (["inputs", "activities", "products", "outcomes", "impacts"] as const).map((k) => p.valueChain[k].filter((x) => x.trim()).join(", ") || "—").join(" → ")
+            : "Sin registrar: se usará «alternativa en operación»."}
         </p>
       </section>
       <section>
         <h5>Efectos e impactos</h5>
+        {!p.impacts.length && <p>Sin registrar: el módulo de valoración no se incluirá.</p>}
         <ul>
           {p.impacts.map((i) => (
             <li key={i.id}>

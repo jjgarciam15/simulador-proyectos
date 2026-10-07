@@ -1391,108 +1391,6 @@ tr.current-attempt td {
   }
 }
 
-/* ---------- Árbol del problema construido por el jugador ---------- */
-.ptb-layout {
-  display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(0, 1.6fr);
-  gap: var(--space-4);
-  margin: var(--space-3) 0;
-}
-.ptb-bank {
-  align-self: start;
-  position: sticky;
-  top: 150px;
-  padding: var(--space-3);
-  border: 2px dashed var(--border-strong);
-  border-radius: var(--radius-md);
-  background: var(--surface-muted);
-}
-.ptb-bank ul,
-.ptb-zone ul {
-  list-style: none;
-  padding: 0;
-  margin: var(--space-2) 0 0;
-  display: grid;
-  gap: 6px;
-}
-.ptb-card {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 6px;
-  align-items: center;
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  cursor: grab;
-  font-size: var(--text-sm);
-  animation: pb-in var(--dur) var(--ease);
-}
-.ptb-card select {
-  grid-column: 1 / -1;
-  width: 100%;
-  min-height: 32px !important;
-  padding: 4px 8px !important;
-  font-size: 13px !important;
-}
-.ptb-card.placed {
-  grid-template-columns: auto 1fr auto;
-  border-color: var(--primary);
-  background: var(--primary-soft);
-}
-.ptb-card.placed select {
-  grid-column: 1 / 3;
-}
-.ptb-grip {
-  color: var(--text-secondary);
-}
-.ptb-zone {
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  border: 2px dashed var(--border);
-  min-height: 64px;
-  transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
-}
-.ptb-zone:hover {
-  border-color: var(--primary);
-}
-.ptb-central {
-  border-style: solid;
-  border-color: var(--primary);
-  background: #f1f8f6;
-}
-.ptb-direct,
-.ptb-indirect {
-  background: #f5f8ff;
-}
-.ptb-effect,
-.ptb-impact {
-  background: #fff8f1;
-}
-.ptb-fuera {
-  margin-top: var(--space-4);
-  background: var(--danger-soft);
-  border-color: #d8a39c;
-}
-.ptb-empty {
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-style: italic;
-}
-@media (max-width: 900px) {
-  .ptb-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .ptb-bank {
-    position: static;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .ptb-card {
-    animation: none;
-  }
-}
-
 /* Alternativa elegida, fija arriba del panel derecho. */
 .pinned-alternative {
   display: grid;
@@ -1544,3 +1442,125 @@ tr.current-attempt td {
 .risk-axis{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--text-secondary,#3f4f49);margin-top:4px}
 .concept-links{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 14px;font-size:14px;color:var(--text-secondary,#3f4f49)}
 .concept-links .text-btn{padding:4px 0}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.score-breakdown{margin:18px 0}
+.score-breakdown>summary{cursor:pointer;font-weight:600;margin-bottom:8px}
+.score-breakdown td:nth-child(n+3),.score-breakdown th:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.presentation-bar{border:1px solid var(--accent,#d9892b);background:var(--accent-soft,#fdf0dc);color:var(--text-primary,#13201c);border-radius:10px;padding:14px 18px;margin:0 0 20px;display:grid;gap:10px}
+.presentation-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.presentation-tag{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--accent-strong,#9a5a0c)}
+.presentation-bar p{margin:0;font-size:14px;line-height:1.6}
+.presentation-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.presentation-steps{display:flex;gap:6px;flex-wrap:wrap}
+.presentation-steps button{width:34px;height:34px;border-radius:50%;border:1px solid var(--accent-strong,#9a5a0c);background:#fff;color:var(--accent-strong,#9a5a0c);font-weight:700;cursor:pointer}
+.presentation-steps button.active{background:var(--accent-strong,#9a5a0c);color:#fff}
+
+/* Árbol del problema jerárquico (2.7): se arma solo arrastrando. */
+.ptb-layout{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:18px;align-items:start;margin:14px 0}
+.ptb-root{container-type:inline-size}
+.ptb-bank{position:sticky;top:210px;max-height:calc(100vh / var(--ui-zoom, 1) - 320px);min-height:240px;overflow:auto;border:1px dashed var(--border-strong,#8a9d94);border-radius:10px;padding:12px;background:var(--surface-muted,#edf2ef);display:grid;gap:8px}
+.ptb-stack{display:grid;gap:6px}
+.ptb-card{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--border,#c5d0ca);border-radius:8px;background:var(--surface,#fff);color:var(--text-primary,#13201c);font-size:13px;line-height:1.35;cursor:grab;user-select:none;touch-action:none;min-width:0}
+.ptb-card:focus-visible{outline:3px solid var(--focus,#1f6fd1);outline-offset:2px}
+.ptb-card.placed{border-color:var(--primary,#0b6e69);background:var(--primary-soft,#ddf2ef)}
+.ptb-card.picked{outline:3px dashed var(--accent,#d9892b);outline-offset:2px}
+.ptb-card .ptb-text{flex:1;min-width:0}
+.ptb-card .icon-btn{padding:2px}
+.ptb-grip{flex-shrink:0;color:var(--text-secondary,#3f4f49);cursor:grab}
+.ptb-level{display:block;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary,#3f4f49);white-space:nowrap}
+.ptb-card{flex-wrap:wrap}.ptb-card>.ptb-level{order:5;flex:1 0 100%;padding-left:21px;white-space:normal}
+.ptb-tree{display:grid;gap:10px;min-width:0;overflow-x:auto;padding-bottom:6px}
+.ptb-side{display:grid;gap:10px}
+.ptb-central{border:2px solid var(--accent-strong,#9a5a0c);border-radius:10px;padding:10px;background:var(--accent-soft,#fdf0dc);display:grid;gap:6px;justify-items:center;text-align:center}
+.ptb-central .ptb-card{min-width:min(100%,320px);justify-content:center;font-weight:600}
+.ptb-add{border:1px dashed var(--border-strong,#8a9d94);border-radius:8px;padding:10px;font-size:13px;color:var(--text-secondary,#3f4f49);display:flex;align-items:center;gap:6px;justify-content:center;text-align:center}
+.ptb-out{border:1px dashed var(--border-strong,#8a9d94);border-radius:10px;padding:12px;margin:10px 0;display:grid;gap:8px;background:var(--surface-muted,#edf2ef)}
+.ptb-out .ptb-stack{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.ptb-empty{font-size:13px;color:var(--text-secondary,#3f4f49);font-style:italic}
+.ptb-over{outline:3px solid var(--primary,#0b6e69)!important;outline-offset:2px;background:var(--primary-soft,#ddf2ef)!important}
+.ptb-armed:not(.ptb-card){cursor:pointer}
+.ptb-ghost{position:fixed;left:0;top:0;z-index:2000;pointer-events:none;max-width:260px;padding:8px 10px;border-radius:8px;background:var(--primary,#0b6e69);color:#fff;font-size:13px;box-shadow:0 8px 24px #0003}
+.ptb-live{min-height:1.4em;font-size:13px;color:var(--text-secondary,#3f4f49);margin:6px 0}
+.ptb-help{font-size:12px}
+/* Ramas: cada tarjeta con sus hijas; las causas hacia abajo y los efectos hacia arriba. */
+.ptb-roots,.ptb-kids{list-style:none;margin:0 auto;padding:0;display:flex;gap:12px;align-items:flex-start;width:max-content;max-width:none}
+.ptb-node{display:flex;flex-direction:column;align-items:center;gap:0;flex:0 0 auto;width:220px}
+.ptb-node>.ptb-card{width:100%}
+.ptb-kids{position:relative;padding-top:18px}
+.ptb-kids::before{content:"";position:absolute;top:0;left:50%;height:12px;border-left:2px solid var(--border-strong,#8a9d94)}
+.ptb-kids>.ptb-node{position:relative;padding-top:6px}
+.ptb-kids>.ptb-node::before{content:"";position:absolute;top:-6px;left:50%;height:12px;border-left:2px solid var(--border-strong,#8a9d94)}
+.ptb-roots>.ptb-node{position:relative;padding-top:14px}
+.ptb-causes .ptb-roots>.ptb-node::before{content:"";position:absolute;top:0;left:50%;height:14px;border-left:2px solid var(--accent-strong,#9a5a0c)}
+/* Efectos: la rama crece hacia arriba. */
+.ptb-up,.ptb-up .ptb-kids{flex-direction:row}
+.ptb-up .ptb-node{flex-direction:column-reverse}
+.ptb-up>.ptb-node{padding-top:0;padding-bottom:14px}
+.ptb-up>.ptb-node::after{content:"";position:absolute;bottom:0;left:50%;height:14px;border-left:2px solid var(--accent-strong,#9a5a0c)}
+.ptb-up .ptb-kids{padding-top:0;padding-bottom:18px}
+.ptb-up .ptb-kids::before{top:auto;bottom:0}
+.ptb-up .ptb-kids>.ptb-node{padding-top:0;padding-bottom:6px}
+.ptb-up .ptb-kids>.ptb-node::before{top:auto;bottom:-6px}
+.ptb-effects{display:flex;flex-direction:column-reverse;gap:10px}
+/* Narrow work area (small window, zoom or open side panels): the bank goes above the tree. */
+@container (max-width:760px){.ptb-layout{grid-template-columns:minmax(0,1fr)}.ptb-bank{position:sticky;top:205px;z-index:6;max-height:none;min-height:0;box-shadow:0 6px 16px #0001}.ptb-bank>.ptb-stack{display:flex;overflow-x:auto;padding-bottom:4px}.ptb-bank>.ptb-stack>.ptb-card{flex:0 0 210px}}
+.ptb-bank.empty{position:static;min-height:0;box-shadow:none}
+.ptb-layout:has(>.ptb-bank.empty){grid-template-columns:minmax(0,1fr)}
+@container (max-width:520px){.ptb-roots,.ptb-kids{flex-direction:column;align-items:stretch;width:auto}.ptb-node{width:auto}.ptb-kids{padding-left:16px}.ptb-kids::before,.ptb-kids>.ptb-node::before{left:6px}.ptb-up .ptb-node{flex-direction:column-reverse}}
+@media (pointer:coarse){.ptb-card{touch-action:pan-x pan-y}.ptb-grip{touch-action:none;padding:4px}}
+.ptb-dragging,.ptb-dragging *{user-select:none;-webkit-user-select:none}
+
+/* Retroalimentación sobre cada elemento (2.8): color + icono en la esquina + texto al pasar el mouse, enfocar o tocar */
+[data-fb]{position:relative;outline:2px solid transparent;border-color:var(--fb-c)!important;background:var(--fb-soft)!important;box-shadow:inset 4px 0 0 var(--fb-c)!important;cursor:help}
+[data-fb=ok]{--fb-c:var(--success,#1f7a4d);--fb-soft:var(--success-soft,#e0f3e8)}
+[data-fb=alerta]{--fb-c:var(--warning,#8f5b00);--fb-soft:var(--warning-soft,#fff2d3)}
+[data-fb=grave]{--fb-c:var(--danger,#b3261e);--fb-soft:var(--danger-soft,#fce8e6)}
+[data-fb]::after{content:"✓";position:absolute;top:-8px;right:-8px;z-index:2;width:20px;height:20px;border-radius:50%;background:var(--fb-c);color:#fff;font:700 12px/20px system-ui,sans-serif;text-align:center;pointer-events:none;box-shadow:0 1px 3px #0003}
+[data-fb=alerta]::after{content:"!"}
+[data-fb=grave]::after{content:"✕"}
+[data-fb]:hover,[data-fb]:focus-visible{outline-color:var(--fb-c);outline-offset:2px}
+.ptb-card[data-fb]{cursor:grab}
+.fb-tooltip{position:fixed;z-index:1000;transform:translate(-50%,-100%);display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:10px;border:1px solid var(--fb-c);border-left-width:5px;background:#fffdf8;color:#1d2a26;font-size:.9rem;line-height:1.4;box-shadow:0 10px 28px #0003;pointer-events:none;animation:fb-in .12s ease-out}
+.fb-tooltip.below{transform:translate(-50%,0)}
+.fb-tooltip.ok{--fb-c:var(--success,#1f7a4d)}.fb-tooltip.alerta{--fb-c:var(--warning,#8f5b00)}.fb-tooltip.grave{--fb-c:var(--danger,#b3261e)}
+.fb-tooltip svg{flex:0 0 auto;margin-top:2px;color:var(--fb-c)}
+@keyframes fb-in{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.fb-tooltip{animation:none}}
+.fb-legend{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:8px 0;font-size:.9rem}
+.fb-key{display:inline-flex;gap:5px;align-items:center;padding:2px 8px;border-radius:999px;font-weight:700}
+.fb-key.ok{color:var(--success,#1f7a4d);background:var(--success-soft,#e0f3e8)}
+.fb-key.alerta{color:var(--warning,#8f5b00);background:var(--warning-soft,#fff2d3)}
+.fb-key.grave{color:var(--danger,#b3261e);background:var(--danger-soft,#fce8e6)}
+.fb-details{margin:6px 0 10px}.fb-details>summary{cursor:pointer;font-weight:600}
+
+/* Actores con perfil sorteado (2.9): posición con icono, palabra y valor */
+.stance{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font-weight:700;font-size:12px;white-space:nowrap}
+.stance.favour{color:var(--success,#1f7a4d);background:var(--success-soft,#e0f3e8)}
+.stance.against{color:var(--danger,#b3261e);background:var(--danger-soft,#fce8e6)}
+.stance.neutral{color:#3f4f49;background:#e6ebe8}
+.actor-dot.favour{background:var(--success,#1f7a4d)}
+.actor-dot.against{background:var(--danger,#b3261e);box-shadow:0 0 0 5px #b3261e1f}
+.actor-dot.neutral{background:#5d6b66}
+.actor-legend{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+
+/* Ordenamiento territorial · Ley 388 de 1997 (3.0) */
+.territory-card{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line,#d9e2dc);border-left:4px solid #5b7f6c;border-radius:8px;padding:14px 16px;margin:14px 0;background:#f6f9f5}
+.territory-card>svg{flex:0 0 auto;color:#4f7a63;margin-top:2px}
+.territory-card dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0}
+.territory-card dt{font-weight:700;font-size:13px;color:#3f4f49}
+.territory-card dd{margin:0;font-size:14px}
+.law-section{border:1px solid var(--line,#d9e2dc);border-radius:8px;padding:8px 12px;margin:6px 0;background:#fff}
+.law-section>summary{cursor:pointer;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.law-section ul{margin:8px 0 6px;padding-left:20px}
+.law-section li{margin:4px 0;font-size:14px}
+.route-builder{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin:12px 0}
+.route-bank{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.route-bank .chip{text-align:left;line-height:1.35}
+.route-list{margin:8px 0;padding-left:0;list-style:none;counter-reset:paso;display:grid;gap:6px}
+.route-list>li{counter-increment:paso;display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--line,#d9e2dc);border-radius:6px;padding:8px 10px;background:#fff;font-size:14px}
+.route-list>li::before{content:counter(paso);font-weight:700;color:#4f7a63;flex:0 0 auto}
+.route-list>li>span:first-of-type{flex:1}
+.route-list>li.muted::before{content:none}
+.route-tools{display:flex;gap:2px;flex:0 0 auto}
+@container (max-width:640px){.route-builder{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.route-builder{grid-template-columns:minmax(0,1fr)}.territory-card dl{grid-template-columns:1fr}}

@@ -347,7 +347,7 @@ export function phaseAvailability(p: NormalizedProject): PhaseAvailability[] {
     withValue = valued.filter((i) => num(i.annualValue));
   return [
     { label: "Problema", status: p.problem && p.causes.length >= 2 && p.problemEffects.length >= 2 ? "si" : "no", reason: "Árbol del problema con causas y efectos del proyecto." },
-    { label: "Actores", status: p.actors.length >= 2 ? (p.actors.some((a) => num(a.power)) ? "si" : "parcial") : "no", reason: p.actors.some((a) => num(a.power)) ? "Poder y posición registrados." : "Sin poder ni posición: se usan valores de referencia." },
+    { label: "Actores", status: p.actors.length >= 2 ? (p.actors.some((a) => num(a.power)) ? "si" : "parcial") : "no", reason: p.actors.some((a) => num(a.power)) ? "Poder y posición registrados como referencia; en cada partida se sortean." : "Sin poder ni posición: en cada partida se sortean." },
     { label: "Alternativas", status: p.alternatives.length >= 2 ? "si" : "no", reason: `${p.alternatives.length} alternativa(s).` },
     { label: "Impactos", status: p.impacts.length ? "si" : "parcial", reason: p.impacts.length ? `${p.impacts.length} efecto(s) e impacto(s).` : "Solo producto y efecto del problema." },
     { label: "Presupuesto", status: "si", reason: "Planificador presupuestal con la inversión de la alternativa." },
@@ -386,7 +386,7 @@ export function generateMission(p: NormalizedProject, config: MissionConfig, mis
     c2 = causes.find((c) => c !== c1 && c.level === "indirecta") ?? causes.find((c) => c !== c1)!,
     e1 = effects.find((e) => e.level === "directa") ?? effects[0],
     e2 = effects.find((e) => e !== e1)!;
-  if (causes.length > 2 || effects.length > 2) assumptions.push(`El Árbol del problema del juego usa dos causas y dos efectos; los demás (${causes.length + effects.length - 4}) aparecen en el Centro de información.`);
+  if (causes.length > 2 || effects.length > 2) assumptions.push(`Objetivos, alternativas y cadena de valor se construyen con dos causas y dos efectos; el Árbol del problema del juego incluye además ${Math.min(6, causes.length + effects.length - 4)} causa(s) y efecto(s) más del proyecto como tarjetas.`);
   const objectiveFor = (causeId: string, i: number) =>
     p.specificObjectives.find((o) => o.causeId === causeId)?.text || p.specificObjectives.filter((o) => o.text.trim())[i]?.text || `Superar: ${lower(causes.find((c) => c.id === causeId)!.text)}`;
   const endFor = (effectId: string) => p.ends.find((e) => e.effectId === effectId)?.text || `Reducir: ${lower(effects.find((e) => e.id === effectId)!.text)}`;
@@ -459,6 +459,11 @@ export function generateMission(p: NormalizedProject, config: MissionConfig, mis
   if (!num(p.horizon)) assumptions.push("Horizonte: vida útil de cada alternativa.");
   if (!p.regulation.failure) assumptions.push("Falla de mercado: «Ninguna falla suficiente».");
   const scenario = build(spec);
+  // Every cause and effect the author wrote becomes a card of the problem tree (up to 6 more than the core ones).
+  scenario.treeExtras = [
+    ...causes.filter((c) => c !== c1 && c !== c2).map((c) => ({ label: c.text.trim(), level: c.level === "indirecta" ? ("indirect" as const) : ("direct" as const) })),
+    ...effects.filter((e) => e !== e1 && e !== e2).map((e) => ({ label: e.text.trim(), level: e.level === "indirecta" ? ("impact" as const) : ("effect" as const) })),
+  ].slice(0, 6);
   if (num(p.financial.rate) || num(p.economic.socialRate))
     scenario.constraints = [...scenario.constraints, `Tasas del proyecto: financiera ${num(p.financial.rate) ? (p.financial.rate * 100).toFixed(1) : "12,0"} %, social ${num(p.economic.socialRate) ? (p.economic.socialRate * 100).toFixed(1) : "9,0"} %`];
   const missionErrors = validateMission(scenario);

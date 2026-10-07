@@ -122,15 +122,16 @@ export function prepareV2(
       reason: "Comparar costos regulatorios con la evidencia disponible.",
     },
   });
+  if (g.v2?.territoryRules) for (const a of referenceTerritory(g)) g = act(g, a);
+  // A private developer pays its plusvalía participation here: it may need the credit it had not taken.
+  if (projectCost(g) > available(g) && !g.loans.some((l) => l.type === "credito")) g = act(g, { type: "finance", source: "credito" });
   g = next(g);
   if (g.v2?.v22 && g.phase === 5) g = act(g, { type: "committee", answers: referenceCommittee(g) });
   return g;
 }
 
-/** Reference classification of effects and impacts (all correct). */
-export function referenceImpacts(g: GameState) {
-  return impactCards(g).map((c) => ({ id: c.id, kind: c.kind, ...(c.group ? { group: c.group } : {}) }));
-}
+/** Reference classification of effects and impacts (shared with the presentation game). */
+export { referenceImpacts } from "../domain/demo";
 /** V2.2 evaluation modules completed with reference answers (valuation, financial and economic flows). */
 export function completeEvaluationV22(g: GameState) {
   if (g.phase !== 3 || !g.v2?.v22 || g.v2.v22.flow) return g;
@@ -145,8 +146,10 @@ export function commitV22(g: GameState, withComparison = false) {
   if (g.v2?.v22 && !g.v2.v22.committee) g = act(g, { type: "committee", answers: referenceCommittee(g) });
   return act(g, { type: "commit" }, withComparison);
 }
-import { impactCards, referenceValuation } from "../domain/valuation";
+import { referenceValuation } from "../domain/valuation";
+import { referenceImpacts } from "../domain/demo";
 import { missionFlowCase } from "../domain/missionFlow";
 import { referenceRows, referenceEconomic, referenceBenefits } from "../domain/flows";
 import { referenceCommittee } from "../domain/committee";
 import { referenceTree } from "../domain/problemTree";
+import { referenceTerritory } from "../domain/territory";

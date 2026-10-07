@@ -1,3 +1,4 @@
+import { gameActors } from "./actors";
 import type { GameState } from "./types";
 import { scenarioById } from "../data/scenarios";
 import { dependencyRules, difficultyRules } from "../data/balance";
@@ -17,6 +18,9 @@ export interface ChainPlacement {
 }
 export interface V2State {
   negotiationRules?:2;
+  /** Games from 3.0 on: territorial puzzles of the Ley 388 de 1997 in the Regulation stage. */
+  territoryRules?: 1;
+  territory?: import('./territory').TerritoryAnswers;
   budgetLines?:import('./budgetLines').BudgetLine[];
   challenge?:import('./challenges').Challenge;
   negotiations?:Record<string,import('./negotiations').NegotiationRecord>;
@@ -62,7 +66,8 @@ export interface V2State {
   >;
   planner: number;
   /** Árbol del problema built by the player: card id → level (or "fuera"). */
-  tree?: { placements: Record<string, import("./problemTree").TreeSlot> };
+  /** Hierarchical tree (2.7); games saved before keep the level-only format and are converted when read. */
+  tree?: { placements: Record<string, import("./problemTree").TreePlacement | import("./problemTree").TreeSlot> };
   /** Local analytics: seconds spent in each stage (not scored). */
   stageSeconds?: Record<number, number>;
   changes: { phase: number; action: string; month: number }[];
@@ -88,6 +93,7 @@ export interface V22State {
 export function newV2State(g: GameState): V2State {
   return {
     negotiationRules:2,
+    territoryRules: 1,
     version: 2,
     completed: [],
     reviews: {},
@@ -260,10 +266,10 @@ export function chainV2Score(g: GameState) {
   );
 }
 export function actorMapScore(g: GameState) {
-  const s = scenarioById(g.scenarioId);
+  const actors = gameActors(g);
   return (
     (100 *
-      s.actors.reduce((n, a) => {
+      actors.reduce((n, a) => {
         const p = g.v2?.actorMap[a.id];
         return (
           n +
@@ -271,7 +277,7 @@ export function actorMapScore(g: GameState) {
           Number(p?.interest === (a.interest >= 60 ? "alto" : "bajo"))
         );
       }, 0)) /
-    (s.actors.length * 2)
+    (actors.length * 2)
   );
 }
 export function sdgReasonScore(g: GameState) {

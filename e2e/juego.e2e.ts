@@ -35,10 +35,35 @@ test("el Árbol del problema se construye con tarjetas y bloquea el avance hasta
   await expect(page.getByRole("alert").first()).toContainText("Árbol del problema");
   await page.keyboard.press("Escape");
   // One card as the central problem, the rest out of the tree: valid structure, low score.
-  await bank.first().locator("select").selectOption("central");
-  while ((await bank.count()) > 0) await bank.first().locator("select").selectOption("fuera");
+  // Only dragging (no selector): the mouse drags a card to the central problem…
+  await expect(panel.locator("select")).toHaveCount(0);
+  await page.getByRole("button", { name: "Cerrar aviso" }).first().click();
+  await panel.locator(".ptb-central").evaluate((el) => el.scrollIntoView({ block: "center" }));
+  const from = (await bank.first().boundingBox())!,
+    to = (await panel.locator(".ptb-central").boundingBox())!;
+  await page.mouse.move(from.x + 20, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 40, from.y + from.height / 2 + 10, { steps: 3 });
+  await page.mouse.move(to.x + to.width / 2, to.y + Math.min(to.height, 40) / 2, { steps: 8 });
+  await page.mouse.up();
+  await expect(panel.locator(".ptb-central .ptb-card")).toHaveCount(1);
+  // …and the keyboard moves the rest out of the tree (Enter lifts the card, Enter on the destination drops it).
+  while ((await bank.count()) > 0) {
+    await bank.first().focus();
+    await page.keyboard.press("Enter");
+    await panel.getByRole("button", { name: "No pertenece al árbol" }).press("Enter");
+  }
   await panel.getByRole("button", { name: "Confirmar Árbol del problema" }).click();
-  await expect(panel.locator(".findings")).toContainText("Construcción del árbol");
+  await expect(panel.locator(".findings").first()).toContainText("Construcción del árbol");
+  // Feedback on each card: green/red marks, and hovering a card shows why.
+  await expect(panel.locator(".ptb-card[data-fb]")).toHaveCount(14);
+  const wrong = panel.locator('.ptb-card[data-fb="grave"]').first();
+  await wrong.evaluate((el) => el.scrollIntoView({ block: "center" }));
+  await wrong.hover();
+  await expect(page.locator("#fb-tooltip")).toContainText(/Error: Tarjeta válida descartada|Error:/);
+  await expect(wrong).toHaveAttribute("aria-describedby", "fb-tooltip");
+  await page.mouse.move(5, 500);
+  await expect(page.locator("#fb-tooltip")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
@@ -62,5 +87,61 @@ test("ninguna pregunta visible de una etapa tiene más de 5 opciones", async ({ 
     return [...names.values()];
   });
   expect(counts.every((n) => n <= 5)).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test("el zoom acerca y aleja toda la interfaz, se guarda y vuelve al ajuste automático", async ({ page }) => {
+  const errors = await fresh(page);
+  const zoom = () => page.evaluate(() => getComputedStyle(document.documentElement).zoom);
+  await expect(page.locator(".zoom-level")).toContainText("100 %");
+  await page.getByRole("button", { name: /Acercar/ }).click();
+  expect(await zoom()).toBe("1.1");
+  await startMission(page);
+  await page.getByRole("button", { name: /Alejar/ }).click();
+  await page.getByRole("button", { name: /Alejar/ }).click();
+  expect(await zoom()).toBe("0.9");
+  await page.reload();
+  expect(await zoom()).toBe("0.9");
+  await page.getByRole("button", { name: /Volver al ajuste automático/ }).click();
+  expect(await zoom()).toBe("1");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+  expect(errors).toEqual([]);
+});
+
+test("el menú de etapas se oculta y se muestra durante la partida y amplía el área de trabajo", async ({ page }) => {
+  const errors = await fresh(page);
+  await startMission(page);
+  const main = () => page.locator(".game-main").evaluate((e) => e.getBoundingClientRect().width);
+  const before = await main();
+  await page.getByRole("button", { name: "Ocultar el menú de etapas" }).click();
+  await expect(page.locator(".sidebar")).toBeHidden();
+  expect(await main()).toBeGreaterThan(before);
+  await page.reload();
+  await page.getByText("Continuar misión").first().click();
+  await expect(page.getByRole("button", { name: "Mostrar el menú de etapas" })).toBeVisible();
+  await page.getByRole("button", { name: "Mostrar el menú de etapas" }).click();
+  await expect(page.locator(".sidebar")).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("el modo presentación muestra una partida resuelta, recorre las 8 etapas y no modifica las partidas guardadas", async ({ page }) => {
+  const errors = await fresh(page);
+  const before = await page.evaluate(() => JSON.stringify(Object.entries(localStorage).filter(([k]) => k.startsWith("proyecta-qa"))));
+  await page.getByRole("button", { name: /Modo presentación/ }).click();
+  await expect(page.locator(".presentation-bar")).toContainText("solo lectura");
+  for (let i = 1; i <= 8; i++) {
+    await expect(page.locator(".page-heading .eyebrow")).toContainText(`ETAPA 0${i} DE 08`);
+    if (i < 8) await page.getByRole("button", { name: /Etapa siguiente/ }).click();
+  }
+  await page.locator(".section-nav button", { hasText: /Por qué obtuviste esta nota/ }).first().click();
+  await expect(page.locator(".score-breakdown")).toBeVisible();
+  await page.getByRole("tab", { name: "1", exact: true }).click();
+  await page.locator(".section-nav button", { hasText: /rbol del problema/ }).first().click();
+  await page.getByRole("button", { name: "Confirmar Árbol del problema" }).click({ force: true });
+  await expect(page.getByRole("alert").first()).toContainText("Modo presentación");
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: /Salir de la presentación/ }).click();
+  const after = await page.evaluate(() => JSON.stringify(Object.entries(localStorage).filter(([k]) => k.startsWith("proyecta-qa"))));
+  expect(after).toBe(before);
   expect(errors).toEqual([]);
 });

@@ -21,6 +21,7 @@ import { fmtMoney, fmtQty, fmtUnitMoney } from "../../domain/format";
 import { Panel, Button } from "../../components/ui";
 import { useDraftGuard, different } from "../../components/workbench";
 import { Deferred, ModuleIntro, Status } from "./common";
+import { fb } from "../../components/feedback";
 import ChoiceExperiment from "./ChoiceExperiment";
 
 export function MethodLibrary() {
@@ -113,7 +114,10 @@ export default function ValuationLab({ g, send }: { g: GameState; send: (a: Acti
         const c = choiceOf(card.id),
           m = measurement(g, card),
           on = !!c,
-          result = summary.rows.find((r) => r.card.id === card.id)?.result;
+          result = summary.rows.find((r) => r.card.id === card.id)?.result,
+          was = saved.find((x) => x.impactId === card.id),
+          // Feedback on the element itself (hover, focus or tap) while the answer stays as confirmed.
+          marks = !!result && !!was && help.immediate && help.detail !== "score";
         return (
           <article key={card.id} className="v22-impact">
             <header>
@@ -135,7 +139,14 @@ export default function ValuationLab({ g, send }: { g: GameState; send: (a: Acti
                   <span className="v22-given">
                     Cantidad por persona al año: {fmtQty(m.perCovered)} {m.unit}
                   </span>
-                  <label className="v22-compute">
+                  <label
+                    className="v22-compute"
+                    {...(marks && c!.quantity === was!.quantity
+                      ? result!.quantityOk
+                        ? fb("ok", "La medición coincide con los datos del caso.")
+                        : fb("grave", "La medición no coincide con los datos: revisa personas × cantidad por persona.")
+                      : {})}
+                  >
                     1. Medición anual ({m.unit}){help.guidedHints && " = personas × cantidad por persona"}
                     <input type="number" min={0} value={c!.quantity ? Math.round(c!.quantity * 100) / 100 : ""} onChange={(e) => update(card.id, { quantity: Number(e.target.value) })} />
                   </label>
@@ -143,7 +154,16 @@ export default function ValuationLab({ g, send }: { g: GameState; send: (a: Acti
                 <fieldset className="v22-choice methods">
                   <legend>2. Metodología de valoración</legend>
                   {methodOptions(g, card).map((method) => (
-                    <label key={method.id} className={c!.method === method.id ? "chosen" : ""}>
+                    <label
+                      key={method.id}
+                      className={c!.method === method.id ? "chosen" : ""}
+                      {...(marks && c!.method === method.id && was!.method === method.id
+                        ? fb(
+                            result!.fit === "optima" ? "ok" : result!.fit === "inadecuada" ? "grave" : "alerta",
+                            `Metodología ${fitLabel[result!.fit].toLowerCase()}.${help.detail === "full" ? ` ${result!.feedback}` : ""}`,
+                          )
+                        : {})}
+                    >
                       <input type="radio" name={"m" + card.id} checked={c!.method === method.id} onChange={() => update(card.id, { method: method.id })} />
                       <span>
                         {method.name}

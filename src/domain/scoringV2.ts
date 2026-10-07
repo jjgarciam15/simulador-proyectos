@@ -4,9 +4,12 @@ import { chainV2Score, actorMapScore, sdgReasonScore } from "./projectV2";
 import { causalQuality, indicatorReview } from "./mga";
 import { treeReview } from "./problemTree";
 import { clamp } from "./finance";
+import type { ScorePart } from "./types";
+import { part, practiceScore, negotiationScore, scaleParts, sumParts } from "./scoreParts";
 import { learningPenalty } from "./questionsV2";
 import { scoringWeightsV2 } from "../data/balance";
 import { regulatoryLabScore } from "./regulationLab";
+import { currentTerritory, encajeScore, plusvaliaScore, prediosScore, territoryActive, territoryScore } from "./territory";
 import { adjustments, coherenceMatrix, transversalCoherence } from "./coherence";
 import { budgetReview } from "./budgetReview";
 /** The plan as approved: budget-dependent reviews use it, while execution facts come from the final state. */
@@ -51,6 +54,26 @@ export function regulatoryScore(g: GameState) {
       Number(r.adverse === expected[1]))
   );
 }
+/**
+ * Regulación, territorio y ODS. From 3.0 the economic regulation shares the dimension with the territorial
+ * puzzles of the Ley 388 de 1997 (encaje, predios, plusvalía); older games keep 60 % regulation and 40 % ODS.
+ */
+export function regulationParts(g: GameState): ScorePart[] {
+  if (!territoryActive(g)) return [part("Regulación: diagnóstico y proporcionalidad", regulatoryScore(g), 0.6), part("ODS justificados", sdgReasonScore(g), 0.4)];
+  const t = currentTerritory(g);
+  return [
+    part("Regulación económica: diagnóstico y proporcionalidad", regulatoryScore(g), 0.4),
+    part("Ley 388: encaje en el ordenamiento", encajeScore(g, t?.encaje), 0.15),
+    part("Ley 388: ruta de adquisición de predios", prediosScore(g, t?.predios), 0.15),
+    part("Ley 388: participación en la plusvalía", plusvaliaScore(g, t?.plusvalia), 0.1),
+    part("ODS justificados", sdgReasonScore(g), 0.2),
+  ];
+}
+function regulationNote(g: GameState) {
+  return territoryActive(g)
+    ? `Regulación, territorio y ODS: 40 % regulación económica (${regulatoryScore(g)}); 40 % ordenamiento territorial con la Ley 388 de 1997 (${territoryScore(g)}/100: encaje en el plan, ruta predial y plusvalía); 20 % pertinencia y evidencia ODS (${sdgReasonScore(g).toFixed(0)}).`
+    : `Regulación: 60 % evidencia, falla, incentivo y efecto adverso (${regulatoryScore(g)}); 40 % pertinencia y evidencia ODS (${sdgReasonScore(g).toFixed(0)}).`;
+}
 export function scoreV2(
   g: GameState,
   observed: Outcome["dimensions"],
@@ -82,13 +105,18 @@ export function scoreV2(
     : 0;
   const focal = g.target > 0 && g.target <= s.affected ? 100 : 0;
   // With the player-built tree: 35 % causal links, 25 % tree construction, 25 % actors, 15 % targeting.
-  const diagnosis = g.v2?.tree
-    ? 0.35 * causalQuality(g) + 0.25 * treeReview(g).score + 0.25 * actorMapScore(g) + 0.15 * focal
-    : 0.5 * causalQuality(g) + 0.3 * actorMapScore(g) + 0.2 * focal;
-  const alternative =
-    50 * Number(g.objective === "n0") +
-    (50 * a.causes.filter((id) => g.nodes.includes(id)).length) /
-      Math.max(1, a.causes.length);
+  // Negotiating with actors adds a 10 % part (the others keep their proportions).
+  const negotiation = negotiationScore(g),
+    diagnosisCore = g.v2?.tree
+      ? [part("Enlaces causales (laboratorio MGA)", causalQuality(g), 0.35), part("Construcción del Árbol del problema", treeReview(g).score, 0.25), part("Mapa de actores", actorMapScore(g), 0.25), part("Focalización de la población", focal, 0.15)]
+      : [part("Enlaces causales (laboratorio MGA)", causalQuality(g), 0.5), part("Mapa de actores", actorMapScore(g), 0.3), part("Focalización de la población", focal, 0.2)];
+  const parts: ScorePart[][] = [
+    negotiation === null ? diagnosisCore : [...scaleParts(diagnosisCore, 0.9), part("Negociación con actores", negotiation, 0.1)],
+    [
+      part("Objetivo central del Árbol de objetivos", 100 * Number(g.objective === "n0"), 0.5),
+      part("Causas que atiende la alternativa", (100 * a.causes.filter((id) => g.nodes.includes(id)).length) / Math.max(1, a.causes.length), 0.5),
+    ],
+  ];
   const expectedValue = g.snapshot
     ? clamp(
         50 +
@@ -100,26 +128,23 @@ export function scoreV2(
       )
     : 0;
   const informationAtDecision = g.snapshot?.quality ?? g.quality;
-  const values = [
-    diagnosis,
-    alternative,
-    0.5 * chainV2Score(g) + 0.3 * budget + 0.2 * indicators,
-    50 * Number(g.acknowledged.includes("evaluation")) +
-      0.25 * expectedValue +
-      0.25 * informationAtDecision,
-    0.6 * regulatoryScore(g) + 0.4 * sdgReasonScore(g),
-    0.5 * observed[5].value + 0.5 * observed[3].value,
-    0.4 * observed[2].value + 0.3 * observed[6].value + 0.3 * observed[7].value,
-    observed[1].value,
-    transversal,
-  ];
+  parts.push(
+    [part("Cadena de valor", chainV2Score(g), 0.5), part("Presupuesto", budget, 0.3), part("Indicadores", indicators, 0.2)],
+    [part("Revisión de la evaluación ex ante", 100 * Number(g.acknowledged.includes("evaluation")), 0.5), part("Valor esperado al invertir", expectedValue, 0.25), part("Información disponible al invertir", informationAtDecision, 0.25)],
+    regulationParts(g),
+    [part(observed[5].name, observed[5].value, 0.5), part(observed[3].name, observed[3].value, 0.5)],
+    [part(observed[2].name, observed[2].value, 0.4), part(observed[6].name, observed[6].value, 0.3), part(observed[7].name, observed[7].value, 0.3)],
+    [part(observed[1].name, observed[1].value, 1)],
+    [part("Coherencia transversal", transversal, 1)],
+  );
+  const values = parts.map(sumParts);
   const weights = scoringWeightsV2[s.role];
   const names = [
     "Diagnóstico y Árbol del problema",
     "Alternativa y objetivos",
     "Cadena de valor y presupuesto",
     "Evaluación ex ante",
-    "Regulación y ODS",
+    "Regulación, territorio y ODS",
     "Compromisos y riesgo",
     "Ejecución y servicio",
     "Valor observado",
@@ -129,15 +154,16 @@ export function scoreV2(
     name: names[i],
     value: clamp(value),
     weight: weights[i],
+    parts: parts[i],
   }));
   const notes = [
     g.v2?.tree
-      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100), 25 % ubicación de actores y 15 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`
+      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100: nivel y de qué causa o efecto cuelga cada tarjeta), 25 % ubicación de actores y 15 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`
       : `Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida. Matriz de actores: ${actorMapScore(g).toFixed(0)}/100.`,
     `Alternativa: 50 % correspondencia del objetivo central y 50 % causas atendidas.`,
     `Preparación: 50 % cadena (${chainV2Score(g)}), 30 % presupuesto (${budget.toFixed(0)}) y 20 % indicadores (${indicators}). Presupuesto: suficiencia de asignación y mantenimiento, con descuento por reserva superior al 15 % del fondo base.`,
     `Evaluación: 50 % revisión confirmada, 25 % valor esperado normalizado y 25 % información disponible al invertir. Los eventos posteriores no cambian esta dimensión.`,
-    `Regulación: 60 % evidencia, falla, incentivo y efecto adverso (${regulatoryScore(g)}); 40 % pertinencia y evidencia ODS (${sdgReasonScore(g).toFixed(0)}). Los textos no se califican automáticamente.`,
+    regulationNote(g),
     `Compromisos: disciplina financiera e información/riesgo, con igual peso.`,
     `Ejecución: 40 % cobertura/equidad, 30 % plazo y 30 % legitimidad.`,
     `Valor observado: beneficio social para rol público; creación de valor para privado, normalizado con la referencia de misión.`,
@@ -145,16 +171,17 @@ export function scoreV2(
     `Práctica: cada pista descuenta según dificultad; cada intento adicional 0,2 puntos. Tope total: 8 puntos. La nota de cada ejercicio se informa aparte.`,
     `Ajustes: bonificaciones +${adjust.bonus} (tope 6) y penalizaciones −${adjust.penalty} (tope 8), cada una con su razón.`,
   ];
-  const v3 = plan.v2?.v22 ? scoreV3Parts(g, plan, values, transversal) : null;
+  const v3 = plan.v2?.v22 ? scoreV3Parts(g, plan, parts, transversal) : null;
   if (v3) {
     dimensions = v3.dimensions;
-    notes.splice(0, 9, ...v3.notes);
+    notes.splice(0, 10, ...v3.notes);
   }
   const story = projectStory(g, plan, review, transversal);
   return {
     dimensions,
     base: dimensions.reduce((n, d) => n + d.value * d.weight, 0),
-    penalty: learningPenalty(g) + adjust.penalty,
+    // V3 grades the practice as its own dimension (hints and retries are inside each question's score).
+    penalty: (v3 ? 0 : learningPenalty(g)) + adjust.penalty,
     bonus: adjust.bonus,
     adjustments: adjust,
     coherence: matrix,
@@ -232,7 +259,7 @@ export function flowScores(plan: GameState) {
     economic: v.economic && v.flow ? errorScore(detectEconomicErrors(c, v.flow.rows, v.economic.rows, v.economic.benefits)) * (v.economic.builtFor === plan.alternative ? 1 : 0.5) : 0,
   };
 }
-function scoreV3Parts(g: GameState, plan: GameState, v2Values: number[], transversal: number) {
+function scoreV3Parts(g: GameState, plan: GameState, v2: ScorePart[][], transversal: number) {
   const s = scenarioById(g.scenarioId),
     on = (m: Parameters<typeof moduleEnabled>[1]) => moduleEnabled(g.scenarioId, m),
     impacts = impactReview(plan).score * (plan.v2?.v22?.impacts?.builtFor === plan.alternative ? 1 : 0.5),
@@ -240,21 +267,24 @@ function scoreV3Parts(g: GameState, plan: GameState, v2Values: number[], transve
     flows = flowScores(plan),
     trace = traceability(plan),
     committee = committeeScore(plan),
-    objectives = objectivesScore(plan);
-  const values = [
-    v2Values[0],
-    0.6 * v2Values[1] + 0.4 * objectives,
-    v2Values[2],
-    on("valuation") ? 0.4 * impacts + 0.6 * valuation : impacts,
-    on("economicFlow") ? 0.5 * flows.financial + 0.5 * flows.economic : flows.financial,
-    v2Values[3],
-    v2Values[4],
-    v2Values[5],
-    v2Values[6],
-    v2Values[7],
-    0.6 * transversal + 0.4 * trace.score,
-    committee,
+    objectives = objectivesScore(plan),
+    practice = practiceScore(g);
+  const parts: ScorePart[][] = [
+    v2[0],
+    [...scaleParts(v2[1], 0.6), part("Objetivos general y específicos", objectives, 0.4)],
+    v2[2],
+    on("valuation") ? [part("Clasificación de efectos e impactos", impacts, 0.4), part("Valoración económica de impactos", valuation, 0.6)] : [part("Clasificación de efectos e impactos", impacts, 1)],
+    on("economicFlow") ? [part("Flujo financiero", flows.financial, 0.5), part("Flujo económico con RPC", flows.economic, 0.5)] : [part("Flujo financiero", flows.financial, 1)],
+    v2[3],
+    v2[4],
+    v2[5],
+    v2[6],
+    v2[7],
+    [part("Coherencia transversal", transversal, 0.6), part("Trazabilidad del proyecto", trace.score, 0.4)],
+    [part("Respuestas al comité evaluador", committee, 1)],
+    [part(`Práctica de conceptos (${practice.answered} de ${practice.total} ejercicios)`, practice.score, 1)],
   ];
+  const values = parts.map(sumParts);
   const names = [
     "Diagnóstico y Árbol del problema",
     "Alternativa y objetivos",
@@ -262,20 +292,21 @@ function scoreV3Parts(g: GameState, plan: GameState, v2Values: number[], transve
     "Efectos, impactos y valoración",
     "Flujos, VPN y RPC",
     "Evaluación ex ante",
-    "Regulación y ODS",
+    "Regulación, territorio y ODS",
     "Compromisos y riesgo",
     "Ejecución y servicio",
     "Valor observado",
     "Coherencia y trazabilidad",
     "Comité evaluador",
+    "Práctica de conceptos",
   ];
   const profile = profileOf(g.scenarioId),
     raw = scoringWeightsV3[s.role].map((w, i) => w * (profile.weights?.[names[i]] ?? 1) * (i === 11 && !on("committee") ? 0 : 1)),
     total = raw.reduce((n, w) => n + w, 0);
-  const dimensions = values.map((value, i) => ({ name: names[i], value: clamp(value), weight: raw[i] / total }));
+  const dimensions = values.map((value, i) => ({ name: names[i], value: clamp(value), weight: raw[i] / total, parts: parts[i] }));
   const notes = [
     g.v2?.tree
-      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100), 25 % ubicación de actores y 15 % focalización válida.`
+      ? `Diagnóstico: 35 % enlaces causales, 25 % construcción del Árbol del problema (${treeReview(g).score}/100: nivel y de qué causa o efecto cuelga cada tarjeta), 25 % ubicación de actores y 15 % focalización válida${negotiationScore(g) === null ? "" : "; si negociaste, la negociación pesa 10 % y el resto conserva sus proporciones"}.`
       : "Diagnóstico: 50 % enlaces causales, 30 % ubicación de actores y 20 % focalización válida.",
     `Alternativa y objetivos: 60 % correspondencia de objetivo y causas; 40 % objetivos general y específicos (${objectives.toFixed(0)}/100).`,
     "Preparación: 50 % cadena de valor, 30 % presupuesto (suficiencia, mantenimiento y diagnóstico) y 20 % indicadores.",
@@ -286,12 +317,13 @@ function scoreV3Parts(g: GameState, plan: GameState, v2Values: number[], transve
       ? `Flujos: 50 % flujo financiero (${flows.financial.toFixed(0)}) y 50 % flujo económico con RPC (${flows.economic.toFixed(0)}); cada error grave resta 12 puntos y cada alerta 5.`
       : `Flujos: flujo financiero (${flows.financial.toFixed(0)}); cada error grave resta 12 puntos y cada alerta 5.`,
     "Evaluación: 50 % revisión confirmada, 25 % valor esperado normalizado y 25 % información disponible al invertir.",
-    "Regulación: 60 % cadena causal y proporcionalidad; 40 % pertinencia y evidencia ODS.",
+    regulationNote(g),
     "Compromisos: disciplina financiera e información/riesgo, con igual peso.",
     "Ejecución: 40 % cobertura/equidad, 30 % plazo y 30 % legitimidad.",
     "Valor observado: beneficio social para rol público; creación de valor para privado.",
     `Coherencia y trazabilidad: 60 % coherencia transversal (${transversal.toFixed(0)}) y 40 % trazabilidad (${trace.score}, ${trace.gaps.length} vacío(s)).`,
     on("committee") ? `Comité evaluador: ${committee}/100 en preguntas derivadas de tu partida.` : "Comité evaluador: no aplica en esta misión.",
+    `Práctica de conceptos: promedio de los ${practice.total} ejercicios de la partida (${practice.answered} respondidos; los no respondidos cuentan 0). Cada pista y cada intento extra ya descuentan dentro del ejercicio.`,
   ];
   return { dimensions, notes };
 }

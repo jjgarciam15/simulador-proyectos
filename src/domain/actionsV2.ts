@@ -7,7 +7,7 @@ import {
 } from "./projectV2";
 import { scenarioById } from "../data/scenarios";
 import { puzzleDeck, puzzleSlots } from "./regulationLab";
-import { nodesFromTree, treeCards, treeSlots, type TreePlacements } from "./problemTree";
+import { nodesFromTree, treeError, type TreePlacements } from "./problemTree";
 export type ActionV2 =
   | { type: "resetStage" }
   | { type: "visit"; phase: number }
@@ -21,7 +21,7 @@ export type ActionV2 =
   | { type: "regulatory"; value: V2State["regulatory"] }
   | { type: "planner"; value: number }
   | { type: "dilemma"; choice: string }
-  | { type: "tree"; placements: Record<string, string> };
+  | { type: "tree"; placements: TreePlacements };
 export function applyV2(original: GameState, a: ActionV2) {
   if (!original.v2)
     throw new Error("Esta herramienta corresponde a una partida V2.");
@@ -30,14 +30,13 @@ export function applyV2(original: GameState, a: ActionV2) {
     s = scenarioById(g.scenarioId);
   if (a.type === "tree") {
     if (g.phase !== 0 || g.snapshot || g.outcome) throw new Error("El Árbol del problema se construye en Diagnóstico.");
-    const ids = new Set(treeCards(g).map((c) => c.id)),
-      slots = new Set(treeSlots.map((t) => t.id as string));
-    const entries = Object.entries(a.placements ?? {});
-    if (!entries.length || entries.some(([id, slot]) => !ids.has(id) || !slots.has(slot)))
-      throw new Error("Ubica cada tarjeta en un nivel del árbol o déjala fuera.");
-    if (entries.filter(([, slot]) => slot === "central").length !== 1) throw new Error("El árbol necesita exactamente un problema central.");
-    v.tree = { placements: Object.fromEntries(entries) as TreePlacements };
-    g.nodes = nodesFromTree(g, v.tree.placements);
+    const error = treeError(g, a.placements);
+    if (error) throw new Error(error);
+    const placements = Object.fromEntries(
+      Object.entries(a.placements as TreePlacements).map(([id, p]) => [id, p.side === "cause" || p.side === "effect" ? { side: p.side, parent: p.parent } : { side: p.side }]),
+    ) as TreePlacements;
+    v.tree = { placements };
+    g.nodes = nodesFromTree(g, placements);
     return g;
   }
   if (a.type === "visit") {
@@ -109,6 +108,8 @@ export function applyV2(original: GameState, a: ActionV2) {
       g.policyAligned = false;
       v.sdgReasons = {};
       v.regulatory = { evidence: "", incentive: "", adverse: "", reason: "" };
+      // Money and time already spent on the territorial analysis stay; the answers are cleared.
+      if (v.territory) v.territory = { alternative: v.territory.alternative, applied: v.territory.applied };
     }
     g.acknowledged = [];
     v.resetCount = (v.resetCount ?? 0) + 1;

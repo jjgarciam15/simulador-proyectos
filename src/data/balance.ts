@@ -128,7 +128,8 @@ export const adjustmentRules = {
  * ejecución, valor observado, coherencia y trazabilidad, comité evaluador. Mission profiles may scale weights;
  * the result is always renormalized to sum 1.
  */
+/** The 13th weight is «Práctica de conceptos»; weights are renormalized at scoring time. */
 export const scoringWeightsV3 = {
-  publico: [0.1, 0.08, 0.12, 0.12, 0.12, 0.08, 0.1, 0.06, 0.06, 0.04, 0.08, 0.04],
-  privado: [0.08, 0.08, 0.12, 0.1, 0.14, 0.1, 0.1, 0.06, 0.06, 0.04, 0.08, 0.04],
+  publico: [0.1, 0.08, 0.12, 0.12, 0.12, 0.08, 0.1, 0.06, 0.06, 0.04, 0.08, 0.04, 0.05],
+  privado: [0.08, 0.08, 0.12, 0.1, 0.14, 0.1, 0.1, 0.06, 0.06, 0.04, 0.08, 0.04, 0.05],
 };

@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { currentTerritory, territoryActive } from "../domain/territory";
 import { CheckCircle2, Circle, Navigation, Save } from "lucide-react";
 import type { GameState } from "../domain/types";
 import { available, projectCost } from "../domain/engine";
@@ -91,6 +92,13 @@ export function StageGuide({ g, pending }: { g: GameState; pending: number }) {
         ];
       case 4:
         return [
+          ...(territoryActive(g)
+            ? [
+                { label: "Encaje en el ordenamiento (Ley 388)", done: !!currentTerritory(g)?.encaje },
+                { label: "Ruta de adquisición de predios", done: !!currentTerritory(g)?.predios },
+                { label: "Participación en la plusvalía", done: !!currentTerritory(g)?.plusvalia },
+              ]
+            : []),
           { label: "Confirmar diagnóstico e instrumento", done: !!g.failure },
           {
             label: "Explicar alineación estratégica",
@@ -156,7 +164,9 @@ export function SectionNavigator({
   const ref = useRef<HTMLDivElement>(null),
     eventRef = useRef<HTMLElement | null>(null),
     [sections, setSections] = useState<{ id: string; title: string }[]>([]),
-    [active, setActive] = useState(0);
+    [active, setActive] = useState(0),
+    // Ex post can be read section by section or as one long report.
+    [showAll, setShowAll] = useState(false);
   useEffect(() => {
     const elements = Array.from(
       ref.current?.querySelectorAll<HTMLElement>(":scope > section.panel") ??
@@ -173,7 +183,7 @@ export function SectionNavigator({
     const list = elements.map((el, i) => {
       const id = "phase-" + phase + "-section-" + i;
       el.id = id;
-      el.hidden = phase !== 7 && i !== nextActive;
+      el.hidden = !showAll && i !== nextActive;
       return {
         id,
         title: el.querySelector("h3")?.textContent ?? "Detalle " + (i + 1),
@@ -182,14 +192,18 @@ export function SectionNavigator({
     setSections((prev) =>
       JSON.stringify(prev) === JSON.stringify(list) ? prev : list,
     );
-  }, [children, phase, active]);
+  }, [children, phase, active, showAll]);
+  useEffect(() => setShowAll(false), [phase]);
+  /** Changes section instantly; only scrolls when the top of the sections is out of view. */
   function move(index: number) {
     setActive(index);
-    ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setShowAll(false);
+    const el = ref.current;
+    if (el && el.getBoundingClientRect().top < 0) el.scrollIntoView({ behavior: "auto", block: "start" });
   }
   return (
     <>
-      {sections.length > 1 && phase !== 7 && (
+      {sections.length > 1 && (
         <nav className="section-nav" aria-label="Herramientas de esta etapa">
           {sections.map((s, i) => (
             <button
@@ -203,12 +217,15 @@ export function SectionNavigator({
               {s.title}
             </button>
           ))}
+          <button className={"section-all" + (showAll ? " active" : "")} aria-pressed={showAll} onClick={() => setShowAll(!showAll)}>
+            {showAll ? "Ver por secciones" : "Ver todo en una página"}
+          </button>
         </nav>
       )}
       <div ref={ref} className="phase-sections">
         {children}
       </div>
-      {sections.length > 1 && phase !== 7 && (
+      {sections.length > 1 && !showAll && (
         <div className="tool-navigation">
           <button disabled={active === 0} onClick={() => move(active - 1)}>
             ← Herramienta anterior

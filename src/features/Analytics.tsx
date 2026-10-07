@@ -61,7 +61,7 @@ export function AttemptComparison({ g, history }: { g: GameState; history: GameS
                   <strong>{x.outcome!.score}</strong>
                 </td>
                 {dims.slice(0, 6).map((d) => (
-                  <td key={d}>{Math.round(x.outcome!.assessment?.dimensions.find((y) => y.name === d)?.value ?? 0)}</td>
+                  <td key={d}>{Math.round(x.outcome!.assessment?.dimensions.find((y) => sameDimension(y.name, d))?.value ?? 0)}</td>
                 ))}
               </tr>
             ))}
@@ -72,3 +72,5 @@ export function AttemptComparison({ g, history }: { g: GameState; history: GameS
     </Panel>
   );
 }
+/** Games before 3.0 called the regulation dimension «Regulación y ODS». */
+const sameDimension = (a: string, b: string) => a === b || [a, b].every((x) => x === "Regulación y ODS" || x === "Regulación, territorio y ODS");

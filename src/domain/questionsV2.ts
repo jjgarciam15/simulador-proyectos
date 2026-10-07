@@ -4,6 +4,7 @@ import { random } from "./finance";
 import { difficultyRules, retryFactors } from "../data/balance";
 import {appliedCases} from './appliedCases';
 import { generatedQuestions } from './project/activityRegistry';
+import { territoryActive } from './territory';
 export interface QuestionV2 {
   id: string;
   phase: number;
@@ -87,7 +88,48 @@ export function questionsV2(g: GameState):QuestionV2[] {
           ],
         }
       : q,
-  ).concat(appliedCases(g), generatedQuestions(g.scenarioId));
+  ).concat(appliedCases(g), generatedQuestions(g.scenarioId), territoryActive(g) ? ley388Questions(g) : []);
+}
+/** Practice on the Ley 388 de 1997 (Regulation stage; games from 3.0 on). */
+function ley388Questions(g: GameState): QuestionV2[] {
+  const base = { phase: 4, context: scenarioName(g), difficulty: g.difficulty, points: 100, penalty: difficultyRules[g.difficulty].hintPenalty };
+  const mix = (id: string, list: { id: string; text: string }[]) => [...list].sort((a, b) => random(g.seed, id + a.id) - random(g.seed, id + b.id));
+  return [
+    {
+      ...base,
+      id: "ley388-principio",
+      concept: "Ordenamiento territorial",
+      question: "¿Qué principio de la Ley 388 de 1997 justifica que el municipio participe en la plusvalía que generan sus decisiones?",
+      options: mix("ley388-principio", [
+        { id: "reparto", text: "La distribución equitativa de las cargas y los beneficios" },
+        { id: "libre", text: "La libre disposición del propietario sobre todo el mayor valor" },
+        { id: "eficiencia", text: "La eficiencia del gasto: recaudar para cubrir el funcionamiento" },
+        { id: "autonomia", text: "La autonomía del contratista para fijar el precio del suelo" },
+        { id: "neutral", text: "La neutralidad fiscal: las decisiones urbanísticas no generan valor" },
+      ]),
+      answers: ["reparto"],
+      explanation: "Art. 2: los principios son la función social y ecológica de la propiedad, la prevalencia del interés general y la distribución equitativa de cargas y beneficios. La plusvalía devuelve a la comunidad parte del valor que crean sus decisiones (arts. 73 y 85).",
+      hints: ["Busca entre los tres principios del art. 2.", "Piensa en quién crea el mayor valor: la decisión pública, no el propietario.", "Los recursos tienen destinación específica (art. 85), no de funcionamiento."],
+      tags: ["Ley 388", "plusvalía"],
+    },
+    {
+      ...base,
+      id: "ley388-expansion",
+      concept: "Ordenamiento territorial",
+      question: "Un terreno del borde fue incorporado al suelo de expansión urbana y todavía no tiene redes. ¿Qué se necesita antes de urbanizarlo?",
+      options: mix("ley388-expansion", [
+        { id: "parcial", text: "Un plan parcial que lo desarrolle (art. 19)" },
+        { id: "licencia", text: "Solo la licencia de construcción del edificio" },
+        { id: "rural", text: "Nada: sigue siendo suelo rural y se puede construir" },
+        { id: "decreto", text: "Un decreto del alcalde que lo declare urbano sin más trámite" },
+        { id: "valorizacion", text: "Cobrar primero la contribución de valorización" },
+      ]),
+      answers: ["parcial"],
+      explanation: "Arts. 19 y 32: el suelo de expansión se habilita para uso urbano mediante planes parciales, que definen redes, cesiones y reparto de cargas y beneficios.",
+      hints: ["El suelo de expansión aún no es urbano.", "Revisa qué instrumento desarrolla el plan en esas áreas.", "Art. 19."],
+      tags: ["Ley 388", "clases de suelo"],
+    },
+  ];
 }
 export type QuestionAction =
   | { type: "answerV2"; id: string; choices: string[] }

@@ -8,7 +8,7 @@ describe("Casos de aplicación MGA", () => {
     for (const s of scenarios) {
       const g = createGameV2(s.id),
         qs = questionsV2(g);
-      expect(qs).toHaveLength(21);
+      expect(qs).toHaveLength(23); // 21 + 2 de la Ley 388 de 1997 (Regulación)
       expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length);
       for (const q of qs.filter((q) => q.id.startsWith("applied-"))) {
         expect(q.options).toHaveLength(5);

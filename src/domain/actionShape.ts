@@ -27,6 +27,7 @@ const objects: Record<string, string[]> = {
   regulatory: ["value"],
   tree: ["placements"],
   committee: ["answers"],
+  territory: ["answers"],
 };
 const integers: Record<string, string[]> = { reopen: ["phase"], visit: ["phase"], stageTime: ["phase"] };
 const numbers: Record<string, string[]> = { target: ["value"], planner: ["value"], stageTime: ["seconds"] };

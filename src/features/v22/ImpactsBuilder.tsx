@@ -7,6 +7,7 @@ import { helpPolicy } from "../../domain/help";
 import { Panel, Button } from "../../components/ui";
 import { useDraftGuard, different } from "../../components/workbench";
 import { Deferred, ModuleIntro, Status } from "./common";
+import { fb, FeedbackLegend, type FeedbackLevel } from "../../components/feedback";
 
 const kinds = Object.keys(kindText) as ImpactKind[];
 const groups: Beneficiary[] = ["Usuarios", "Consumidores", "Productores", "Gobierno", "Comunidad", "Trabajadores", "Población objetivo", "Terceros"];
@@ -21,10 +22,34 @@ export default function ImpactsBuilder({ g, send }: { g: GameState; send: (a: Ac
   useDraftGuard(different(placements, saved));
   const place = (id: string, patch: Partial<ImpactPlacement>) => {
     const prior = placements.find((p) => p.id === id);
-    const next = { id, kind: (patch.kind ?? prior?.kind ?? "efecto") as ImpactKind, group: patch.group ?? prior?.group };
+    const next = {
+      id,
+      kind: (patch.kind ?? prior?.kind ?? "efecto") as ImpactKind,
+      group: patch.group ?? prior?.group,
+    };
     setPlacements([...placements.filter((p) => p.id !== id), next]);
   };
-  const review = impactReview(g);
+  const review = impactReview(g),
+    marks = saved.length > 0 && help.immediate && help.detail !== "score";
+  /** Color and hover text of a card, only while it stays as it was confirmed. */
+  function feedbackOf(id: string): { level: FeedbackLevel; text: string } | null {
+    const r = marks ? review.rows.find((x) => x.card.id === id) : undefined,
+      now = placements.find((x) => x.id === id);
+    if (!r?.placed || !now || now.kind !== r.placed.kind || now.group !== r.placed.group) return null;
+    const right = `${kindText[r.card.kind].toLowerCase()}${r.card.group && (r.card.kind === "impactoPositivo" || r.card.kind === "impactoNegativo") ? `, recibido por ${r.card.group}` : ""}`;
+    if (r.status === "correcta")
+      return {
+        level: "ok",
+        text: help.detail === "full" ? `Bien clasificada: ${right}. ${r.card.why}` : "Bien clasificada.",
+      };
+    const status = r.status.charAt(0).toUpperCase() + r.status.slice(1);
+    return {
+      level: r.status === "grupo incorrecto" ? "alerta" : "grave",
+      text: `${status}.${help.detail === "full" ? ` Corresponde a ${right}. ${r.card.why}` : ""}`,
+    };
+  }
+  const levels = cards.map((c) => feedbackOf(c.id)?.level).filter((x): x is FeedbackLevel => !!x),
+    count = (k: FeedbackLevel) => levels.filter((x) => x === k).length;
   return (
     <Panel title="Efectos e impactos del proyecto" kicker="PRODUCTO → EFECTO → IMPACTO">
       <ModuleIntro
@@ -35,8 +60,8 @@ export default function ImpactsBuilder({ g, send }: { g: GameState; send: (a: Ac
         next="Valoración económica, flujo económico, evaluación distributiva y ODS."
       />
       <p className="muted">
-        Diferencia: <strong>efecto del problema</strong> = consecuencia de que el problema exista hoy; <strong>efecto del proyecto</strong> = cambio que
-        produce la intervención. Arrastra una tarjeta a una columna o usa sus selectores.
+        Diferencia: <strong>efecto del problema</strong> = consecuencia de que el problema exista hoy; <strong>efecto del proyecto</strong> = cambio que produce
+        la intervención. Arrastra una tarjeta a una columna o usa sus selectores.
       </p>
       <div className="v22-columns">
         {kinds.map((k) => (
@@ -57,18 +82,30 @@ export default function ImpactsBuilder({ g, send }: { g: GameState; send: (a: Ac
             <strong>{kindText[k]}</strong>
             {placements
               .filter((p) => p.kind === k)
-              .map((p) => (
-                <small key={p.id}>{cards.find((c) => c.id === p.id)?.text}</small>
-              ))}
+              .map((p) => {
+                const f = feedbackOf(p.id);
+                return (
+                  <small key={p.id} tabIndex={f ? 0 : undefined} {...fb(f?.level, f?.text ?? "")}>
+                    {cards.find((c) => c.id === p.id)?.text}
+                  </small>
+                );
+              })}
           </div>
         ))}
       </div>
       <div className="v22-cards">
         {cards.map((c) => {
           const p = placements.find((x) => x.id === c.id),
-            isImpact = p?.kind === "impactoPositivo" || p?.kind === "impactoNegativo";
+            isImpact = p?.kind === "impactoPositivo" || p?.kind === "impactoNegativo",
+            f = feedbackOf(c.id);
           return (
-            <article key={c.id} draggable onDragStart={(e) => e.dataTransfer.setData("text/plain", c.id)} className={p ? "placed" : ""}>
+            <article
+              key={c.id}
+              draggable
+              onDragStart={(e) => e.dataTransfer.setData("text/plain", c.id)}
+              className={p ? "placed" : ""}
+              {...fb(f?.level, f?.text ?? "")}
+            >
               <strong>{c.text}</strong>
               <div className="two-col">
                 <label>
@@ -107,18 +144,35 @@ export default function ImpactsBuilder({ g, send }: { g: GameState; send: (a: Ac
             <p>
               <strong>Clasificación: {review.score}/100.</strong>
             </p>
+            {marks && (
+              <FeedbackLegend
+                counts={{
+                  ok: count("ok"),
+                  alerta: count("alerta"),
+                  grave: count("grave"),
+                }}
+              />
+            )}
             {help.detail !== "score" && (
-              <ul className="findings">
-                {review.rows
-                  .filter((r) => r.status !== "correcta")
-                  .map((r) => (
-                    <Status key={r.card.id} level={r.status === "grupo incorrecto" ? "alerta" : "grave"}>
-                      «{r.card.text}»: {r.status}
-                      {help.detail === "full" && <> — corresponde a {kindText[r.card.kind].toLowerCase()}. {r.card.why}</>}
-                    </Status>
-                  ))}
-                {review.rows.every((r) => r.status === "correcta") && <Status level="ok">Todas las tarjetas están bien clasificadas.</Status>}
-              </ul>
+              <details className="fb-details">
+                <summary>Ver la retroalimentación en lista</summary>
+                <ul className="findings">
+                  {review.rows
+                    .filter((r) => r.status !== "correcta")
+                    .map((r) => (
+                      <Status key={r.card.id} level={r.status === "grupo incorrecto" ? "alerta" : "grave"}>
+                        «{r.card.text}»: {r.status}
+                        {help.detail === "full" && (
+                          <>
+                            {" "}
+                            — corresponde a {kindText[r.card.kind].toLowerCase()}. {r.card.why}
+                          </>
+                        )}
+                      </Status>
+                    ))}
+                  {review.rows.every((r) => r.status === "correcta") && <Status level="ok">Todas las tarjetas están bien clasificadas.</Status>}
+                </ul>
+              </details>
             )}
           </div>
         ) : (

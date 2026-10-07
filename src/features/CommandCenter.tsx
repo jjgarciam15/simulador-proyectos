@@ -50,12 +50,12 @@ const introductions = [
     more: "La evaluación ex ante estima costos y beneficios futuros antes de ejecutar. La financiera mide caja; la social mide bienestar. Un VPN social positivo no paga las cuentas.",
   },
   {
-    title: "Examinar incentivos y sostenibilidad",
-    what: "Diagnosticas la falla de mercado, eliges un instrumento (o no intervenir) y sustentas los ODS.",
-    why: "Una regla cambia comportamientos: puede corregir una falla o crear otra.",
-    decide: "Si existe una falla suficiente, qué instrumento es proporcional y qué ODS puedes sostener con evidencia.",
-    effect: "Un instrumento desproporcionado genera fallo regulatorio al invertir; seleccionar ODS sin relación resta puntos.",
-    more: "Regular tiene costos administrativos, de cumplimiento y riesgos de captura o barreras. No intervenir es correcto cuando la falla es leve frente a esos costos.",
+    title: "Regular el mercado y el territorio",
+    what: "Aplicas la Ley 388 de 1997 a tu alternativa (encaje en el plan de ordenamiento, ruta de adquisición de predios y plusvalía), diagnosticas la falla de mercado, eliges un instrumento (o no intervenir) y sustentas los ODS.",
+    why: "Una regla cambia comportamientos y el suelo condiciona la obra: un sitio incompatible, predios mal adquiridos o una plusvalía no prevista retrasan y encarecen el proyecto.",
+    decide: "Dónde puede construirse la alternativa y con qué trámite, cómo se adquieren sus predios, quién paga o recibe la plusvalía, qué instrumento es proporcional y qué ODS puedes sostener.",
+    effect: "La plusvalía bien liquidada cofinancia un proyecto público; un error territorial se paga al invertir (licencia negada, plan parcial faltante, adquisición impugnable). Un instrumento desproporcionado genera fallo regulatorio.",
+    more: "La Ley 388 de 1997 ordena el territorio con tres principios: función social y ecológica de la propiedad, prevalencia del interés general y reparto equitativo de cargas y beneficios. Regular el mercado también tiene costos: no intervenir es correcto cuando la falla es leve.",
   },
   {
     title: "Asumir compromisos",

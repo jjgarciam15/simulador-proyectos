@@ -125,7 +125,7 @@ class Collector {
     // Link specific objectives to causes only when the count matches one to one (never guessed otherwise).
     if (p.specificObjectives.length && p.specificObjectives.length === p.causes.length) p.specificObjectives.forEach((o, i) => (o.causeId = p.causes[i].id));
     const missing = [
-      ["title", p.title],
+      ["nombre del proyecto", p.title],
       ["problema central", p.problem],
       ["objetivo general", p.generalObjective],
       ["alternativas", p.alternatives.length],
@@ -259,6 +259,9 @@ export function normalizeExcel(wb: XlsxWorkbook, fileName: string, now = new Dat
         }
         const t = normText(label);
         const typed = /^causa/.test(t) ? "causes" : /^efecto/.test(t) ? "problemEffects" : /^objetivo especifico/.test(t) ? "specificObjectives" : /^supuesto/.test(t) ? "assumptions" : /^impacto/.test(t) ? "impacts" : null;
+        // A row with an empty description and only a level («Causa | | Directa», as in the blank template) is not data.
+        const onlyLevel = typeof row[nextCol] === "string" && /^(in)?direct[oa]s?$/.test(normText(row[nextCol] as string));
+        if (typed && onlyLevel) break;
         if (typed && nextCol > col && typeof row[nextCol] === "string") {
           const levelCell = row.slice(nextCol + 1).find((v) => typeof v === "string" && /direct|indirect/i.test(v)) as string | undefined;
           c.add(typed, row[nextCol] as string, ref(r, nextCol), "alta", levelCell ?? (/indirect/.test(t) ? "indirecta" : undefined));

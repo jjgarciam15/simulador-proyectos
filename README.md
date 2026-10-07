@@ -64,7 +64,7 @@ Mis proyectos → «Restablecer partidas…». Hay que escribir `RESTABLECER`.
 |---|---|
 | Partidas activas, en pausa y terminadas; puntuaciones, respuestas, progreso y bitácoras (`proyecta-v1`, `proyecta-v1:unreadable`) | Las nueve misiones oficiales, su contenido e ilustraciones |
 | Proyectos importados y creados, borradores y misiones generadas (`proyecta-projects-v1`) | Metodologías y Centro de aprendizaje |
-| Intentos del Examen 2 (`proyecta-exam2-v1`) | Preferencias de sonido y animación, y el código |
+| Intentos del Examen 2 (`proyecta-exam2-v1`) | Preferencias de sonido, animación y tamaño (zoom), y el código |
 
 Con «Preparar el simulador para compartir» la página se recarga y verifica el estado cero (0 partidas, 0 proyectos personales, 0 importados, 0 misiones generadas) y que las misiones oficiales siguen disponibles.
 
@@ -87,13 +87,25 @@ Con «Preparar el simulador para compartir» la página se recarga y verifica el
 5. Al comprometer la inversión (Decisión) el plan se congela y comienza la ejecución: eventos condicionados, dilemas y consecuencias diferidas.
 6. En Ex post ves la nota con cada dimensión explicada, errores y aciertos, la historia del proyecto y recomendaciones.
 
+**Modo presentación:** en el inicio, «Modo presentación» abre una partida de ejemplo completa y resuelta. Es la misión «Agua para todos», jugada por el mismo motor con las respuestas de referencia de cada herramienta, y termina con su nota y el desglose completo. Una barra guía indica qué mostrar en cada etapa y permite pasar de una etapa a otra. Es de solo lectura y no se guarda: no toca tus partidas ni tus resultados.
+
+**Desplazamiento:**
+- Cada etapa, incluida Ex post, se recorre por secciones con pestañas que quedan fijas arriba.
+- Ex post tiene el botón «Ver todo en una página».
+- Al cambiar de sección el salto es inmediato.
+- En las páginas largas aparece el botón «Arriba».
+
+**Más espacio de trabajo:** en escritorio y tableta, el botón «Ocultar» de la cabecera del juego esconde el menú de etapas de la izquierda y amplía el área central; «Etapas» lo vuelve a mostrar. La preferencia se recuerda. En teléfonos se usa el menú ☰.
+
+**Tamaño de la pantalla (zoom):** la barra flotante de abajo a la izquierda, visible en todas las pantallas (inicio, juego, Project Builder, exámenes y ventanas), tiene botones para **alejar (−)** y **acercar (+)** de 10 en 10 % entre 60 % y 160 %. El botón del porcentaje vuelve al **ajuste automático**, que adapta el simulador al ancho de la ventana: 75 % en portátiles pequeños, 100 % a 1.440 px y hasta 135 % en monitores grandes; en teléfonos queda en 100 % y el máximo se limita para que nada se salga de la pantalla. El panel ✨ incluye un deslizador fino. La preferencia se guarda en el navegador y no afecta la partida.
+
 Apoyos: **Centro de aprendizaje** (menú lateral o «Cómo jugar»), tutorial interactivo de tres minutos, **Práctica rápida** (VPN y RPC sin jugar una misión) y **Examen 2** (caso aplicado independiente, en el encabezado).
 
 ## Modos
 
 | Modo | Retroalimentación | Pistas | Indicador de coherencia |
 |---|---|---|---|
-| Aprendizaje | Inmediata en cada herramienta | Ilimitadas (pistas guiadas en dificultad guiado) | Con detalle |
+| Aprendizaje | Inmediata sobre cada elemento: verde (✓) correcto, ámbar (!) a revisar, rojo (✕) error; al pasar el mouse, enfocar o tocar se ve el porqué | Ilimitadas (pistas guiadas en dificultad guiado) | Con detalle |
 | Evaluación | Diferida: se ve la nota al final | Una por pregunta | Solo nivel |
 
 La dificultad cambia lo que conoces y tu exposición al riesgo, no la realidad subyacente: guiado (100 % del efectivo, explicaciones), intermedio (92 %), experto (85 %, menos ayudas).
@@ -102,11 +114,11 @@ La dificultad cambia lo que conoces y tu exposición al riesgo, no la realidad s
 
 | # | Fase | Objetivo | Conceptos | Qué recibe | Qué hace el jugador | Decisiones clave | Salida | Dependencias | Puntuación |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | Diagnóstico | Entender el problema antes de proponer | Árbol del problema, causa-efecto, actores, población objetivo | Caso, centro de información, actores | Compra estudios; construye el Árbol del problema ubicando 14 tarjetas mezcladas (8 correctas y 6 trampas) en su nivel o fuera del árbol; conecta causas y efectos, ubica actores, focaliza | Qué información comprar; qué nodos y enlaces | Árbol del problema y población | Ninguna | Diagnóstico y Árbol del problema |
+| 1 | Diagnóstico | Entender el problema antes de proponer | Árbol del problema, causa-efecto, actores, población objetivo | Caso, centro de información, actores | Compra estudios; construye el Árbol del problema arrastrando 14 tarjetas mezcladas (8 correctas y 6 trampas): cada causa cuelga del problema o de la causa que explica, cada efecto del problema o del efecto que lo produce, y las trampas quedan fuera; conecta causas y efectos; ubica a los actores (su poder, interés y posición se sortean en cada partida; el gobierno siempre es neutral) y gestiona su posición; focaliza | Qué información comprar; qué nodos y enlaces | Árbol del problema y población | Ninguna | Diagnóstico y Árbol del problema |
 | 2 | Formulación | Convertir el problema en objetivos y elegir alternativa | Objetivo general y específicos, alternativas, costo de oportunidad | Árbol del problema confirmado | Construye objetivos desde el Árbol del problema; compara 3–4 alternativas | Objetivo; alternativa | Objetivos y alternativa en estudio | Diagnóstico | Alternativa y objetivos |
 | 3 | Preparación | Traducir la alternativa en recursos | Cadena de valor, presupuesto, contingencia, O&M, indicadores, efectos e impactos | Alternativa y objetivos | Arma la cadena de valor (arrastrar o seleccionar), el presupuesto sin valores precargados (obligatorio: operación, mantenimiento, interventoría y contingencias, con partidas detalladas de operación y mantenimiento), indicadores; clasifica efectos e impactos | Asignación del presupuesto; clasificación | Plan de recursos y mapa de impactos | Formulación | Cadena de valor y presupuesto; efectos e impactos |
 | 4 | Evaluación | Saber si el proyecto crea valor | Valoración económica, flujo financiero, VPN, RPC, tasa social, costos hundidos, doble conteo, sensibilidad | Presupuesto, impactos, datos del caso | Elige métodos de valoración (con costo de estudio y confianza), construye el flujo financiero y el económico, prueba escenarios y valor de quiebre, revisa la distribución | Método por impacto; qué entra al flujo; RPC | VPN financiero y económico, variable crítica | Preparación | Efectos, impactos y valoración; Flujos, VPN y RPC; Evaluación ex ante |
-| 5 | Regulación | Corregir fallas sin crear otras | Falla de mercado/regulatoria, instrumentos, proporcionalidad, ODS | Proyecto evaluado | Resuelve el puzzle regulatorio (falla → evidencia → instrumento → efecto) y sustenta ODS | Instrumento; ODS con evidencia | Argumento regulatorio y ODS | Evaluación | Regulación y ODS |
+| 5 | Regulación | Regular el mercado y el territorio sin crear nuevas fallas | Ley 388 de 1997 (plan de ordenamiento, clases de suelo, adquisición de predios, plusvalía), falla de mercado/regulatoria, instrumentos, proporcionalidad, ODS | Proyecto evaluado y perfil territorial de la alternativa | Resuelve los tres puzzles territoriales (encaje en el ordenamiento, ruta de adquisición de predios, participación en la plusvalía), el puzzle regulatorio (falla → evidencia → instrumento → efecto) y sustenta ODS | Sitio y trámite; ruta predial; liquidación y destino de la plusvalía; instrumento; ODS con evidencia | Análisis territorial, argumento regulatorio y ODS | Evaluación | Regulación, territorio y ODS |
 | 6 | Decisión | Comprometer o no la inversión | Comparación de alternativas, matriz de decisión, riesgo, financiación | Todo lo anterior | Compara alternativas, responde al comité evaluador, fija contingencia y financiación, justifica | Invertir, esperar o rediseñar | Plan congelado | Regulación | Compromisos y riesgo; Comité evaluador |
 | 7 | Ejecución | Gestionar lo que sale distinto | Eventos condicionados, dilemas, consecuencias diferidas | Plan congelado | Responde eventos y dilemas | Adaptar o continuar | Servicio entregado | Decisión | Ejecución y servicio |
 | 8 | Ex post | Aprender de la experiencia | Evaluación ex post, valor observado, trazabilidad | Resultado | Revisa nota, historia, errores y recomendaciones | Rejugar con otra estrategia | Informe y logros | Ejecución | Valor observado; Coherencia y trazabilidad |
@@ -123,7 +135,23 @@ La dificultad cambia lo que conoces y tu exposición al riesgo, no la realidad s
 
 ## Puntuación
 
-Las partidas V2.2 usan **12 dimensiones**: Diagnóstico y Árbol del problema, Alternativa y objetivos, Cadena de valor y presupuesto, Efectos/impactos y valoración, Flujos/VPN/RPC, Evaluación ex ante, Regulación y ODS, Compromisos y riesgo, Ejecución y servicio, Valor observado, Coherencia y trazabilidad, Comité evaluador. Los pesos dependen del rol (público o privado) y del perfil de la misión; si un módulo no aplica, su peso se reparte (`src/data/balance.ts`, `scoringWeightsV3`).
+Las partidas V2.2 usan **13 dimensiones**: Diagnóstico y Árbol del problema, Alternativa y objetivos, Cadena de valor y presupuesto, Efectos/impactos y valoración, Flujos/VPN/RPC, Evaluación ex ante, Regulación, territorio y ODS, Compromisos y riesgo, Ejecución y servicio, Valor observado, Coherencia y trazabilidad, Comité evaluador y **Práctica de conceptos**. Los pesos dependen del rol (público o privado) y del perfil de la misión; si un módulo no aplica, su peso se reparte (`src/data/balance.ts`, `scoringWeightsV3`).
+
+**Regulación con la Ley 388 de 1997 (desde 3.0):** la etapa de Regulación aplica a cada proyecto la Ley de Desarrollo Territorial de Colombia. Aurora es un territorio ficticio, así que el simulador le aplica este marco con fines educativos y sus sitios, predios y precios son simulados. Las reglas sí son las de la ley.
+
+- **Repaso de la ley:** objeto y principios; tipos de plan (POT, PBOT y EOT según la población); determinantes, adopción y vigencias; clases de suelo; gestión del suelo; adquisición por motivos de utilidad pública; participación en la plusvalía. Cada sección indica cómo aparece en el juego.
+- **Perfil territorial por alternativa:** cada alternativa de las nueve misiones tiene un sitio con su clase de suelo, sus predios por adquirir y su hecho generador de plusvalía. Los proyectos creados en Crear proyecto reciben un perfil de referencia.
+- **Tres puzzles** con preguntas de 5 opciones y retroalimentación al pasar el mouse:
+  1. **Encaje en el ordenamiento:** instrumento, clase de suelo, requisito antes de construir, determinante y programa de ejecución.
+  2. **Ruta de adquisición de predios:** ordenar los pasos y responder cuándo procede la expropiación (o por qué un privado no puede pedirla).
+  3. **Participación en la plusvalía:** hecho generador, liquidación de mayor valor × área × tasa, y destino o momento de pago.
+- **Efectos en la dinámica del juego:**
+  - Plan parcial y relocalización cuestan tiempo y dinero si se identifican a tiempo, y bastante más si se omiten (licencia negada, retraso al invertir).
+  - La gestión predial tiene costo, y una ruta irregular hace impugnable la adquisición y aumenta el riesgo del evento «Predios sin liberar» en la ejecución.
+  - La plusvalía bien liquidada cofinancia los proyectos públicos y es un costo que los privados deben prever.
+- **Calificación:** la dimensión «Regulación, territorio y ODS» pesa 40 % la regulación económica, 40 % el ordenamiento territorial (15 % encaje, 15 % predios y 10 % plusvalía) y 20 % los ODS. También suma una relación de coherencia «Proyecto ↔ territorio», ítems en «Aciertos y errores» y dos ejercicios de práctica. Las partidas guardadas antes de 3.0 conservan sus reglas y su nota.
+
+**Puntuación integral:** cada dimensión se compone de las actividades que la forman, con su propio peso. Por ejemplo, Diagnóstico combina enlaces causales, Árbol del problema, mapa de actores, focalización y, si negociaste, la negociación con actores. Al final de la partida, «Desglose completo» lista unas 30 actividades con tu resultado, su peso en la nota y los puntos que aportó, y la suma coincide con la nota base. La práctica de conceptos suma por acertar: es el promedio de los ejercicios que se pueden responder antes del cierre, y un ejercicio sin responder cuenta 0. Las pistas y los intentos extra ya descuentan dentro de cada ejercicio. Los dilemas, eventos, estudios y mitigaciones no tienen nota propia, pero cuentan a través de los recursos, el riesgo y la ejecución, y el desglose lo indica.
 
 Nota final = (base ponderada − penalizaciones + bonificaciones) × factor de dificultad. Cada dimensión explica su cálculo, los errores y aciertos. La nota usa el estado confirmado, no el número de intentos: reconfirmar un módulo o repetir el Examen 2 no acumula puntos.
 
@@ -185,13 +213,13 @@ En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o re
 pnpm test
 ```
 
-Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 239 pruebas en 25 archivos, todas aprobadas.
+Cubren: motor y finanzas, flujos financiero y económico (VPN, RPC, residual, valor de quiebre), análisis de riesgo Monte Carlo, valoración, trazabilidad, comité, Examen 2, puntuación V2/V3 (bonificaciones y penalizaciones), presupuesto y sus datos básicos obligatorios, Árbol del problema, cadena de valor, dependencias y «requiere revisión», dilemas, eventos de ejecución condicionales y consecuencias diferidas, semilla determinista, laboratorio regulatorio, ODS, dificultad, persistencia y el catálogo completo (nueve misiones × tres dificultades). Incluyen además el Project Builder, la normalización manual/PDF/Excel hacia el mismo generador, la partida generada completa, formato portable, reset, personajes, la regla de **5 opciones por pregunta** en todo el simulador y una prueba de robustez con acciones aleatorias y malformadas. Última ejecución: 250 pruebas en 28 archivos, todas aprobadas.
 
 ```bash
 pnpm build && pnpm e2e
 ```
 
-Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje y el límite de 5 opciones, y fallan ante cualquier error de consola.
+Las pruebas de extremo a extremo (`e2e/`, Playwright) arrancan una misión, construyen el Árbol del problema, revisan el Centro de aprendizaje, el límite de 5 opciones, el zoom, el menú de etapas ocultable y el modo presentación, y fallan ante cualquier error de consola.
 
 ## Compilación
 

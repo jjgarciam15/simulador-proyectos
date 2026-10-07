@@ -9,7 +9,7 @@ import { Button, Panel } from "../../components/ui";
 import { Preview } from "./ProjectBuilder";
 
 const sourceLabel = { official: "Misión oficial", imported_pdf: "Importado (PDF)", imported_excel: "Importado (Excel)", manual: "Creado" };
-const difficultyLabel = { guiado: "Fácil", profesional: "Intermedio", experto: "Avanzado" };
+const difficultyLabel = { guiado: "Guiado", profesional: "Profesional", experto: "Experto" };
 type Tab = "oficiales" | "importados" | "creados" | "borradores" | "partidas";
 const fmtDate = (iso: string) => {
   const d = new Date(iso);
