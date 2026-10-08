@@ -16,6 +16,9 @@
   - Tarjetas con filo dorado y una retícula heráldica de fondo.
   - Barra de la partida con línea dorada y franja de fases carmesí→oro.
   - El contraste de los textos se mantiene en nivel AA.
+- **Campos numéricos solo por escritura.**
+  - Ya no tienen botones de subir y bajar.
+  - Las flechas del teclado y la rueda del mouse no cambian el valor; con la rueda, la página se desplaza normalmente.
 - **Compatibilidad.**
   - Las partidas, los proyectos y las preferencias guardados siguen en las mismas claves del navegador, así que nada se pierde al actualizar.
   - Los proyectos se exportan ahora como `.ludo.json` y se siguen importando los `.proyecta.json` de versiones anteriores, porque el formato interno es el mismo.

@@ -78,6 +78,27 @@ test("el Centro de aprendizaje ofrece 5 opciones por ejercicio", async ({ page }
   expect(errors).toEqual([]);
 });
 
+test("los campos numéricos se llenan solo escribiendo: sin botones de subir/bajar, flechas ni rueda", async ({ page }) => {
+  const errors = await fresh(page);
+  await page.getByRole("button", { name: /^Aprender$/ }).first().click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name: "Práctica rápida" }).click();
+  const input = dialog.locator('input[type="number"]').first();
+  await input.fill("100001");
+  await expect(input).toHaveCSS("appearance", "textfield");
+  await input.press("ArrowUp");
+  await input.press("ArrowDown");
+  await input.press("ArrowDown");
+  await expect(input).toHaveValue("100001");
+  await input.hover();
+  await page.mouse.wheel(0, 200);
+  await expect(input).toHaveValue("100001");
+  await expect(input).not.toBeFocused();
+  await input.fill("42");
+  await expect(input).toHaveValue("42");
+  expect(errors).toEqual([]);
+});
+
 test("ninguna pregunta visible de una etapa tiene más de 5 opciones", async ({ page }) => {
   const errors = await fresh(page);
   await startMission(page);
