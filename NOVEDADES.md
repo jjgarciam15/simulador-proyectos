@@ -6,11 +6,11 @@
 - Regresión de todas las misiones y dificultades.
 - Carpeta preparada para GitHub: ver `docs/GUIA_GITHUB.md`.
 
-# Aurora: expansión de reconstrucción
+# Reino de Liones: expansión de reconstrucción
 
 ## Cómo probarla
 
-Abre `ABRIR_PROYECTA.cmd`. Si ya tienes la ventana abierta, confirma tus cambios pendientes y actualiza la página.
+Abre `ABRIR_LUDO.cmd`. Si ya tienes la ventana abierta, confirma tus cambios pendientes y actualiza la página.
 
 El mapa permite seleccionar un distrito y recibir su misión. También puedes usar las tarjetas de proyectos. Hay nueve misiones, cada una con ocho etapas y cuatro alternativas.
 
@@ -49,9 +49,9 @@ Validación: 31 pruebas automatizadas, incluyendo cierre reproducible de los nue
 - `src/data/world.ts`: distritos, personajes y avance nacional.
 - `src/components/LivingWorld.tsx`: mapa, escena y selección de respuestas.
 - `src/domain/engine.ts`: consecuencias, recursos y reproducción.
-- `src/aurora.css`: ambiente visual, animaciones y adaptación a pantalla.
+- `src/liones.css`: ambiente visual, animaciones y adaptación a pantalla.
 
-## Sonido y transiciones de Aurora
+## Sonido y transiciones del Reino de Liones
 
 - Nuevas presentaciones de capítulos y cierre de misión, con ilustración, partículas y movimiento de cámara simulado.
 - Avisos de eventos y avances de ejecución; destellos en los recursos que cambian.
@@ -83,7 +83,7 @@ El informe final presenta la valoración de 0–100, resultados esperados y obse
 
 Bandas educativas: 85–100 destacado; 70–84 sólido; 50–69 en desarrollo; 0–49 necesita revisión. Se mantiene la fórmula del motor por rol y el factor de 0,35 para abandono e insolvencia. La cifra combina calidad de estrategia y desempeño observado; no mide por sí sola adquisición de conocimientos.
 
-La pantalla inicial muestra el avance al premio «Consejero de la reconstrucción de Aurora». Requiere los nueve proyectos con ejecución finalizada, incluso si terminaron fuera de plazo; abandono e insolvencia no completan un distrito. La valoración final es el promedio de la mejor puntuación por proyecto. Repetir uno no suma distritos. Los mejores registros se guardan aparte de los últimos 30 informes, en el mismo navegador.
+La pantalla inicial muestra el avance al premio «Consejero de la reconstrucción del Reino de Liones». Requiere los nueve proyectos con ejecución finalizada, incluso si terminaron fuera de plazo; abandono e insolvencia no completan un distrito. La valoración final es el promedio de la mejor puntuación por proyecto. Repetir uno no suma distritos. Los mejores registros se guardan aparte de los últimos 30 informes, en el mismo navegador.
 
 Implementación: `src/domain/recognition.ts` contiene reglas, resumen de campaña y exportación; `src/features/Recognition.tsx` presenta los premios y el informe; `src/recognition.css` define su aspecto. El guardado admite partidas anteriores sin registros de campaña.
 

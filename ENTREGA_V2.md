@@ -1,4 +1,4 @@
-# Entrega V2 · PROYECTA
+# Entrega V2 · Ludo
 
 > Actualización del 25 de septiembre de 2026: la iteración 2 de la V2 (dilemas, laboratorio regulatorio, planificador presupuestal, coherencia transversal y más) se documenta en `IMPLEMENTATION_PLAN_V2.md` y en `MANUAL_CREACION.md`. Este documento conserva el estado de la entrega anterior.
 
@@ -6,7 +6,7 @@ Fecha de revisión: 23 de septiembre de 2026. Evolución local del proyecto exis
 
 ## IMPLEMENTADO
 
-Mapa de ocho etapas con estado; navegación gratuita por etapas desbloqueadas antes de invertir; revisiones dependientes sin eliminar el trabajo; alternativa visible; planificador exploratorio; partidas en pausa; construcción de cadena de valor; ubicación de actores; presupuesto desde cero y calculadora de partidas; argumentación regulatoria y ODS; práctica con cinco o seis opciones, selección múltiple, pistas e intentos; perfil final con radar, aportes y explicación; reinicio controlado de etapas de formulación. Se mantienen narrativa de Aurora, nueve misiones, personajes, audio local y transiciones existentes.
+Mapa de ocho etapas con estado; navegación gratuita por etapas desbloqueadas antes de invertir; revisiones dependientes sin eliminar el trabajo; alternativa visible; planificador exploratorio; partidas en pausa; construcción de cadena de valor; ubicación de actores; presupuesto desde cero y calculadora de partidas; argumentación regulatoria y ODS; práctica con cinco o seis opciones, selección múltiple, pistas e intentos; perfil final con radar, aportes y explicación; reinicio controlado de etapas de formulación. Se mantienen narrativa del Reino de Liones, nueve misiones, personajes, audio local y transiciones existentes.
 
 Ampliación posterior: laboratorio de costo-eficiencia, modo reto, mesas de negociación de hasta tres rondas por actor, 36 condiciones específicas por misión, presupuesto detallado persistente y cinco casos adicionales de aprendizaje (21 por misión). Preparación local para GitHub, sin publicación.
 

@@ -1,4 +1,4 @@
-# Memoria del simulador PROYECTA
+# Memoria del simulador Ludo
 
 ## Visión y método
 
@@ -232,7 +232,7 @@ Contrato central en `src/domain/project/types.ts` (`schemaVersion` 1). Adaptado 
 
 ### Esquema, migraciones y formato portable
 
-`src/domain/project/schema.ts`: `parseProject` valida tipos campo a campo, recorta longitudes, descarta claves desconocidas y acepta solo datos. `migrateProject` aplica migraciones por versión (v0 → v1) y rechaza versiones futuras. El formato portable `.proyecta.json` (`format: "proyecta-project"`) se exporta desde la revisión y se importa por la misma pantalla de importación.
+`src/domain/project/schema.ts`: `parseProject` valida tipos campo a campo, recorta longitudes, descarta claves desconocidas y acepta solo datos. `migrateProject` aplica migraciones por versión (v0 → v1) y rechaza versiones futuras. El formato portable `.ludo.json` (antes `.proyecta.json`) (`format: "proyecta-project"`) se exporta desde la revisión y se importa por la misma pantalla de importación.
 
 ### MissionGenerator
 

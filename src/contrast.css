@@ -3,18 +3,18 @@
  * Loaded last on purpose: it only darkens (light surfaces) or lightens (dark surfaces) inherited greys.
  */
 :root {
-  --muted: #4a5f5b;
+  --muted: #464168;
 }
 /* Light panels that live inside the dark home keep dark text (challenge cards were unreadable). */
-.aurora-home .panel {
+.liones-home .panel {
   color: var(--text-primary);
 }
-.aurora-home .panel h3,
-.aurora-home .panel h4 {
+.liones-home .panel h3,
+.liones-home .panel h4 {
   color: var(--text-primary);
 }
-.aurora-home .panel .muted,
-.aurora-home .panel small {
+.liones-home .panel .muted,
+.liones-home .panel small {
   color: var(--text-secondary);
 }
 /* Eyebrows and headings on light surfaces */
@@ -29,7 +29,7 @@
 }
 .page-heading p,
 .page-heading p span {
-  color: #455a56;
+  color: #423d62;
 }
 .information-box > span,
 .information-box small,
@@ -99,8 +99,8 @@
 .crew-intro .eyebrow,
 .world-coordinate,
 .fiction-note,
-.aurora-home .eyebrow,
-.aurora-home > footer span,
+.liones-home .eyebrow,
+.liones-home > footer span,
 .landing footer span,
 .history-list .eyebrow,
 .context-panel > .eyebrow,
@@ -141,7 +141,7 @@
 }
 /* Eyebrows: light surfaces dark gold, dark surfaces light gold. */
 .panel .eyebrow,
-.aurora-home .panel .eyebrow,
+.liones-home .panel .eyebrow,
 .brief-panel .eyebrow,
 .journal .eyebrow {
   color: #66531f !important;
@@ -174,13 +174,13 @@
 .guide-title > span {
   color: #6b531c;
 }
-.aurora-home .btn.secondary {
-  background: #4a6563;
-  border-color: #4a6563;
+.liones-home .btn.secondary {
+  background: #46406f;
+  border-color: #46406f;
   color: #eef5f1;
 }
-.aurora-home .btn.secondary:hover:not(:disabled) {
-  background: #3d5654;
+.liones-home .btn.secondary:hover:not(:disabled) {
+  background: #3a345f;
 }
 .context-panel .panel .eyebrow {
   color: #e6d3a6 !important;
@@ -191,7 +191,7 @@
 }
 /* Keep footers clear of the floating sound control. */
 .landing > footer,
-.aurora-home > footer,
+.liones-home > footer,
 .game-footer {
   padding-bottom: 84px !important;
 }

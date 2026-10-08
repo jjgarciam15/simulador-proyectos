@@ -1,4 +1,4 @@
-# Aprender formulando en Aurora
+# Aprender formulando en el Reino de Liones
 
 La actualización introduce una ruta visible en cada etapa: responder un caso, contrastar la explicación y aplicar el concepto en otra situación. Son 16 casos por misión, disponibles en los nueve escenarios. El diagnóstico usa el contexto del escenario y el microcaso de VPN ajusta sus montos al escenario; los demás casos comparten conceptos transversales. No constituyen 144 preguntas distintas.
 

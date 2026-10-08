@@ -20,3 +20,6 @@ Thumbs.db
 .idea/
 exports/
 release/
+
+# Local deliverables sent to the user (screenshots, portable zip)
+entrega/

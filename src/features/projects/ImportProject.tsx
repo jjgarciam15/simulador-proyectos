@@ -53,7 +53,7 @@ export default function ImportProject({ onOpen, onBack }: { onOpen: (p: Normaliz
       </button>
       <h1>Importar proyecto</h1>
       <p className="lead">Transforma un documento existente en una estructura académica editable y luego en una simulación.</p>
-      <Panel title="Archivo" kicker="PDF · XLSX · .proyecta.json">
+      <Panel title="Archivo" kicker="PDF · XLSX · .ludo.json">
         <p className="pb-privacy">
           <ShieldCheck size={16} aria-hidden /> El archivo se procesa solo en este navegador: no se envía a ningún servicio. Los libros con macros no se aceptan y las fórmulas se leen como texto, sin ejecutarse. Máximo 15 MB.
         </p>
@@ -76,7 +76,7 @@ export default function ImportProject({ onOpen, onBack }: { onOpen: (p: Normaliz
           <input type="file" accept=".pdf,.xlsx,.json,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/json" onChange={(e) => e.target.files?.[0] && void handle(e.target.files[0])} disabled={busy} />
         </label>
         <div className="actions">
-          <Button secondary onClick={() => download("plantilla-proyecto-proyecta.xlsx", writeXlsx(projectTemplate()), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}>
+          <Button secondary onClick={() => download("plantilla-proyecto-ludo.xlsx", writeXlsx(projectTemplate()), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}>
             <FileSpreadsheet size={15} /> Descargar plantilla Excel
           </Button>
         </div>

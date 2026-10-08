@@ -1,6 +1,6 @@
-# PROYECTA · Reconstruir Aurora
+# Ludo · Reconstruir el Reino de Liones
 
-Simulador educativo en español de **formulación y evaluación de proyectos**. El jugador administra un proyecto en un territorio ficticio (Aurora): tiene presupuesto y tiempo limitados, compra información, elige una alternativa, construye la cadena de valor y el presupuesto, enfrenta dilemas y eventos, decide la regulación y los ODS, y al final ve las consecuencias de sus decisiones con una nota explicada.
+Simulador educativo en español de **formulación y evaluación de proyectos**. El jugador administra un proyecto en un territorio ficticio (el Reino de Liones): tiene presupuesto y tiempo limitados, compra información, elige una alternativa, construye la cadena de valor y el presupuesto, enfrenta dilemas y eventos, decide la regulación y los ODS, y al final ve las consecuencias de sus decisiones con una nota explicada.
 
 Integra MGA, economía, regulación económica, gestión de recursos, evaluación ex ante, riesgo y ODS. Los datos son simulados: no acredita viabilidad oficial ni sustituye MGA Web.
 
@@ -12,7 +12,7 @@ Pasar de «respondo actividades para avanzar» a «administro un proyecto y mis 
 
 | Experiencia | Qué es | Cómo se entra |
 |---|---|---|
-| **Jugar historia** | Nueve misiones oficiales en Aurora, con narrativa y datos diseñados. | Inicio → «Jugar historia» o «Comenzar reconstrucción». |
+| **Jugar historia** | Nueve misiones oficiales en el Reino de Liones, con narrativa y datos diseñados. | Inicio → «Jugar historia» o «Comenzar reconstrucción». |
 | **Importar proyecto** | Convierte un PDF o un Excel en una estructura académica editable y luego en una simulación. | Inicio → «Importar proyecto» (o Mis proyectos). |
 | **Crear proyecto** | Formula tu propio proyecto paso a paso; el sistema revisa su coherencia y lo convierte en una simulación. | Inicio → «Crear proyecto» (o Mis proyectos). |
 
@@ -54,7 +54,7 @@ Los datos ausentes nunca se inventan: si el generador necesita un valor (por eje
 - **Excel:** lee hojas, encabezados, tablas y valores; reconoce pares etiqueta/valor y tablas de alternativas, actores, costos y riesgos. Hay una **plantilla descargable**.
 - **Trazabilidad:** cada dato guarda su página, hoja y celda, y una confianza (alta, media, baja). Lo que falta aparece como «No identificada».
 - **Revisión obligatoria:** el proyecto se abre en el mismo Project Builder; hay que confirmar la revisión antes de generar la partida.
-- **Formato portable:** un proyecto se exporta e importa como `.proyecta.json` (datos versionados, sin código), validado contra el esquema.
+- **Formato portable:** un proyecto se exporta e importa como `.ludo.json` (también se aceptan los `.proyecta.json` de versiones anteriores) (datos versionados, sin código), validado contra el esquema.
 
 ### Restablecer partidas y preparar para compartir
 
@@ -80,7 +80,7 @@ Con «Preparar el simulador para compartir» la página se recarga y verifica el
 
 ## Cómo jugar
 
-1. En el inicio elige una misión (nueve territorios de Aurora), la dificultad (guiado, intermedio · profesional, experto) y el modo (**Aprendizaje** o **Evaluación**). El perfil de la misión indica qué módulos aplican.
+1. En el inicio elige una misión (nueve territorios del Reino de Liones), la dificultad (guiado, intermedio · profesional, experto) y el modo (**Aprendizaje** o **Evaluación**). El perfil de la misión indica qué módulos aplican.
 2. Recorre las etapas en orden. Cada etapa se divide en herramientas (pestañas numeradas); lo que confirmas cambia el estado del proyecto: saldo, plazo, información, apoyo, legitimidad y riesgo.
 3. Puedes volver a una etapa completada desde el menú lateral sin repetir el recorrido. Cambiar algo ya confirmado cuesta un mes y 0,2 % del presupuesto, y marca como **«Requiere revisión»** lo que dependía de ello (con el motivo concreto).
 4. La alternativa en estudio aparece siempre en el panel derecho; se puede cambiar en Formulación sin borrar el trabajo.
@@ -137,7 +137,7 @@ La dificultad cambia lo que conoces y tu exposición al riesgo, no la realidad s
 
 Las partidas V2.2 usan **13 dimensiones**: Diagnóstico y Árbol del problema, Alternativa y objetivos, Cadena de valor y presupuesto, Efectos/impactos y valoración, Flujos/VPN/RPC, Evaluación ex ante, Regulación, territorio y ODS, Compromisos y riesgo, Ejecución y servicio, Valor observado, Coherencia y trazabilidad, Comité evaluador y **Práctica de conceptos**. Los pesos dependen del rol (público o privado) y del perfil de la misión; si un módulo no aplica, su peso se reparte (`src/data/balance.ts`, `scoringWeightsV3`).
 
-**Regulación con la Ley 388 de 1997 (desde 3.0):** la etapa de Regulación aplica a cada proyecto la Ley de Desarrollo Territorial de Colombia. Aurora es un territorio ficticio, así que el simulador le aplica este marco con fines educativos y sus sitios, predios y precios son simulados. Las reglas sí son las de la ley.
+**Regulación con la Ley 388 de 1997 (desde 3.0):** la etapa de Regulación aplica a cada proyecto la Ley de Desarrollo Territorial de Colombia. El Reino de Liones es un territorio ficticio, así que el simulador le aplica este marco con fines educativos y sus sitios, predios y precios son simulados. Las reglas sí son las de la ley.
 
 - **Repaso de la ley:** objeto y principios; tipos de plan (POT, PBOT y EOT según la población); determinantes, adopción y vigencias; clases de suelo; gestión del suelo; adquisición por motivos de utilidad pública; participación en la plusvalía. Cada sección indica cómo aparece en el juego.
 - **Perfil territorial por alternativa:** cada alternativa de las nueve misiones tiene un sitio con su clase de suelo, sus predios por adquirir y su hecho generador de plusvalía. En Crear proyecto, el autor puede registrar esos datos (y el determinante principal) para cada alternativa; las alternativas sin datos usan un perfil de referencia.
@@ -205,7 +205,7 @@ No se requieren variables de entorno ni claves API.
 
 TypeScript se compila en modo estricto, sin variables ni importaciones sin uso.
 
-En Windows, después de instalar dependencias, `ABRIR_PROYECTA.cmd` inicia (o reutiliza) Vite en el puerto 5173 y abre una ventana de aplicación. Los registros quedan en `.local/`.
+En Windows, después de instalar dependencias, `ABRIR_LUDO.cmd` inicia (o reutiliza) Vite en el puerto 5173 y abre una ventana de aplicación. Los registros quedan en `.local/`.
 
 ## Pruebas
 
@@ -293,11 +293,11 @@ La memoria técnica completa está en [`MANUAL_CREACION.md`](MANUAL_CREACION.md)
 
 Para llevar el simulador a otro computador Windows **sin instalar Node.js, npm ni pnpm**:
 
-1. Descarga `PROYECTA-<versión>-portable.zip`: desde la pestaña **Actions → Paquete portátil** (artefacto de cada actualización de `main`) o desde **Releases** cuando se publica una etiqueta `v*`. También se genera localmente con `pnpm portable` (queda en `release/`).
-2. Descomprímelo (clic derecho → Extraer todo) y haz doble clic en `ABRIR_PROYECTA.cmd`.
+1. Descarga `LUDO-<versión>-portable.zip`: desde la pestaña **Actions → Paquete portátil** (artefacto de cada actualización de `main`) o desde **Releases** cuando se publica una etiqueta `v*`. También se genera localmente con `pnpm portable` (queda en `release/`).
+2. Descomprímelo (clic derecho → Extraer todo) y haz doble clic en `ABRIR_LUDO.cmd`.
 3. Deja abierta la ventana negra mientras usas el simulador; para terminar, ciérrala.
 
-El paquete contiene la aplicación compilada (`app/`) y `servidor-portatil.ps1`, un servidor mínimo en PowerShell (incluido en Windows) que solo escucha en `127.0.0.1`, no sirve archivos fuera de `app/` y usa el puerto 5173 (o el siguiente libre). Se copia con USB, OneDrive o correo; las partidas quedan en el navegador de cada equipo (para llevar un proyecto propio, exporta el `.proyecta.json`).
+El paquete contiene la aplicación compilada (`app/`) y `servidor-portatil.ps1`, un servidor mínimo en PowerShell (incluido en Windows) que solo escucha en `127.0.0.1`, no sirve archivos fuera de `app/` y usa el puerto 5173 (o el siguiente libre). Se copia con USB, OneDrive o correo; las partidas quedan en el navegador de cada equipo (para llevar un proyecto propio, exporta el `.ludo.json`).
 
 ## Actualizar a una versión nueva
 
@@ -312,7 +312,7 @@ Si el simulador estaba abierto, ciérralo antes (o reinicia el servidor): una in
 
 | Problema | Solución |
 |---|---|
-| `Cannot find module`, dependencias ausentes o «Failed to resolve import "fflate"» después de actualizar | Cierra el simulador y ejecuta `pnpm install`. `ABRIR_PROYECTA.cmd` ahora detecta dependencias faltantes y las instala solo |
+| `Cannot find module`, dependencias ausentes o «Failed to resolve import "fflate"» después de actualizar | Cierra el simulador y ejecuta `pnpm install`. `ABRIR_LUDO.cmd` ahora detecta dependencias faltantes y las instala solo |
 | Aviso «Unsupported engine» | Usa Node 24 (`nvm use`); con Node 22 funciona igual |
 | Puerto 5173 ocupado | Cierra la otra instancia o revisa `.local/servidor-error.log` (lanzador Windows) |
 | La partida no se guarda | Revisa permisos o cuota del almacenamiento del navegador; mantén la pestaña abierta |

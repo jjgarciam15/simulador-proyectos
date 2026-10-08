@@ -10,7 +10,7 @@
   display: grid;
   place-items: center;
   color: #ddbd7b;
-  background: linear-gradient(145deg, #31514a, #142f38);
+  background: linear-gradient(145deg, #2e285a, #150e3e);
   clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
   flex-shrink: 0;
   animation: medal-arrive 0.6s ease-out;
@@ -125,7 +125,7 @@
   padding: 28px;
   border: 1px solid #586e58;
   border-radius: 14px;
-  background: linear-gradient(115deg, #15343a, #24453f);
+  background: linear-gradient(115deg, #160f40, #221b4e);
   color: #c6d7be;
 }
 .campaign-heading {
@@ -171,7 +171,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #0c29304d;
+  background: #100b314d;
   padding: 12px;
   border-radius: 6px;
 }

@@ -23,7 +23,7 @@ El índice debe incluir código, documentación, configuración, lockfile e ilus
 3. Crea el primer commit y conecta la URL real que te dé GitHub:
 
 ```sh
-git commit -m "Preparar PROYECTA V2: simulador MGA y evaluación económica"
+git commit -m "Preparar Ludo V2: simulador MGA y evaluación económica"
 git remote add origin URL_REAL_DEL_REPOSITORIO
 git push -u origin main
 ```

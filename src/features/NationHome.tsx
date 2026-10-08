@@ -24,6 +24,7 @@ import { scenarios } from "../data/scenarios";
 import { assets, missions, nationProgress, world } from "../data/world";
 import { money } from "../domain/finance";
 import { Button } from "../components/ui";
+import { Crest } from "../components/Brand";
 const icons = [
   Droplets,
   Route,
@@ -61,15 +62,19 @@ export default function NationHome({
         <img
           className="nation-art"
           src={assets.nation}
-          alt="Ilustración 3D de Aurora: una ciudad reconstruye sus redes de agua, puentes, hospitales y zonas productivas entre las ruinas"
+          alt="Ilustración 3D del Reino de Liones: una ciudad reconstruye sus redes de agua, puentes, hospitales y zonas productivas entre las ruinas"
         />
         <div className="nation-veil" />
         <div className="nation-story">
+          <div className="hero-crest">
+            <Crest size={58} title="Escudo del Reino de Liones" />
+            <span>REINO DE LIONES</span>
+          </div>
           <div className="eyebrow">
             <Radio size={13} /> {world.era.toUpperCase()}
           </div>
           <h1>
-            Una nación en ruinas.
+            Un reino en ruinas.
             <br />
             <em>Un futuro por decidir.</em>
           </h1>
@@ -90,10 +95,10 @@ export default function NationHome({
           </button>
         </div>
         <span className="world-coordinate">
-          <MapPin size={13} /> AURORA · TERRITORIO DE RECONSTRUCCIÓN
+          <MapPin size={13} /> REINO DE LIONES · TERRITORIO DE RECONSTRUCCIÓN
         </span>
         <div className="hero-status">
-          <span>ESTADO DE LA NACIÓN</span>
+          <span>ESTADO DEL REINO</span>
           <strong>
             {nation.progress}
             <small>%</small>
@@ -210,12 +215,12 @@ export default function NationHome({
             <br />
             Necesitamos una que siga funcionando mañana.»
           </h3>
-          <p>Mara · ingeniera del Consejo de Aurora</p>
+          <p>Mara · ingeniera del Consejo del Reino de Liones</p>
         </div>
         <img src={assets.ivo} alt="Ivo, enlace de las comunidades" />
       </section>
       <p className="fiction-note">
-        Aurora y el Gran Apagón son ficción. Los conceptos de formulación,
+        El Reino de Liones y el Gran Apagón son ficción. Los conceptos de formulación,
         evaluación y regulación se mantienen como herramientas académicas. Datos
         simulados en millones de COP.
       </p>

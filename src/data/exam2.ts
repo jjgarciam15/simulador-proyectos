@@ -8,7 +8,7 @@ import type { FlowCase } from "../domain/flows";
 export const exam2 = {
   title: "Sendero ecológico del humedal La Esperanza",
   context:
-    "El humedal La Esperanza está degradado por residuos y senderos informales. Recibe visitantes de tres barrios, pero no hay infraestructura ni control. La alcaldía de Aurora evalúa un proyecto de uso recreativo con conservación.",
+    "El humedal La Esperanza está degradado por residuos y senderos informales. Recibe visitantes de tres barrios, pero no hay infraestructura ni control. La alcaldía del Reino de Liones evalúa un proyecto de uso recreativo con conservación.",
   problem: "Uso recreativo desordenado que degrada el humedal",
   constraints: ["Presupuesto disponible: 1.100 M", "Horizonte de evaluación: 5 años", "Tasa financiera 12 %; tasa social de descuento 9 % (DNP, Res. 1092 de 2022)"],
   objectives: [

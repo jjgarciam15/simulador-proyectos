@@ -1,11 +1,11 @@
-# PROYECTA portátil: sirve la aplicación compilada (carpeta "app") en este equipo, sin Node.js ni instalaciones.
+# Ludo portátil: sirve la aplicación compilada (carpeta "app") en este equipo, sin Node.js ni instalaciones.
 # Solo escucha en 127.0.0.1 (no se expone a la red). Compatible con Windows PowerShell 5.1 y PowerShell 7.
 param([switch]$NoBrowser, [int]$MaxRequests = 0)
 $ErrorActionPreference = 'Stop'
 $root = Join-Path $PSScriptRoot 'app'
 $index = Join-Path $root 'index.html'
 if (-not (Test-Path -LiteralPath $index)) {
-    Write-Host 'No se encontro la carpeta "app". Copia la carpeta PROYECTA completa, sin separar sus archivos.' -ForegroundColor Red
+    Write-Host 'No se encontro la carpeta "app". Copia la carpeta Ludo completa, sin separar sus archivos.' -ForegroundColor Red
     exit 1
 }
 $rootFull = [System.IO.Path]::GetFullPath($root)
@@ -32,10 +32,10 @@ foreach ($port in 5173..5183) {
     }
 }
 if (-not $listener) {
-    Write-Host 'No hay un puerto libre entre 5173 y 5183. Cierra otras ventanas de PROYECTA e intentalo de nuevo.' -ForegroundColor Red
+    Write-Host 'No hay un puerto libre entre 5173 y 5183. Cierra otras ventanas de Ludo e intentalo de nuevo.' -ForegroundColor Red
     exit 1
 }
-Write-Host "PROYECTA listo en $url" -ForegroundColor Green
+Write-Host "Ludo listo en $url" -ForegroundColor Green
 Write-Host 'Deja esta ventana abierta mientras usas el simulador. Para cerrarlo, cierra esta ventana.'
 if ($url -ne 'http://127.0.0.1:5173/') {
     Write-Host 'Aviso: el puerto 5173 estaba ocupado. Las partidas guardadas en este puerto son independientes.' -ForegroundColor Yellow

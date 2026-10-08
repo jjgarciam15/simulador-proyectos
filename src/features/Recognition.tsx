@@ -60,7 +60,7 @@ export function FinalRecognition({ g }: { g: GameState }) {
       );
       const link = document.createElement("a");
       link.href = url;
-      link.download = `PROYECTA-informe-${g.scenarioId}-${g.id.slice(0, 8)}.html`;
+      link.download = `Ludo-informe-${g.scenarioId}-${g.id.slice(0, 8)}.html`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 10000);
       setDownloadError("");
@@ -235,8 +235,8 @@ export function CampaignRecognition({
           <span className="eyebrow">EL LEGADO DEL CONSEJO</span>
           <h2>
             {c.finished
-              ? "Consejero de la reconstrucción de Aurora"
-              : "Tu camino al reconocimiento de Aurora"}
+              ? "Consejero de la reconstrucción del Reino de Liones"
+              : "Tu camino al reconocimiento del Reino de Liones"}
           </h2>
           <p>
             {c.finished

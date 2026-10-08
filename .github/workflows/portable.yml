@@ -1,6 +1,6 @@
 name: Paquete portátil
 
-# Genera PROYECTA-<versión>-portable.zip (aplicación compilada + servidor PowerShell, sin Node.js).
+# Genera LUDO-<versión>-portable.zip (aplicación compilada + servidor PowerShell, sin Node.js).
 # - En cada push a main: queda como artefacto descargable en la pestaña Actions.
 # - Al publicar una etiqueta v* (por ejemplo v2.4.1): se adjunta a una Release pública de GitHub.
 on:
@@ -36,7 +36,7 @@ jobs:
       - name: Guardar el paquete como artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: PROYECTA-portable
+          name: LUDO-portable
           path: release/*.zip
           retention-days: 90
       - name: Publicar en una Release (solo etiquetas v*)
@@ -46,5 +46,5 @@ jobs:
         run: |
           gh release create "${GITHUB_REF_NAME}" release/*.zip \
             --repo "${GITHUB_REPOSITORY}" \
-            --title "PROYECTA ${GITHUB_REF_NAME}" \
-            --notes "Versión portátil para Windows. Descomprime el zip y abre ABRIR_PROYECTA.cmd; no requiere instalar nada."
+            --title "Ludo ${GITHUB_REF_NAME}" \
+            --notes "Versión portátil para Windows. Descomprime el zip y abre ABRIR_LUDO.cmd; no requiere instalar nada."
