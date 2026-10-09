@@ -86,7 +86,8 @@ export function updateCampaign(
   g: GameState,
 ): CampaignVault {
   const o = g.outcome;
-  if (!o || !["completado", "incumplimiento"].includes(o.status)) return vault;
+  // A quick game solves part of the project with the reference answers: it does not reconstruct the district.
+  if (!o || g.v2?.quick || !["completado", "incumplimiento"].includes(o.status)) return vault;
   const old = vault[g.scenarioId];
   if (old && old.score >= o.score) return vault;
   return {

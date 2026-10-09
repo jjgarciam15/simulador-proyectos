@@ -1,5 +1,20 @@
 # Cambios
 
+## 4.1.0 · Partida rápida por módulos (9 de octubre de 2026)
+
+- **Partida rápida.** Se juegan solo los módulos elegidos, entre las siete etapas de Diagnóstico a Ejecución, sin recorrer la partida completa. Por ejemplo, solo Preparación para repasar la planeación.
+  - Se abre desde el botón «Partida rápida» del inicio o desde «Tipo de partida» al elegir cualquier misión oficial.
+  - Las etapas no elegidas se resuelven con la solución de referencia del modo presentación, aplicada por el mismo motor del juego. Esas decisiones quedan en la Bitácora y en el menú de etapas aparecen como «auto».
+  - Si el jugador cambia la alternativa, las etapas automáticas siguientes se resuelven sobre ella.
+  - La partida termina en Ex post con los resultados. «Repetir estos módulos» vuelve a jugar la misma selección.
+- **Nota de la partida rápida.**
+  - Solo pesan las dimensiones de los módulos jugados, reescaladas a 100 %, y los ejercicios de práctica de esos módulos.
+  - Las bonificaciones, las penalizaciones y la coherencia transversal no se aplican.
+  - En el desglose, las dimensiones de las etapas automáticas aparecen con el aviso «Resuelta automáticamente · no cuenta».
+  - Una partida rápida no cuenta para la campaña.
+- **Exploración en partida rápida:** «Explorar qué habría pasado si…» conserva los módulos elegidos; si cambias la alternativa, las etapas automáticas se rehacen para ella.
+- **Modo presentación:** ahora usa la misma solución de referencia por etapa que la partida rápida, sin duplicar código. La partida de ejemplo no cambia.
+
 ## 4.0.0 · Ludo · Reino de Liones (7 de octubre de 2026)
 
 - **Nuevo nombre.**

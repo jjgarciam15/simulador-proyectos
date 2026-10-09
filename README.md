@@ -87,6 +87,11 @@ Con «Preparar el simulador para compartir» la página se recarga y verifica el
 5. Al comprometer la inversión (Decisión) el plan se congela y comienza la ejecución: eventos condicionados, dilemas y consecuencias diferidas.
 6. En Ex post ves la nota con cada dimensión explicada, errores y aciertos, la historia del proyecto y recomendaciones.
 
+**Partida rápida:** en el inicio, «Partida rápida» (o «Tipo de partida» al elegir una misión) deja escoger solo los módulos que se quieren repasar. Por ejemplo, solo Preparación para practicar la planeación. Los módulos son las siete etapas, de Diagnóstico a Ejecución.
+- **Cómo se juega:** la partida empieza en el primer módulo elegido. Las etapas no elegidas llegan resueltas con la misma solución de referencia del modo presentación y quedan en la Bitácora. Si el jugador cambia una decisión, como la alternativa, las etapas automáticas siguientes se resuelven sobre esa decisión. Ex post siempre muestra los resultados.
+- **Nota:** solo cuentan las dimensiones de los módulos jugados, con sus pesos reescalados a 100 %, y los ejercicios de práctica de esos módulos. Las bonificaciones, las penalizaciones y la coherencia transversal no se aplican, porque juzgan el proyecto completo.
+- **Campaña:** una partida rápida no cuenta para completar la campaña del Reino de Liones.
+
 **Modo presentación:** en el inicio, «Modo presentación» abre una partida de ejemplo completa y resuelta. Es la misión «Agua para todos», jugada por el mismo motor con las respuestas de referencia de cada herramienta, y termina con su nota y el desglose completo. Una barra guía indica qué mostrar en cada etapa y permite pasar de una etapa a otra. Es de solo lectura y no se guarda: no toca tus partidas ni tus resultados.
 
 **Desplazamiento:**

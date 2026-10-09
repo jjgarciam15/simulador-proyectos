@@ -11,6 +11,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import type { GameState } from "../domain/types";
+import { phases } from "../domain/types";
 import {
   model,
   selected,
@@ -342,6 +343,11 @@ export function Results({
             <p>
               {selected(g)!.name} · {s.territory}
             </p>
+            {g.v2?.quick && (
+              <p className="quick-result">
+                Partida rápida · la nota califica solo {g.v2.quick.stages.length === 1 ? "el módulo jugado" : "los módulos jugados"}: {g.v2.quick.stages.map((p) => phases[p]).join(", ")}.
+              </p>
+            )}
           </div>
           <div className="score-circle">
             <strong>{o.score}</strong>
@@ -356,7 +362,7 @@ export function Results({
         <div className="actions">
           <Button onClick={onRetry}>
             <RotateCcw size={16} />
-            Volver a intentarlo
+            {g.v2?.quick ? "Repetir estos módulos" : "Volver a intentarlo"}
           </Button>
           <Button secondary onClick={onFork} disabled={!g.snapshot}>
             <GitBranch size={16} />

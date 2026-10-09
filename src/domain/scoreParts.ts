@@ -18,7 +18,9 @@ export const scaleParts = (parts: ScorePart[], factor: number) => parts.map((p) 
  */
 export function practiceScore(g: GameState) {
   // Ex post questions (stage 8) open after the grade is computed, so they never count.
-  const qs = questionsV2(g).filter((q) => q.phase < 7),
+  // In a quick game only the exercises of the chosen modules count.
+  const quick = g.v2?.quick?.stages,
+    qs = questionsV2(g).filter((q) => q.phase < 7 && (!quick || quick.includes(q.phase))),
     done = g.v2?.assessments ?? {};
   if (!qs.length) return { score: 0, answered: 0, total: 0 };
   const answered = qs.filter((q) => done[q.id]?.choices.length).length;
