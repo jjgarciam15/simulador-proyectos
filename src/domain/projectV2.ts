@@ -17,6 +17,11 @@ export interface ChainPlacement {
   level: ChainLevel;
 }
 export interface V2State {
+  /**
+   * Partida rápida: the stages (0–6) the player chose to play. The others are solved with the reference
+   * answers (domain/demo.ts) and do not count in the grade. Absent in complete games.
+   */
+  quick?: { stages: number[] };
   negotiationRules?:2;
   /** Games from 3.0 on: territorial puzzles of the Ley 388 de 1997 in the Regulation stage. */
   territoryRules?: 1;

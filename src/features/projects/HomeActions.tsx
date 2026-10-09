@@ -1,7 +1,7 @@
-import { BookOpen, CirclePlay, Compass, FilePlus2, FileUp, GraduationCap, Presentation } from "lucide-react";
+import { BookOpen, CirclePlay, Compass, FilePlus2, FileUp, GraduationCap, Presentation, Zap } from "lucide-react";
 
 /** Main screen: the three experiences plus continue, learn and how to play. */
-export default function HomeActions({ onStory, onImport, onCreate, onContinue, onLearn, onHow, onPresent, canContinue }: { onStory: () => void; onImport: () => void; onCreate: () => void; onContinue: () => void; onLearn: () => void; onHow: () => void; onPresent: () => void; canContinue: boolean }) {
+export default function HomeActions({ onStory, onImport, onCreate, onContinue, onLearn, onHow, onPresent, onQuick, canContinue }: { onQuick: () => void; onStory: () => void; onImport: () => void; onCreate: () => void; onContinue: () => void; onLearn: () => void; onHow: () => void; onPresent: () => void; canContinue: boolean }) {
   const main = [
     { title: "Jugar historia", text: "Nueve misiones oficiales en el Reino de Liones: aprende con un caso diseñado.", Icon: Compass, action: onStory, tone: "story" },
     { title: "Importar proyecto", text: "Convierte un PDF o un Excel en una estructura académica editable y juégalo.", Icon: FileUp, action: onImport, tone: "import" },
@@ -24,6 +24,9 @@ export default function HomeActions({ onStory, onImport, onCreate, onContinue, o
             <CirclePlay size={17} aria-hidden /> Continuar
           </button>
         )}
+        <button type="button" onClick={onQuick} title="Elige solo los módulos que quieres repasar; las demás etapas llegan resueltas">
+          <Zap size={17} aria-hidden /> Partida rápida
+        </button>
         <button type="button" onClick={onLearn}>
           <GraduationCap size={17} aria-hidden /> Aprender
         </button>

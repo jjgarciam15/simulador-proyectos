@@ -99,6 +99,27 @@ test("los campos numéricos se llenan solo escribiendo: sin botones de subir/baj
   expect(errors).toEqual([]);
 });
 
+test("la partida rápida arranca en el módulo elegido con las demás etapas resueltas", async ({ page }) => {
+  const errors = await fresh(page);
+  await page.getByRole("button", { name: /Partida rápida/ }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("checkbox", { name: /Preparación/ })).toBeChecked();
+  // Choosing no module blocks the start.
+  await dialog.getByRole("checkbox", { name: /Preparación/ }).uncheck();
+  await expect(dialog.getByText("Elige al menos un módulo.")).toBeVisible();
+  await expect(dialog.getByRole("button", { name: /Entrar a la partida rápida/ })).toBeDisabled();
+  await dialog.getByRole("checkbox", { name: /Preparación/ }).check();
+  await expect(dialog.getByText(/Jugarás 1 de 7 módulos; 6 se resolverán automáticamente/)).toBeVisible();
+  await dialog.getByRole("button", { name: /Entrar a la partida rápida/ }).click();
+  await page.getByRole("button", { name: /Recibir el encargo/ }).click();
+  await expect(page.locator(".page-heading .eyebrow")).toContainText("ETAPA 03");
+  await expect(page.locator(".quick-banner")).toContainText("Juegas Preparación");
+  const diagnosis = page.locator(".sidebar nav button", { hasText: "Diagnóstico" });
+  await expect(diagnosis).toBeDisabled();
+  await expect(diagnosis.locator(".quick-tag")).toHaveText("auto");
+  expect(errors).toEqual([]);
+});
+
 test("ninguna pregunta visible de una etapa tiene más de 5 opciones", async ({ page }) => {
   const errors = await fresh(page);
   await startMission(page);

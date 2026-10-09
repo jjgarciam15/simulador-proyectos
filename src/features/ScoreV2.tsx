@@ -31,15 +31,19 @@ const short: Record<string, string> = {
 export default function ScoreV2({ g }: { g: GameState }) {
   const a = g.outcome?.assessment;
   if (!a) return null;
-  const practice = a.notes.find((n) => n.startsWith("Práctica")),
-    mastered = a.dimensions.filter((d) => d.value >= 75),
-    review = a.dimensions.filter((d) => d.value < 55),
+  // In a quick game the dimensions of automatic stages weigh 0: they are shown, but not judged.
+  const quickNote = g.v2?.quick ? a.notes.find((n) => n.startsWith("Partida rápida")) : undefined,
+    graded = quickNote ? a.dimensions.filter((d) => d.weight > 0) : a.dimensions,
+    practice = a.notes.find((n) => n.startsWith("Práctica")),
+    mastered = graded.filter((d) => d.value >= 75),
+    review = graded.filter((d) => d.value < 55),
     ledger = outcomeLedger(g);
   return (
     <Panel
       title="Por qué obtuviste esta nota"
       kicker="APORTES, BONIFICACIONES Y PENALIZACIONES"
     >
+      {quickNote && <p className="notice quick-score-note">{quickNote}</p>}
       <p className="story">{a.story}</p>
       <div
         style={{ height: 280 }}
@@ -76,9 +80,10 @@ export default function ScoreV2({ g }: { g: GameState }) {
           </thead>
           <tbody>
             {a.dimensions.map((d, i) => (
-              <tr key={d.name}>
+              <tr key={d.name} className={quickNote && !d.weight ? "quick-auto" : undefined}>
                 <td>
                   {d.name}
+                  {quickNote && !d.weight && <small className="quick-tag">Resuelta automáticamente · no cuenta</small>}
                   <details>
                     <summary>Ver criterio</summary>
                     {a.notes[i]}
@@ -99,7 +104,8 @@ export default function ScoreV2({ g }: { g: GameState }) {
         Se limita a 0–100 y se redondea. Abandono/insolvencia multiplican el
         resultado por 0,35.
       </p>
-      {a.adjustments && (
+      {a.adjustments && quickNote && <p className="muted">Partida rápida: las bonificaciones y penalizaciones juzgan el proyecto completo, que en buena parte llegó resuelto, así que no se aplican a esta nota.</p>}
+      {a.adjustments && !quickNote && (
         <div className="two-col adjustments">
           <div>
             <h4>Bonificaciones</h4>
@@ -232,7 +238,7 @@ export default function ScoreV2({ g }: { g: GameState }) {
 /** Puntuación integral: every scored activity of the game, its result, its weight in the grade and the points it gave. */
 function ActivityBreakdown({ g }: { g: GameState }) {
   const a = g.outcome!.assessment!,
-    rows = scoreBreakdown(a.dimensions),
+    rows = scoreBreakdown(a.dimensions).filter((r) => !g.v2?.quick || r.weight > 0),
     indirect = [
       [g.studies.length, "estudio(s) comprados", "información al invertir y riesgo"],
       [g.v2?.dilemmas?.length ?? 0, "dilema(s) resueltos", "recursos, apoyo, plazo y ejecución"],

@@ -177,18 +177,57 @@ export function scoreV2(
     notes.splice(0, 10, ...v3.notes);
   }
   const story = projectStory(g, plan, review, transversal);
+  // Partida rápida: only the dimensions of the chosen modules count; bonuses and penalties judge the whole
+  // project, which the player did not build, so they are left out.
+  const quick = g.v2?.quick?.stages;
+  if (quick) {
+    dimensions = quickDimensions(dimensions, quick);
+    notes.push(quickNote(quick));
+  }
   return {
     dimensions,
     base: dimensions.reduce((n, d) => n + d.value * d.weight, 0),
     // V3 grades the practice as its own dimension (hints and retries are inside each question's score).
-    penalty: (v3 ? 0 : learningPenalty(g)) + adjust.penalty,
-    bonus: adjust.bonus,
+    penalty: quick ? 0 : (v3 ? 0 : learningPenalty(g)) + adjust.penalty,
+    bonus: quick ? 0 : adjust.bonus,
     adjustments: adjust,
     coherence: matrix,
     budgetFindings: review.findings,
     notes,
     story,
   };
+}
+
+/**
+ * Stages (0–6) behind each dimension of the grade. A dimension counts in a quick game when the player
+ * played at least one of its stages; coherence and traceability judge the whole project, so they never count.
+ */
+export const dimensionStages: Record<string, number[]> = {
+  "Diagnóstico y Árbol del problema": [0],
+  "Alternativa y objetivos": [1],
+  "Cadena de valor y presupuesto": [2],
+  "Efectos, impactos y valoración": [2, 3],
+  "Flujos, VPN y RPC": [3],
+  "Evaluación ex ante": [3],
+  "Regulación, territorio y ODS": [4],
+  "Compromisos y riesgo": [5],
+  "Comité evaluador": [5],
+  "Ejecución y servicio": [6],
+  "Valor observado": [5, 6],
+  "Práctica de conceptos": [0, 1, 2, 3, 4, 5, 6],
+  "Coherencia y trazabilidad": [],
+  "Coherencia transversal": [],
+};
+/** Weights of a quick game: the dimensions of unplayed stages weigh 0 and the rest keep their proportions. */
+export function quickDimensions<D extends { name: string; weight: number }>(dimensions: D[], stages: number[]): D[] {
+  const counts = (d: D) => d.weight > 0 && (dimensionStages[d.name] ?? []).some((p) => stages.includes(p)),
+    total = dimensions.filter(counts).reduce((n, d) => n + d.weight, 0);
+  if (!total) return dimensions;
+  return dimensions.map((d) => ({ ...d, weight: counts(d) ? d.weight / total : 0 }));
+}
+function quickNote(stages: number[]) {
+  const names = ["Diagnóstico", "Formulación", "Preparación", "Evaluación", "Regulación", "Decisión", "Ejecución"];
+  return `Partida rápida: solo cuentan las dimensiones de los módulos jugados (${stages.map((p) => names[p]).join(", ")}), con sus pesos reescalados a 100 %. Las demás etapas se resolvieron con la solución de referencia y pesan 0 %; las bonificaciones, las penalizaciones y la coherencia transversal no se aplican.`;
 }
 
 /** Rule-based synthesis of the game. Every sentence comes from an observed fact, never from random text. */
