@@ -12,6 +12,7 @@
   - Las bonificaciones, las penalizaciones y la coherencia transversal no se aplican.
   - En el desglose, las dimensiones de las etapas automáticas aparecen con el aviso «Resuelta automáticamente · no cuenta».
   - Una partida rápida no cuenta para la campaña.
+- **Exploración en partida rápida:** «Explorar qué habría pasado si…» conserva los módulos elegidos; si cambias la alternativa, las etapas automáticas se rehacen para ella.
 - **Modo presentación:** ahora usa la misma solución de referencia por etapa que la partida rápida, sin duplicar código. La partida de ejemplo no cambia.
 
 ## 4.0.0 · Ludo · Reino de Liones (7 de octubre de 2026)

@@ -30,7 +30,7 @@ export const autoStage = (g: GameState, phase: number) => !!g.v2?.quick && phase
 
 /**
  * Solves every automatic stage from the current one until the next stage the player chose (or the results).
- * A stage already confirmed is only confirmed again. Dilemmas that open on an automatic stage take the
+ * A stage already confirmed is only confirmed again, unless it went stale. Dilemmas that open on an automatic stage take the
  * reference choice. The function is pure: it returns a new state built with `act`.
  */
 export function autoAdvance(g: GameState): GameState {
@@ -38,7 +38,10 @@ export function autoAdvance(g: GameState): GameState {
     const phase = g.phase;
     g = settle(g);
     if (phase < 5) {
-      if (!g.v2!.completed.includes(phase)) g = referenceStage(g, phase);
+      // Solved again when it was never solved, when a later decision sent it to review (for example, a new
+      // alternative) or when its ex ante confirmation was cleared (exploring another strategy clears it).
+      const stale = !g.v2!.completed.includes(phase) || !!g.v2!.reviews[phase]?.length || (phase === 3 && !g.acknowledged.includes("evaluation"));
+      if (stale) g = referenceStage(g, phase);
       g = next(confirmReviews(g));
     } else g = referenceStage(phase === 5 ? confirmReviews(g) : g, phase);
     if (g.phase === phase && !g.outcome) break;

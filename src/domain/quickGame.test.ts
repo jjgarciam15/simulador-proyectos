@@ -136,3 +136,47 @@ describe("partida rápida", () => {
     expect(decode(JSON.stringify({ version: 1, active: bad, history: [] })).active!.v2!.quick).toBeUndefined();
   });
 });
+
+describe("partida rápida · exploración y revisión", () => {
+  it("«Explorar qué habría pasado si…» conserva los módulos y vuelve al módulo jugado", async () => {
+    const { forkDecision } = await import("./engine");
+    const g = playQuick("agua", [2]);
+    let fork = autoAdvance(forkDecision(g));
+    expect(fork.v2!.quick).toEqual({ stages: [2] });
+    expect(fork.phase).toBe(2);
+    fork = act(fork, { type: "next" }, false);
+    fork = autoAdvance(settle(fork));
+    expect(fork.outcome).toBeTruthy();
+  });
+
+  it("si el jugador cambia la alternativa al explorar, las etapas automáticas se rehacen para la nueva", async () => {
+    const { forkDecision } = await import("./engine");
+    let g = createQuickGame("salud", "guiado", "RAPIDA-4", "aprendizaje", [1]);
+    g = playStage(g);
+    expect(g.outcome).toBeTruthy();
+    let fork = autoAdvance(forkDecision(g));
+    expect(fork.phase).toBe(1);
+    const other = scenarioById("salud").alternatives.find((a) => a.id !== fork.alternative)!;
+    fork = act(fork, { type: "alternative", id: other.id }, false);
+    fork = autoAdvance(settle(act(fork, { type: "next" }, false)));
+    expect(fork.outcome).toBeTruthy();
+    expect(fork.alternative).toBe(other.id);
+    expect(fork.snapshot!.decisionState!.v2!.v22!.flow!.builtFor).toBe(other.id);
+  });
+
+  it("si el jugador abre una revisión de una etapa automática al decidir, se confirma sola", () => {
+    let g = createQuickGame("agua", "guiado", "RAPIDA-3", "aprendizaje", [5]);
+    expect(g.phase).toBe(5);
+    const risk = scenarioById("agua").risks.find((r) => !g.mitigations.includes(r.id));
+    if (risk) {
+      try {
+        g = autoAdvance(act(g, { type: "mitigate", id: risk.id }, false));
+      } catch {
+        /* not enough cash for this mitigation: nothing to review */
+      }
+    }
+    expect(Object.entries(g.v2!.reviews).filter(([p, r]) => r.length && Number(p) < 5)).toEqual([]);
+    g = autoAdvance(settle(referenceStage(g, 5)));
+    expect(g.outcome).toBeTruthy();
+  });
+});
